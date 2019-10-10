@@ -1,0 +1,2366 @@
+{
+  "columns": [
+    {
+      "columnNumber": 1,
+      "headerValue": "Sample",
+      "results": [
+        {
+          "resultNumber": 1,
+          "result": {
+            "dataElement": {
+              "id": "6118214",
+              "name": "Biospecimen Identifier"
+            },
+            "dataElementConcept": {
+              "id": "2859655",
+              "name": "Biospecimen Identifier",
+              "concepts": ["ncit:C70699", "ncit:C25364"]
+            }
+          },
+          "observedValues": [
+            {
+              "value": "900_00_1961",
+              "concept": {
+                "name": "CONFORMING",
+                "id": null
+              }
+            },
+            {
+              "value": "900_00_5332",
+              "concept": {
+                "name": "CONFORMING",
+                "id": null
+              }
+            },
+            {
+              "value": "900_00_5308",
+              "concept": {
+                "name": "CONFORMING",
+                "id": null
+              }
+            },
+            {
+              "value": "900_00_5316",
+              "concept": {
+                "name": "CONFORMING",
+                "id": null
+              }
+            },
+            {
+              "value": "900_00_5317",
+              "concept": {
+                "name": "CONFORMING",
+                "id": null
+              }
+            },
+            {
+              "value": "900_00_5338",
+              "concept": {
+                "name": "CONFORMING",
+                "id": null
+              }
+            },
+            {
+              "value": "900_00_5339",
+              "concept": {
+                "name": "CONFORMING",
+                "id": null
+              }
+            },
+            {
+              "value": "900_00_5341",
+              "concept": {
+                "name": "CONFORMING",
+                "id": null
+              }
+            },
+            {
+              "value": "900_00_5342",
+              "concept": {
+                "name": "CONFORMING",
+                "id": null
+              }
+            },
+            {
+              "value": "900_00_5345",
+              "concept": {
+                "name": "CONFORMING",
+                "id": null
+              }
+            },
+            {
+              "value": "900_00_5346",
+              "concept": {
+                "name": "CONFORMING",
+                "id": null
+              }
+            },
+            {
+              "value": "900_00_5379",
+              "concept": {
+                "name": "CONFORMING",
+                "id": null
+              }
+            },
+            {
+              "value": "900_00_5380",
+              "concept": {
+                "name": "CONFORMING",
+                "id": null
+              }
+            },
+            {
+              "value": "900_00_5381",
+              "concept": {
+                "name": "CONFORMING",
+                "id": null
+              }
+            },
+            {
+              "value": "900_00_5382",
+              "concept": {
+                "name": "CONFORMING",
+                "id": null
+              }
+            },
+            {
+              "value": "900_00_5384",
+              "concept": {
+                "name": "CONFORMING",
+                "id": null
+              }
+            },
+            {
+              "value": "900_00_5385",
+              "concept": {
+                "name": "CONFORMING",
+                "id": null
+              }
+            },
+            {
+              "value": "900_00_5393",
+              "concept": {
+                "name": "CONFORMING",
+                "id": null
+              }
+            },
+            {
+              "value": "900_00_5396",
+              "concept": {
+                "name": "CONFORMING",
+                "id": null
+              }
+            },
+            {
+              "value": "900_00_5404",
+              "concept": {
+                "name": "CONFORMING",
+                "id": null
+              }
+            },
+            {
+              "value": "900_00_5412",
+              "concept": {
+                "name": "CONFORMING",
+                "id": null
+              }
+            },
+            {
+              "value": "900_00_5413",
+              "concept": {
+                "name": "CONFORMING",
+                "id": null
+              }
+            },
+            {
+              "value": "900_00_5414",
+              "concept": {
+                "name": "CONFORMING",
+                "id": null
+              }
+            },
+            {
+              "value": "900_00_5445",
+              "concept": {
+                "name": "CONFORMING",
+                "id": null
+              }
+            },
+            {
+              "value": "900_00_5458",
+              "concept": {
+                "name": "CONFORMING",
+                "id": null
+              }
+            },
+            {
+              "value": "900_00_5459",
+              "concept": {
+                "name": "CONFORMING",
+                "id": null
+              }
+            },
+            {
+              "value": "900_00_5462",
+              "concept": {
+                "name": "CONFORMING",
+                "id": null
+              }
+            },
+            {
+              "value": "900_00_5468",
+              "concept": {
+                "name": "CONFORMING",
+                "id": null
+              }
+            },
+            {
+              "value": "900_00_5476",
+              "concept": {
+                "name": "CONFORMING",
+                "id": null
+              }
+            },
+            {
+              "value": "900_00_5477",
+              "concept": {
+                "name": "CONFORMING",
+                "id": null
+              }
+            },
+            {
+              "value": "900_00_5299",
+              "concept": {
+                "name": "CONFORMING",
+                "id": null
+              }
+            },
+            {
+              "value": "900_00_5303",
+              "concept": {
+                "name": "CONFORMING",
+                "id": null
+              }
+            },
+            {
+              "value": "HF0608",
+              "concept": {
+                "name": "CONFORMING",
+                "id": null
+              }
+            },
+            {
+              "value": "HF0652.4",
+              "concept": {
+                "name": "CONFORMING",
+                "id": null
+              }
+            },
+            {
+              "value": "HF0763",
+              "concept": {
+                "name": "CONFORMING",
+                "id": null
+              }
+            },
+            {
+              "value": "HF0828",
+              "concept": {
+                "name": "CONFORMING",
+                "id": null
+              }
+            },
+            {
+              "value": "HF0835",
+              "concept": {
+                "name": "CONFORMING",
+                "id": null
+              }
+            },
+            {
+              "value": "HF0855",
+              "concept": {
+                "name": "CONFORMING",
+                "id": null
+              }
+            },
+            {
+              "value": "HF0868",
+              "concept": {
+                "name": "CONFORMING",
+                "id": null
+              }
+            },
+            {
+              "value": "HF0883",
+              "concept": {
+                "name": "CONFORMING",
+                "id": null
+              }
+            },
+            {
+              "value": "HF0899",
+              "concept": {
+                "name": "CONFORMING",
+                "id": null
+              }
+            },
+            {
+              "value": "HF0920",
+              "concept": {
+                "name": "CONFORMING",
+                "id": null
+              }
+            },
+            {
+              "value": "HF0931",
+              "concept": {
+                "name": "CONFORMING",
+                "id": null
+              }
+            },
+            {
+              "value": "HF0953",
+              "concept": {
+                "name": "CONFORMING",
+                "id": null
+              }
+            },
+            {
+              "value": "HF0960",
+              "concept": {
+                "name": "CONFORMING",
+                "id": null
+              }
+            },
+            {
+              "value": "HF0962",
+              "concept": {
+                "name": "CONFORMING",
+                "id": null
+              }
+            },
+            {
+              "value": "HF0966",
+              "concept": {
+                "name": "CONFORMING",
+                "id": null
+              }
+            },
+            {
+              "value": "HF0986",
+              "concept": {
+                "name": "CONFORMING",
+                "id": null
+              }
+            },
+            {
+              "value": "HF0990",
+              "concept": {
+                "name": "CONFORMING",
+                "id": null
+              }
+            },
+            {
+              "value": "HF0996",
+              "concept": {
+                "name": "CONFORMING",
+                "id": null
+              }
+            },
+            {
+              "value": "HF1000",
+              "concept": {
+                "name": "CONFORMING",
+                "id": null
+              }
+            },
+            {
+              "value": "HF1032",
+              "concept": {
+                "name": "CONFORMING",
+                "id": null
+              }
+            },
+            {
+              "value": "HF1057",
+              "concept": {
+                "name": "CONFORMING",
+                "id": null
+              }
+            },
+            {
+              "value": "HF1058",
+              "concept": {
+                "name": "CONFORMING",
+                "id": null
+              }
+            },
+            {
+              "value": "HF1059",
+              "concept": {
+                "name": "CONFORMING",
+                "id": null
+              }
+            },
+            {
+              "value": "HF1071",
+              "concept": {
+                "name": "CONFORMING",
+                "id": null
+              }
+            },
+            {
+              "value": "HF1077",
+              "concept": {
+                "name": "CONFORMING",
+                "id": null
+              }
+            },
+            {
+              "value": "HF1078",
+              "concept": {
+                "name": "CONFORMING",
+                "id": null
+              }
+            },
+            {
+              "value": "HF1097",
+              "concept": {
+                "name": "CONFORMING",
+                "id": null
+              }
+            },
+            {
+              "value": "HF1113",
+              "concept": {
+                "name": "CONFORMING",
+                "id": null
+              }
+            },
+            {
+              "value": "HF1122",
+              "concept": {
+                "name": "CONFORMING",
+                "id": null
+              }
+            },
+            {
+              "value": "HF1136",
+              "concept": {
+                "name": "CONFORMING",
+                "id": null
+              }
+            },
+            {
+              "value": "HF1137",
+              "concept": {
+                "name": "CONFORMING",
+                "id": null
+              }
+            },
+            {
+              "value": "HF1139",
+              "concept": {
+                "name": "CONFORMING",
+                "id": null
+              }
+            },
+            {
+              "value": "HF1150",
+              "concept": {
+                "name": "CONFORMING",
+                "id": null
+              }
+            },
+            {
+              "value": "HF1156",
+              "concept": {
+                "name": "CONFORMING",
+                "id": null
+              }
+            },
+            {
+              "value": "HF1167",
+              "concept": {
+                "name": "CONFORMING",
+                "id": null
+              }
+            },
+            {
+              "value": "HF1185",
+              "concept": {
+                "name": "CONFORMING",
+                "id": null
+              }
+            },
+            {
+              "value": "HF1191",
+              "concept": {
+                "name": "CONFORMING",
+                "id": null
+              }
+            },
+            {
+              "value": "HF1199",
+              "concept": {
+                "name": "CONFORMING",
+                "id": null
+              }
+            },
+            {
+              "value": "HF1219",
+              "concept": {
+                "name": "CONFORMING",
+                "id": null
+              }
+            },
+            {
+              "value": "HF1226",
+              "concept": {
+                "name": "CONFORMING",
+                "id": null
+              }
+            },
+            {
+              "value": "HF1227",
+              "concept": {
+                "name": "CONFORMING",
+                "id": null
+              }
+            },
+            {
+              "value": "HF1232",
+              "concept": {
+                "name": "CONFORMING",
+                "id": null
+              }
+            },
+            {
+              "value": "HF1235",
+              "concept": {
+                "name": "CONFORMING",
+                "id": null
+              }
+            },
+            {
+              "value": "HF1242",
+              "concept": {
+                "name": "CONFORMING",
+                "id": null
+              }
+            },
+            {
+              "value": "HF1246",
+              "concept": {
+                "name": "CONFORMING",
+                "id": null
+              }
+            },
+            {
+              "value": "HF1264",
+              "concept": {
+                "name": "CONFORMING",
+                "id": null
+              }
+            },
+            {
+              "value": "HF1269",
+              "concept": {
+                "name": "CONFORMING",
+                "id": null
+              }
+            },
+            {
+              "value": "HF1280",
+              "concept": {
+                "name": "CONFORMING",
+                "id": null
+              }
+            },
+            {
+              "value": "HF1292",
+              "concept": {
+                "name": "CONFORMING",
+                "id": null
+              }
+            },
+            {
+              "value": "HF1293",
+              "concept": {
+                "name": "CONFORMING",
+                "id": null
+              }
+            },
+            {
+              "value": "HF1297",
+              "concept": {
+                "name": "CONFORMING",
+                "id": null
+              }
+            },
+            {
+              "value": "HF1300",
+              "concept": {
+                "name": "CONFORMING",
+                "id": null
+              }
+            },
+            {
+              "value": "HF1307",
+              "concept": {
+                "name": "CONFORMING",
+                "id": null
+              }
+            },
+            {
+              "value": "HF1316",
+              "concept": {
+                "name": "CONFORMING",
+                "id": null
+              }
+            },
+            {
+              "value": "HF1325",
+              "concept": {
+                "name": "CONFORMING",
+                "id": null
+              }
+            },
+            {
+              "value": "HF1331",
+              "concept": {
+                "name": "CONFORMING",
+                "id": null
+              }
+            },
+            {
+              "value": "HF1334",
+              "concept": {
+                "name": "CONFORMING",
+                "id": null
+              }
+            },
+            {
+              "value": "HF1344",
+              "concept": {
+                "name": "CONFORMING",
+                "id": null
+              }
+            },
+            {
+              "value": "HF1345",
+              "concept": {
+                "name": "CONFORMING",
+                "id": null
+              }
+            },
+            {
+              "value": "HF1357",
+              "concept": {
+                "name": "CONFORMING",
+                "id": null
+              }
+            },
+            {
+              "value": "HF1381",
+              "concept": {
+                "name": "CONFORMING",
+                "id": null
+              }
+            },
+            {
+              "value": "HF1397",
+              "concept": {
+                "name": "CONFORMING",
+                "id": null
+              }
+            },
+            {
+              "value": "HF1398",
+              "concept": {
+                "name": "CONFORMING",
+                "id": null
+              }
+            },
+            {
+              "value": "HF1407",
+              "concept": {
+                "name": "CONFORMING",
+                "id": null
+              }
+            },
+            {
+              "value": "HF1409",
+              "concept": {
+                "name": "CONFORMING",
+                "id": null
+              }
+            },
+            {
+              "value": "HF1420",
+              "concept": {
+                "name": "CONFORMING",
+                "id": null
+              }
+            },
+            {
+              "value": "HF1429",
+              "concept": {
+                "name": "CONFORMING",
+                "id": null
+              }
+            },
+            {
+              "value": "HF1433",
+              "concept": {
+                "name": "CONFORMING",
+                "id": null
+              }
+            },
+            {
+              "value": "HF1437",
+              "concept": {
+                "name": "CONFORMING",
+                "id": null
+              }
+            },
+            {
+              "value": "HF1442",
+              "concept": {
+                "name": "CONFORMING",
+                "id": null
+              }
+            },
+            {
+              "value": "HF1458",
+              "concept": {
+                "name": "CONFORMING",
+                "id": null
+              }
+            },
+            {
+              "value": "HF1463",
+              "concept": {
+                "name": "CONFORMING",
+                "id": null
+              }
+            },
+            {
+              "value": "HF1475",
+              "concept": {
+                "name": "CONFORMING",
+                "id": null
+              }
+            },
+            {
+              "value": "HF1489",
+              "concept": {
+                "name": "CONFORMING",
+                "id": null
+              }
+            },
+            {
+              "value": "HF1490",
+              "concept": {
+                "name": "CONFORMING",
+                "id": null
+              }
+            },
+            {
+              "value": "HF1502",
+              "concept": {
+                "name": "CONFORMING",
+                "id": null
+              }
+            },
+            {
+              "value": "HF1510",
+              "concept": {
+                "name": "CONFORMING",
+                "id": null
+              }
+            },
+            {
+              "value": "HF1511",
+              "concept": {
+                "name": "CONFORMING",
+                "id": null
+              }
+            },
+            {
+              "value": "HF1517",
+              "concept": {
+                "name": "CONFORMING",
+                "id": null
+              }
+            },
+            {
+              "value": "HF1538",
+              "concept": {
+                "name": "CONFORMING",
+                "id": null
+              }
+            },
+            {
+              "value": "HF1540",
+              "concept": {
+                "name": "CONFORMING",
+                "id": null
+              }
+            },
+            {
+              "value": "HF1551",
+              "concept": {
+                "name": "CONFORMING",
+                "id": null
+              }
+            },
+            {
+              "value": "HF1553",
+              "concept": {
+                "name": "CONFORMING",
+                "id": null
+              }
+            },
+            {
+              "value": "HF1560",
+              "concept": {
+                "name": "CONFORMING",
+                "id": null
+              }
+            },
+            {
+              "value": "HF1568",
+              "concept": {
+                "name": "CONFORMING",
+                "id": null
+              }
+            },
+            {
+              "value": "HF1587",
+              "concept": {
+                "name": "CONFORMING",
+                "id": null
+              }
+            },
+            {
+              "value": "HF1588",
+              "concept": {
+                "name": "CONFORMING",
+                "id": null
+              }
+            },
+            {
+              "value": "HF1606",
+              "concept": {
+                "name": "CONFORMING",
+                "id": null
+              }
+            },
+            {
+              "value": "HF1613",
+              "concept": {
+                "name": "CONFORMING",
+                "id": null
+              }
+            },
+            {
+              "value": "HF1628",
+              "concept": {
+                "name": "CONFORMING",
+                "id": null
+              }
+            },
+            {
+              "value": "HF1652",
+              "concept": {
+                "name": "CONFORMING",
+                "id": null
+              }
+            },
+            {
+              "value": "HF1671",
+              "concept": {
+                "name": "CONFORMING",
+                "id": null
+              }
+            },
+            {
+              "value": "HF1677",
+              "concept": {
+                "name": "CONFORMING",
+                "id": null
+              }
+            },
+            {
+              "value": "HF1702",
+              "concept": {
+                "name": "CONFORMING",
+                "id": null
+              }
+            },
+            {
+              "value": "HF1708",
+              "concept": {
+                "name": "CONFORMING",
+                "id": null
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "columnNumber": 2,
+      "headerValue": "Age at Dx (years)",
+      "results": [
+        {
+          "resultNumber": 1,
+          "result": {
+            "dataElement": {
+              "id": "4828451",
+              "name": "Person Diagnosis Age Catetory"
+            },
+            "dataElementConcept": {
+              "id": "3070767",
+              "name": "Person Diagnosis Age",
+              "concepts": ["ncit:C25190", "ncit:C15220", "ncit:C25150"]
+            }
+          },
+          "observedValues": [
+            {
+              "value": "50-54",
+              "concept": {
+                "name": "NOMATCH",
+                "id": null
+              }
+            },
+            {
+              "value": "35-39",
+              "concept": {
+                "name": "NOMATCH",
+                "id": null
+              }
+            },
+            {
+              "value": "55-59",
+              "concept": {
+                "name": "NOMATCH",
+                "id": null
+              }
+            },
+            {
+              "value": "85-89",
+              "concept": {
+                "name": "NOMATCH",
+                "id": null
+              }
+            },
+            {
+              "value": "30-34",
+              "concept": {
+                "name": "NOMATCH",
+                "id": null
+              }
+            },
+            {
+              "value": "40-44",
+              "concept": {
+                "name": "NOMATCH",
+                "id": null
+              }
+            },
+            {
+              "value": "60-64",
+              "concept": {
+                "name": "NOMATCH",
+                "id": null
+              }
+            },
+            {
+              "value": "45-49",
+              "concept": {
+                "name": "NOMATCH",
+                "id": null
+              }
+            },
+            {
+              "value": "70-74",
+              "concept": {
+                "name": "NOMATCH",
+                "id": null
+              }
+            },
+            {
+              "value": "25-29",
+              "concept": {
+                "name": "NOMATCH",
+                "id": null
+              }
+            },
+            {
+              "value": "65-69",
+              "concept": {
+                "name": "NOMATCH",
+                "id": null
+              }
+            },
+            {
+              "value": "20-24",
+              "concept": {
+                "name": "NOMATCH",
+                "id": null
+              }
+            },
+            {
+              "value": "15-19",
+              "concept": {
+                "name": "NOMATCH",
+                "id": null
+              }
+            },
+            {
+              "value": "75-79",
+              "concept": {
+                "name": "NOMATCH",
+                "id": null
+              }
+            },
+            {
+              "value": "14-Oct",
+              "concept": {
+                "name": "NOMATCH",
+                "id": null
+              }
+            }
+          ]
+        },
+        {
+          "resultNumber": 2,
+          "result": {
+            "dataElement": {
+              "id": "2006657",
+              "name": "Diagnosis Age"
+            },
+            "dataElementConcept": {
+              "id": "2014077",
+              "name": "Disease Diagnosis",
+              "concepts": ["ncit:C2991", "ncit:C15220"]
+            }
+          },
+          "observedValues": [
+            {
+              "value": "50-54",
+              "concept": {
+                "name": "NONCONFORMING",
+                "id": null
+              }
+            },
+            {
+              "value": "35-39",
+              "concept": {
+                "name": "NONCONFORMING",
+                "id": null
+              }
+            },
+            {
+              "value": "55-59",
+              "concept": {
+                "name": "NONCONFORMING",
+                "id": null
+              }
+            },
+            {
+              "value": "85-89",
+              "concept": {
+                "name": "NONCONFORMING",
+                "id": null
+              }
+            },
+            {
+              "value": "30-34",
+              "concept": {
+                "name": "NONCONFORMING",
+                "id": null
+              }
+            },
+            {
+              "value": "40-44",
+              "concept": {
+                "name": "NONCONFORMING",
+                "id": null
+              }
+            },
+            {
+              "value": "60-64",
+              "concept": {
+                "name": "NONCONFORMING",
+                "id": null
+              }
+            },
+            {
+              "value": "45-49",
+              "concept": {
+                "name": "NONCONFORMING",
+                "id": null
+              }
+            },
+            {
+              "value": "70-74",
+              "concept": {
+                "name": "NONCONFORMING",
+                "id": null
+              }
+            },
+            {
+              "value": "25-29",
+              "concept": {
+                "name": "NONCONFORMING",
+                "id": null
+              }
+            },
+            {
+              "value": "65-69",
+              "concept": {
+                "name": "NONCONFORMING",
+                "id": null
+              }
+            },
+            {
+              "value": "20-24",
+              "concept": {
+                "name": "NONCONFORMING",
+                "id": null
+              }
+            },
+            {
+              "value": "15-19",
+              "concept": {
+                "name": "NONCONFORMING",
+                "id": null
+              }
+            },
+            {
+              "value": "75-79",
+              "concept": {
+                "name": "NONCONFORMING",
+                "id": null
+              }
+            },
+            {
+              "value": "14-Oct",
+              "concept": {
+                "name": "NONCONFORMING",
+                "id": null
+              }
+            }
+          ]
+        },
+        {
+          "resultNumber": 3,
+          "result": {
+            "dataElement": {
+              "id": "6762857",
+              "name": "Person Diagnosis Age Value"
+            },
+            "dataElementConcept": {
+              "id": "3070767",
+              "name": "Person Diagnosis Age",
+              "concepts": ["ncit:C25190", "ncit:C15220", "ncit:C25150"]
+            }
+          },
+          "observedValues": [
+            {
+              "value": "50-54",
+              "concept": {
+                "name": "NONCONFORMING",
+                "id": null
+              }
+            },
+            {
+              "value": "35-39",
+              "concept": {
+                "name": "NONCONFORMING",
+                "id": null
+              }
+            },
+            {
+              "value": "55-59",
+              "concept": {
+                "name": "NONCONFORMING",
+                "id": null
+              }
+            },
+            {
+              "value": "85-89",
+              "concept": {
+                "name": "NONCONFORMING",
+                "id": null
+              }
+            },
+            {
+              "value": "30-34",
+              "concept": {
+                "name": "NONCONFORMING",
+                "id": null
+              }
+            },
+            {
+              "value": "40-44",
+              "concept": {
+                "name": "NONCONFORMING",
+                "id": null
+              }
+            },
+            {
+              "value": "60-64",
+              "concept": {
+                "name": "NONCONFORMING",
+                "id": null
+              }
+            },
+            {
+              "value": "45-49",
+              "concept": {
+                "name": "NONCONFORMING",
+                "id": null
+              }
+            },
+            {
+              "value": "70-74",
+              "concept": {
+                "name": "NONCONFORMING",
+                "id": null
+              }
+            },
+            {
+              "value": "25-29",
+              "concept": {
+                "name": "NONCONFORMING",
+                "id": null
+              }
+            },
+            {
+              "value": "65-69",
+              "concept": {
+                "name": "NONCONFORMING",
+                "id": null
+              }
+            },
+            {
+              "value": "20-24",
+              "concept": {
+                "name": "NONCONFORMING",
+                "id": null
+              }
+            },
+            {
+              "value": "15-19",
+              "concept": {
+                "name": "NONCONFORMING",
+                "id": null
+              }
+            },
+            {
+              "value": "75-79",
+              "concept": {
+                "name": "NONCONFORMING",
+                "id": null
+              }
+            },
+            {
+              "value": "14-Oct",
+              "concept": {
+                "name": "NONCONFORMING",
+                "id": null
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "columnNumber": 3,
+      "headerValue": "Gender",
+      "results": [
+        {
+          "resultNumber": 1,
+          "result": {
+            "dataElement": {
+              "id": "2721620",
+              "name": "Patient Person Gender Code"
+            },
+            "dataElementConcept": {
+              "id": "2009919",
+              "name": "Patient Gender",
+              "concepts": ["ncit:C16960", "ncit:C17357"]
+            }
+          },
+          "observedValues": [
+            {
+              "value": "M",
+              "concept": {
+                "name": "Male",
+                "id": "ncit:C20197"
+              }
+            },
+            {
+              "value": "F",
+              "concept": {
+                "name": "Female",
+                "id": "ncit:C16576"
+              }
+            },
+            {
+              "value": "-",
+              "concept": {
+                "name": "NOMATCH",
+                "id": null
+              }
+            }
+          ]
+        },
+        {
+          "resultNumber": 2,
+          "result": {
+            "dataElement": {
+              "id": "2200604",
+              "name": "Person Gender Text Type"
+            },
+            "dataElementConcept": {
+              "id": "2200600",
+              "name": "Person Gender",
+              "concepts": ["ncit:C25190", "ncit:C17357"]
+            }
+          },
+          "observedValues": [
+            {
+              "value": "M",
+              "concept": {
+                "name": "Male Gender",
+                "id": "ncit:C46109"
+              }
+            },
+            {
+              "value": "F",
+              "concept": {
+                "name": "Female Gender",
+                "id": "G46110"
+              }
+            },
+            {
+              "value": "-",
+              "concept": {
+                "name": "NOMATCH",
+                "id": null
+              }
+            }
+          ]
+        },
+        {
+          "resultNumber": 3,
+          "result": {
+            "dataElement": {
+              "id": "62",
+              "name": "Patient Gender Category"
+            },
+            "dataElementConcept": {
+              "id": "2009919",
+              "name": "Patient Gender",
+              "concepts": ["ncit:C16960", "ncit:C17357"]
+            }
+          },
+          "observedValues": [
+            {
+              "value": "M",
+              "concept": {
+                "name": "Male Gender",
+                "id": "ncit:C46109"
+              }
+            },
+            {
+              "value": "F",
+              "concept": {
+                "name": "Female Gender",
+                "id": "G46110"
+              }
+            },
+            {
+              "value": "-",
+              "concept": {
+                "name": "NOMATCH",
+                "id": null
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "columnNumber": 4,
+      "headerValue": "Survival (months)",
+      "results": [
+        {
+          "resultNumber": 1,
+          "result": {
+            "dataElement": {
+              "id": "2434145",
+              "name": "Surgical Diagnosis Last Contact or Death Time in Month NUMBER"
+            },
+            "dataElementConcept": {
+              "id": "2434140",
+              "name": "Surgical Diagnosis To Date of Last Contact or Death Time in Months",
+              "concepts": ["ncit:CL052737", "ncit:C15220", "ncit:C0805839", "ncit:C28554", "ncit:C25207", "ncit:C29846"]
+            }
+          },
+          "observedValues": [
+            {
+              "value": "15",
+              "concept": {
+                "name": "CONFORMING",
+                "id": null
+              }
+            },
+            {
+              "value": "17",
+              "concept": {
+                "name": "CONFORMING",
+                "id": null
+              }
+            },
+            {
+              "value": "16",
+              "concept": {
+                "name": "CONFORMING",
+                "id": null
+              }
+            },
+            {
+              "value": "10",
+              "concept": {
+                "name": "CONFORMING",
+                "id": null
+              }
+            },
+            {
+              "value": "4",
+              "concept": {
+                "name": "CONFORMING",
+                "id": null
+              }
+            },
+            {
+              "value": "9",
+              "concept": {
+                "name": "CONFORMING",
+                "id": null
+              }
+            },
+            {
+              "value": "13",
+              "concept": {
+                "name": "CONFORMING",
+                "id": null
+              }
+            },
+            {
+              "value": "12",
+              "concept": {
+                "name": "CONFORMING",
+                "id": null
+              }
+            },
+            {
+              "value": "2",
+              "concept": {
+                "name": "CONFORMING",
+                "id": null
+              }
+            },
+            {
+              "value": "7",
+              "concept": {
+                "name": "CONFORMING",
+                "id": null
+              }
+            },
+            {
+              "value": "5",
+              "concept": {
+                "name": "CONFORMING",
+                "id": null
+              }
+            },
+            {
+              "value": "6",
+              "concept": {
+                "name": "CONFORMING",
+                "id": null
+              }
+            },
+            {
+              "value": "10.6",
+              "concept": {
+                "name": "CONFORMING",
+                "id": null
+              }
+            },
+            {
+              "value": "19.6",
+              "concept": {
+                "name": "CONFORMING",
+                "id": null
+              }
+            },
+            {
+              "value": "45.3",
+              "concept": {
+                "name": "CONFORMING",
+                "id": null
+              }
+            },
+            {
+              "value": "13.7",
+              "concept": {
+                "name": "CONFORMING",
+                "id": null
+              }
+            },
+            {
+              "value": "66.7",
+              "concept": {
+                "name": "CONFORMING",
+                "id": null
+              }
+            },
+            {
+              "value": "1",
+              "concept": {
+                "name": "CONFORMING",
+                "id": null
+              }
+            },
+            {
+              "value": "119",
+              "concept": {
+                "name": "CONFORMING",
+                "id": null
+              }
+            },
+            {
+              "value": "44.6",
+              "concept": {
+                "name": "CONFORMING",
+                "id": null
+              }
+            },
+            {
+              "value": "88.7",
+              "concept": {
+                "name": "CONFORMING",
+                "id": null
+              }
+            },
+            {
+              "value": "116.5",
+              "concept": {
+                "name": "CONFORMING",
+                "id": null
+              }
+            },
+            {
+              "value": "137.7",
+              "concept": {
+                "name": "CONFORMING",
+                "id": null
+              }
+            },
+            {
+              "value": "62.4",
+              "concept": {
+                "name": "CONFORMING",
+                "id": null
+              }
+            },
+            {
+              "value": "88.3",
+              "concept": {
+                "name": "CONFORMING",
+                "id": null
+              }
+            },
+            {
+              "value": "120.5",
+              "concept": {
+                "name": "CONFORMING",
+                "id": null
+              }
+            },
+            {
+              "value": "40.3",
+              "concept": {
+                "name": "CONFORMING",
+                "id": null
+              }
+            },
+            {
+              "value": "28.1",
+              "concept": {
+                "name": "CONFORMING",
+                "id": null
+              }
+            },
+            {
+              "value": "24.5",
+              "concept": {
+                "name": "CONFORMING",
+                "id": null
+              }
+            },
+            {
+              "value": "18",
+              "concept": {
+                "name": "CONFORMING",
+                "id": null
+              }
+            },
+            {
+              "value": "11.5",
+              "concept": {
+                "name": "CONFORMING",
+                "id": null
+              }
+            },
+            {
+              "value": "8.8",
+              "concept": {
+                "name": "CONFORMING",
+                "id": null
+              }
+            },
+            {
+              "value": "73.4",
+              "concept": {
+                "name": "CONFORMING",
+                "id": null
+              }
+            },
+            {
+              "value": "22.8",
+              "concept": {
+                "name": "CONFORMING",
+                "id": null
+              }
+            },
+            {
+              "value": "7.3",
+              "concept": {
+                "name": "CONFORMING",
+                "id": null
+              }
+            },
+            {
+              "value": "18.3",
+              "concept": {
+                "name": "CONFORMING",
+                "id": null
+              }
+            },
+            {
+              "value": "15.8",
+              "concept": {
+                "name": "CONFORMING",
+                "id": null
+              }
+            },
+            {
+              "value": "21.2",
+              "concept": {
+                "name": "CONFORMING",
+                "id": null
+              }
+            },
+            {
+              "value": "105.3",
+              "concept": {
+                "name": "CONFORMING",
+                "id": null
+              }
+            },
+            {
+              "value": "17.9",
+              "concept": {
+                "name": "CONFORMING",
+                "id": null
+              }
+            },
+            {
+              "value": "95.2",
+              "concept": {
+                "name": "CONFORMING",
+                "id": null
+              }
+            },
+            {
+              "value": "0.3",
+              "concept": {
+                "name": "CONFORMING",
+                "id": null
+              }
+            },
+            {
+              "value": "27.1",
+              "concept": {
+                "name": "CONFORMING",
+                "id": null
+              }
+            },
+            {
+              "value": "251.7",
+              "concept": {
+                "name": "CONFORMING",
+                "id": null
+              }
+            },
+            {
+              "value": "20.2",
+              "concept": {
+                "name": "CONFORMING",
+                "id": null
+              }
+            },
+            {
+              "value": "98.4",
+              "concept": {
+                "name": "CONFORMING",
+                "id": null
+              }
+            },
+            {
+              "value": "149",
+              "concept": {
+                "name": "CONFORMING",
+                "id": null
+              }
+            },
+            {
+              "value": "0.2",
+              "concept": {
+                "name": "CONFORMING",
+                "id": null
+              }
+            },
+            {
+              "value": "89.1",
+              "concept": {
+                "name": "CONFORMING",
+                "id": null
+              }
+            },
+            {
+              "value": "57.7",
+              "concept": {
+                "name": "CONFORMING",
+                "id": null
+              }
+            },
+            {
+              "value": "17.2",
+              "concept": {
+                "name": "CONFORMING",
+                "id": null
+              }
+            },
+            {
+              "value": "6.9",
+              "concept": {
+                "name": "CONFORMING",
+                "id": null
+              }
+            },
+            {
+              "value": "84.5",
+              "concept": {
+                "name": "CONFORMING",
+                "id": null
+              }
+            },
+            {
+              "value": "115.7",
+              "concept": {
+                "name": "CONFORMING",
+                "id": null
+              }
+            },
+            {
+              "value": "83.5",
+              "concept": {
+                "name": "CONFORMING",
+                "id": null
+              }
+            },
+            {
+              "value": "30.8",
+              "concept": {
+                "name": "CONFORMING",
+                "id": null
+              }
+            },
+            {
+              "value": "136.2",
+              "concept": {
+                "name": "CONFORMING",
+                "id": null
+              }
+            },
+            {
+              "value": "30",
+              "concept": {
+                "name": "CONFORMING",
+                "id": null
+              }
+            },
+            {
+              "value": "66.8",
+              "concept": {
+                "name": "CONFORMING",
+                "id": null
+              }
+            },
+            {
+              "value": "5.2",
+              "concept": {
+                "name": "CONFORMING",
+                "id": null
+              }
+            },
+            {
+              "value": "12.7",
+              "concept": {
+                "name": "CONFORMING",
+                "id": null
+              }
+            },
+            {
+              "value": "78.2",
+              "concept": {
+                "name": "CONFORMING",
+                "id": null
+              }
+            },
+            {
+              "value": "47.2",
+              "concept": {
+                "name": "CONFORMING",
+                "id": null
+              }
+            },
+            {
+              "value": "72",
+              "concept": {
+                "name": "CONFORMING",
+                "id": null
+              }
+            },
+            {
+              "value": "31.7",
+              "concept": {
+                "name": "CONFORMING",
+                "id": null
+              }
+            },
+            {
+              "value": "68.3",
+              "concept": {
+                "name": "CONFORMING",
+                "id": null
+              }
+            },
+            {
+              "value": "6.4",
+              "concept": {
+                "name": "CONFORMING",
+                "id": null
+              }
+            },
+            {
+              "value": "56.6",
+              "concept": {
+                "name": "CONFORMING",
+                "id": null
+              }
+            },
+            {
+              "value": "8.3",
+              "concept": {
+                "name": "CONFORMING",
+                "id": null
+              }
+            },
+            {
+              "value": "3.2",
+              "concept": {
+                "name": "CONFORMING",
+                "id": null
+              }
+            },
+            {
+              "value": "10.2",
+              "concept": {
+                "name": "CONFORMING",
+                "id": null
+              }
+            },
+            {
+              "value": "70.9",
+              "concept": {
+                "name": "CONFORMING",
+                "id": null
+              }
+            },
+            {
+              "value": "71.2",
+              "concept": {
+                "name": "CONFORMING",
+                "id": null
+              }
+            },
+            {
+              "value": "1.2",
+              "concept": {
+                "name": "CONFORMING",
+                "id": null
+              }
+            },
+            {
+              "value": "42.6",
+              "concept": {
+                "name": "CONFORMING",
+                "id": null
+              }
+            },
+            {
+              "value": "75.3",
+              "concept": {
+                "name": "CONFORMING",
+                "id": null
+              }
+            },
+            {
+              "value": "75.2",
+              "concept": {
+                "name": "CONFORMING",
+                "id": null
+              }
+            },
+            {
+              "value": "73.6",
+              "concept": {
+                "name": "CONFORMING",
+                "id": null
+              }
+            },
+            {
+              "value": "14.6",
+              "concept": {
+                "name": "CONFORMING",
+                "id": null
+              }
+            },
+            {
+              "value": "13.3",
+              "concept": {
+                "name": "CONFORMING",
+                "id": null
+              }
+            },
+            {
+              "value": "63.5",
+              "concept": {
+                "name": "CONFORMING",
+                "id": null
+              }
+            },
+            {
+              "value": "5.4",
+              "concept": {
+                "name": "CONFORMING",
+                "id": null
+              }
+            },
+            {
+              "value": "67.8",
+              "concept": {
+                "name": "CONFORMING",
+                "id": null
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "columnNumber": 5,
+      "headerValue": "Disease",
+      "results": [
+        {
+          "resultNumber": 1,
+          "result": {
+            "dataElement": {
+              "id": "2199550",
+              "name": "Adult Malignant Disease Type"
+            },
+            "dataElementConcept": {
+              "id": "",
+              "name": "Cancer Diagnosis",
+              "concepts": ["ncit:C9305", "ncit:C15220"]
+            }
+          },
+          "observedValues": [
+            {
+              "value": "ASTROCYTOMA",
+              "concept": {
+                "name": "Brain",
+                "id": "ncit:C12439"
+              }
+            },
+            {
+              "value": "GBM",
+              "concept": {
+                "name": "Brain",
+                "id": "ncit:C12439"
+              }
+            },
+            {
+              "value": "OLIGODENDROGLIOMA",
+              "concept": {
+                "name": "NOMATCH",
+                "id": null
+              }
+            },
+            {
+              "value": "OLIGODENDROGLIOMA",
+              "concept": {
+                "name": "Brain",
+                "id": "ncit:C12439"
+              }
+            },
+            {
+              "value": "MIXED",
+              "concept": {
+                "name": "Brain",
+                "id": "ncit:C12439"
+              }
+            }
+          ]
+        },
+        {
+          "resultNumber": 2,
+          "result": {
+            "dataElement": {
+              "id": "2201052",
+              "name": "Patient Disease Name"
+            },
+            "dataElementConcept": {
+              "id": "2201050",
+              "name": "Patient Disease",
+              "concepts": ["ncit:C16960", "ncit:C2991"]
+            }
+          },
+          "observedValues": [
+            {
+              "value": "ASTROCYTOMA",
+              "concept": {
+                "name": "Astrocytoma Malignant NOS",
+                "id": "ncit:C60781"
+              }
+            },
+            {
+              "value": "GBM",
+              "concept": {
+                "name": "Glioblastoma (multiforme)",
+                "id": "ncit:C3058"
+              }
+            },
+            {
+              "value": "OLIGODENDROGLIOMA",
+              "concept": {
+                "name": "NOMATCH",
+                "id": null
+              }
+            },
+            {
+              "value": "MIXED",
+              "concept": {
+                "name": "NOMATCH",
+                "id": null
+              }
+            }
+          ]
+        },
+        {
+          "resultNumber": 3,
+          "result": {
+            "dataElement": {
+              "id": "2736361",
+              "name": "Patient Disease Code"
+            },
+            "dataElementConcept": {
+              "id": "2201050",
+              "name": "Patient Disease",
+              "concepts": ["ncit:C16960", "ncit:C2991"]
+            }
+          },
+          "observedValues": [
+            {
+              "value": "ASTROCYTOMA",
+              "concept": {
+                "name": "NOMATCH",
+                "id": null
+              }
+            },
+            {
+              "value": "GBM",
+              "concept": {
+                "name": "NOMATCH",
+                "id": null
+              }
+            },
+            {
+              "value": "OLIGODENDROGLIOMA",
+              "concept": {
+                "name": "NOMATCH",
+                "id": null
+              }
+            },
+            {
+              "value": "MIXED",
+              "concept": {
+                "name": "NOMATCH",
+                "id": null
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "columnNumber": 6,
+      "headerValue": "Grade",
+      "results": [
+        {
+          "resultNumber": 1,
+          "result": {
+            "dataElement": {
+              "id": "2785839",
+              "name": "Neoplasm Histologic Grade"
+            },
+            "dataElementConcept": {
+              "id": "2783102",
+              "name": "Specimen Histologic Grade Grading System Name",
+              "concepts": ["ncit:C19157", "ncit:C18000", "ncit:C48224", "ncit:C42614"]
+            }
+          },
+          "observedValues": [
+            {
+              "value": "II",
+              "concept": {
+                "name": "Moderately Differentiated",
+                "id": "ncit:C14162"
+              }
+            },
+            {
+              "value": "III",
+              "concept": {
+                "name": "Poorly Differentiated",
+                "id": "ncit:C14167"
+              }
+            },
+            {
+              "value": "IV",
+              "concept": {
+                "name": "Undifferentiated Histology",
+                "id": "ncit:C14176,C16681"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "columnNumber": 7,
+      "headerValue": "Race",
+      "results": [
+        {
+          "resultNumber": 1,
+          "result": {
+            "dataElement": {
+              "id": "6412503",
+              "name": "Collected Race"
+            },
+            "dataElementConcept": {
+              "id": "6412496",
+              "name": "Demographics Domain Collected Race",
+              "concepts": ["ncit:C49572", "ncit:C25453", "ncit:C17049"]
+            }
+          },
+          "observedValues": [
+            {
+              "value": "WHITE",
+              "concept": {
+                "name": "White",
+                "id": "ncit:C41261"
+              }
+            },
+            {
+              "value": "BLACK",
+              "concept": {
+                "name": "Black",
+                "id": "ncit:C128938"
+              }
+            },
+            {
+              "value": "ASIAN NOS",
+              "concept": {
+                "name": "Asian",
+                "id": "LA6156-9"
+              }
+            },
+            {
+              "value": "OTHER",
+              "concept": {
+                "name": "Unknown",
+                "id": "ncit:C17998"
+              }
+            }
+          ]
+        },
+        {
+          "resultNumber": 2,
+          "result": {
+            "dataElement": {
+              "id": "2192199",
+              "name": "Race Category Text"
+            },
+            "dataElementConcept": {
+              "id": "",
+              "name": "2192191 Race Category",
+              "concepts": []
+            }
+          },
+          "observedValues": [
+            {
+              "value": "WHITE",
+              "concept": {
+                "name": "White",
+                "id": "ncit:C41261"
+              }
+            },
+            {
+              "value": "BLACK",
+              "concept": {
+                "name": "Black or African American",
+                "id": "ncit:C16352"
+              }
+            },
+            {
+              "value": "ASIAN NOS",
+              "concept": {
+                "name": "Asian",
+                "id": "LA6156-9"
+              }
+            },
+            {
+              "value": "OTHER",
+              "concept": {
+                "name": "Unknown",
+                "id": "ncit:C17998"
+              }
+            }
+          ]
+        },
+        {
+          "resultNumber": 3,
+          "result": {
+            "dataElement": {
+              "id": "5700802",
+              "name": "Race"
+            },
+            "dataElementConcept": {
+              "id": "2388875",
+              "name": "Patient Race",
+              "concepts": ["ncit:C16960", "ncit:C17049"]
+            }
+          },
+          "observedValues": [
+            {
+              "value": "WHITE",
+              "concept": {
+                "name": "White",
+                "id": "loinc::A4457-3"
+              }
+            },
+            {
+              "value": "BLACK",
+              "concept": {
+                "name": "Black or African American",
+                "id": "loinc::A10610-6"
+              }
+            },
+            {
+              "value": "ASIAN NOS",
+              "concept": {
+                "name": "Asian",
+                "id": "loinc::A6156-9"
+              }
+            },
+            {
+              "value": "OTHER",
+              "concept": {
+                "name": "Unknown",
+                "id": "ncit:C17998"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "columnNumber": 8,
+      "headerValue": "Institution",
+      "results": [
+        {
+          "resultNumber": 1,
+          "result": {
+            "dataElement": {
+              "id": "1100",
+              "name": "Institution Name"
+            },
+            "dataElementConcept": {
+              "id": "",
+              "name": "Institution Identifier",
+              "concepts": ["ncit:C21541", "ncit:C25364"]
+            }
+          },
+          "observedValues": [
+            {
+              "value": "TJU",
+              "concept": {
+                "name": "CONFORMING",
+                "id": null
+              }
+            },
+            {
+              "value": "HENRY FORD HOSPITAL (RETRO)",
+              "concept": {
+                "name": "CONFORMING",
+                "id": null
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

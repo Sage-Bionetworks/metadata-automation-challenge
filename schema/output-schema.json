@@ -1,0 +1,114 @@
+{
+    "$schema" : "http://json-schema.org/draft-07/schema",
+    "title" : "Submission Outputs",
+    "type" : "object",
+    "description" : "Structure and formatting requirements for the output of metadata annotation tools submitted to the challenge",
+    "properties" : {
+        "columns": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "required": [
+                    "columnNumber",
+                    "headerValue",
+                    "results"
+                ],
+                "properties": {
+                    "columnNumber": {
+                        "type": "integer",
+                        "description": "The 1-indexed column number from the input table",
+                        "minimum": 1
+                    },
+                    "headerValue": {
+                        "type": "string",
+                        "description": "The header value from the input table."
+                    },
+                    "results": {
+                        "type": "array",
+                        "items": {
+                            "type": "object",
+                            "description": "Annotation details (data element, data element concepts, permissable values for a selected column",
+                            "properties": {
+                                "dataElement": {
+                                    "type": "object",
+                                    "description": "caDSR public ID and long name for a selected data element",
+                                    "properties": {
+                                        "id": {
+                                            "type": "string",
+                                            "description": "The unique identifier of the common data element (CDE) in the caDSR",
+                                            "examples": [
+                                                "3701084"
+                                            ]
+                                        },
+                                        "name": {
+                                            "type": "string",
+                                            "description": "The descriptive set of words by which a CDE is known. It is constructed from a terminology’s preferred names for the DEC and Value Domain",
+                                            "examples": [
+                                                "APGAR Test Breathing Effort Score"
+                                            ]
+                                        }
+                                    }
+                                },
+                                "dataElementConcept": {
+                                    "type": "object",
+                                    "description": "caDSR public ID and long name for a selected data element concept",
+                                    "properties": {
+                                        "id": {
+                                            "type": "string",
+                                            "description": "The unique identifier in the caDSR of the data element concept (DEC)",
+                                            "examples" [
+                                                "2958442"
+                                            ]
+                                        },
+                                        "name": {
+                                            "type": "string",
+                                            "description": "A concept that can be represented in the form of a data element, using a unique combination of its Object Class and Property. A DEC is described independently of any particular representation or value domain",
+                                            "examples": [
+                                                "Assessment Multiple Birth"
+                                            ]
+                                        },
+                                        "concepts": {
+                                            "type": "array",
+                                            "items": {
+                                                "type": "object",
+                                                "properties": {
+                                                    "id": {
+                                                        "type": "string"
+                                                    },
+                                                    "name": {
+                                                        "type": "string"
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                },
+                                "permissibleValues": {
+                                    "type": "array",
+                                    "items": {
+                                        "type": "object",
+                                        "properties": {
+                                            "name": {
+                                                "type": "string"
+                                            },
+                                            "id": {
+                                                "type": "string"
+                                            },
+                                            "instances": {
+                                                "type": "array",
+                                                "items": {
+                                                    "type": "string"
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "additionalProperties" : false
+}
