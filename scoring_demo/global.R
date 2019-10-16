@@ -11,19 +11,17 @@ submission_data <- readr::read_file("../scoring/test_rembrandt.json") %>%
 submission_annotated <- readr::read_file("../scoring/annotated_rembrandt.json") %>%
   jsonlite::fromJSON(simplifyVector = FALSE)
 
-de_wt <- 1.0
-dec_wt <- 1.0
-top_wt <- 2.0
-vd_wt <- 0.5
-
-score_checks <- tribble(
-  ~step, ~check, ~nextIfTrue, ~nextIfFalse, ~pointsIfTrue,
-  1L, "Result matches Gold Standard?", 2L, 3L, de_wt,
-  2L, "Top Result = Gold Standard?", NA, 3L, top_wt,
-  3L, "'Good' DEC Concept Codes Match?", NA, 4L, dec_wt,
-  4L, "'Good' VD Coverage?", NA, 5L, vd_wt,
-  5L, "[HR] Better Match?", NA, NA, 1
-)
+get_score_checks <- function(de_wt=1.0, dec_wt=1.0, top_wt=2.0, vd_wt=.5) {
+  score_checks <- tribble(
+    ~step, ~check, ~nextIfTrue, ~nextIfFalse, ~pointsIfTrue,
+    1L, "Result matches Gold Standard?", 2L, 3L, de_wt,
+    2L, "Top Result = Gold Standard?", NA, 3L, top_wt,
+    3L, "'Good' DEC Concept Codes Match?", NA, 4L, dec_wt,
+    4L, "'Good' VD Coverage?", NA, 5L, vd_wt,
+    5L, "[HR] Better Match?", NA, NA, 1
+  )
+  score_checks
+}
 
 jaccard <- function(list_a, list_b) {
   n <- length(intersect(list_a, list_b))
@@ -45,10 +43,9 @@ get_observed_values <- function(col_data, res_num = 1) {
 }
 
 
-get_res_score <- function(sub_data, anno_data, res_num) {
-  overlap_thresh <- 0.5
-  coverage_thresh <- 0.8
-
+get_res_score <- function(sub_data, anno_data, res_num, score_checks,
+                          overlap_thresh = 0.5,
+                          coverage_thresh = 0.8) {
   sub_c_ids <- get_dec_concepts(sub_data, res_num)
   anno_c_ids <- get_dec_concepts(anno_data)
   metric_3 <- jaccard(sub_c_ids, anno_c_ids)
@@ -132,7 +129,9 @@ find_mismatch_rows <- function(df_a, df_b, col_name = "id") {
   df_a[[col_name]][!(df_a[[col_name]] %in% df_b[[col_name]])]
 }
 
-get_overall_score <- function(sub_data, anno_data, aggregate_by="max") {
+get_overall_score <- function(sub_data, anno_data, score_check, aggregate_by="max",
+                              overlap_thresh = 0.5,
+                              coverage_thresh = 0.8) {
   number_of_columns = c(1:length(sub_data$columns))
   column_scores = sapply(number_of_columns, function(column) {
     sub_data_result <- purrr::keep(
@@ -147,7 +146,9 @@ get_overall_score <- function(sub_data, anno_data, aggregate_by="max") {
 
     num_res <- length(sub_data_result$result)
     res_scores <- map(1:num_res, function(r) {
-      get_res_score(sub_data_result, anno_data_result, r)
+      get_res_score(sub_data_result, anno_data_result, r, score_check,
+                    overlap_thresh = overlap_thresh,
+                    coverage_thresh = coverage_thresh)
     })
     get_col_score(res_scores, aggregate_by = aggregate_by)
   })

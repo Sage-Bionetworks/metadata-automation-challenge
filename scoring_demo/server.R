@@ -11,9 +11,41 @@
 shinyServer(function(input, output) {
 
     selected_col <- reactiveValues()
-    
+
+    observeEvent(input$update_weighting, {
+        selected_col$overlap_thresh = input$overlap_thresh
+        selected_col$coverage_thresh = input$coverage_thresh
+        selected_col$score_checks = get_score_checks(de_wt = input$de_wt,
+                                                     dec_wt = input$dec_wt,
+                                                     top_wt = input$top_wt,
+                                                     vd_wt = input$vd_wt)
+        selected_col$res_scores <- map(1:selected_col$num_res, function(r) {
+            get_res_score(selected_col$sub_data,
+                          selected_col$anno_data,
+                          r,
+                          selected_col$score_checks,
+                          overlap_thresh = input$overlap_thresh,
+                          coverage_thresh = input$coverage_thresh)
+        })
+    })
+
+    observeEvent(input$update_cutoff, {
+        selected_col$overlap_thresh = input$overlap_thresh
+        selected_col$coverage_thresh = input$coverage_thresh
+        selected_col$res_scores <- map(1:selected_col$num_res, function(r) {
+            get_res_score(selected_col$sub_data,
+                          selected_col$anno_data,
+                          r,
+                          selected_col$score_checks,
+                          overlap_thresh = input$overlap_thresh,
+                          coverage_thresh = input$coverage_thresh)
+        })
+    })
+
     observeEvent(input$column, {
         selected_col$col_num <- input$column
+        selected_col$overlap_thresh = input$overlap_thresh
+        selected_col$coverage_thresh = input$coverage_thresh
         selected_col$sub_data <- purrr::keep(
             submission_data$columns, ~ .x$columnNumber == input$column
         ) %>% 
@@ -23,16 +55,22 @@ shinyServer(function(input, output) {
         ) %>% 
             pluck(1)
         selected_col$num_res <- length(selected_col$sub_data$result)
+        selected_col$score_checks = get_score_checks(de_wt = input$de_wt,
+                                                     dec_wt = input$dec_wt,
+                                                     top_wt = input$top_wt,
+                                                     vd_wt = input$vd_wt)
         selected_col$res_scores <- map(1:selected_col$num_res, function(r) {
             get_res_score(selected_col$sub_data,
                           selected_col$anno_data,
-                          r)
+                          r,
+                          selected_col$score_checks,
+                          overlap_thresh = input$overlap_thresh,
+                          coverage_thresh = input$coverage_thresh)
         })
         selected_col$anno_de <- get_de_table(selected_col$anno_data)
         selected_col$anno_dec <- get_dec_table(selected_col$anno_data)
         selected_col$anno_dec_concepts <- get_dec_concepts(selected_col$anno_data)
         selected_col$anno_ovs <- get_observed_values(selected_col$anno_data)
-        
     })
     
     output$col_number <- renderText({
@@ -53,15 +91,15 @@ shinyServer(function(input, output) {
     output$score_table <- renderTable({
         res_num <- as.integer(input$result)
         res_score_table <- as_tibble(selected_col$res_scores[[res_num]])
-        score_checks %>% 
-            select(step, check, pointsIfTrue) %>% 
+        selected_col$score_checks %>%
+            select(step, check, pointsIfTrue) %>%
             left_join(res_score_table, by = "step")
     })
-    
+
     output$score_proc_table <- renderTable({
-        score_checks
+        selected_col$score_checks
     })
-    
+
     output$res_score <- renderText({
         res_num <- as.integer(input$result)
         sum(selected_col$res_scores[[res_num]]$score, na.rm = TRUE)
@@ -73,7 +111,9 @@ shinyServer(function(input, output) {
     })
 
     output$overall_score <- renderText({
-        get_overall_score(submission_data, submission_annotated,
+        get_overall_score(submission_data, submission_annotated, selected_col$score_checks,
+                          overlap_thresh = selected_col$overlap_thresh,
+                          coverage_thresh = selected_col$coverage_thresh,
                           aggregate_by = input$column_aggregate)
     })
 
