@@ -86,7 +86,11 @@ shinyUI(fluidPage(
                     ),
                     actionButton("update_cutoff", "Update Cutoffs")
                 )
-            )
+            ),
+            selectInput("column_aggregate",
+                        "Column Score Aggregation",
+                        choices = c("max", "median"),
+                        selected = "max")
 
         ),
 
@@ -97,13 +101,23 @@ shinyUI(fluidPage(
                 wellPanel(
                     fluidRow(
                         column(
-                            4,
+                            3,
                             uiOutput("result_opts")
                         ),
                         column(
-                            8,
+                            3,
                             h5("Result score"),
                             textOutput("res_score")
+                        ),
+                        column(
+                            3,
+                            h5("Column score"),
+                            textOutput("col_score")
+                        ),
+                        column(
+                            3,
+                            h5("Overall score"),
+                            textOutput("overall_score")
                         )
                     )
                 )
