@@ -84,7 +84,11 @@ shinyUI(fluidPage(
                         )
                     )
                 )
-            )
+            ),
+            selectInput("column_aggregate",
+                        "Column Score Aggregation",
+                        choices = c("max", "median"),
+                        selected = "max")
 
         ),
 

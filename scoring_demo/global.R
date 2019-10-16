@@ -97,10 +97,14 @@ get_res_score <- function(sub_data, anno_data, res_num) {
        score = c(score_1, score_2, score_3, score_4))
 }
 
-get_col_score <- function(res_scores) {
+get_col_score <- function(res_scores, aggregate_by="max") {
   scores = sapply(res_scores, function(x) { sum(x$score, na.rm = T) })
   # Get max of all result scores
-  max(scores)
+  if (aggregate_by == "max") {
+    max(scores)
+  } else {
+    median(scores)
+  }
 }
 
 get_de_table <- function(col_data, res_num = 1) {
