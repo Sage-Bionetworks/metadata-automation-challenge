@@ -97,9 +97,11 @@ get_res_score <- function(sub_data, anno_data, res_num) {
        score = c(score_1, score_2, score_3, score_4))
 }
 
-# get_col_score <- function(sub_data, anno_data, num_res) {
-#   
-# }
+get_col_score <- function(res_scores) {
+  scores = sapply(res_scores, function(x) { sum(x$score, na.rm = T) })
+  # Get max of all result scores
+  max(scores)
+}
 
 get_de_table <- function(col_data, res_num = 1) {
   as_tibble(col_data$results[[res_num]]$result$dataElement)

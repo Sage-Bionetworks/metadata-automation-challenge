@@ -99,9 +99,14 @@ shinyUI(fluidPage(
                             uiOutput("result_opts")
                         ),
                         column(
-                            8,
+                            4,
                             h5("Result score"),
                             textOutput("res_score")
+                        ),
+                        column(
+                            4,
+                            h5("Column score"),
+                            textOutput("col_score")
                         )
                     )
                 )
