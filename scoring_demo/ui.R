@@ -99,18 +99,23 @@ shinyUI(fluidPage(
                 wellPanel(
                     fluidRow(
                         column(
-                            4,
+                            3,
                             uiOutput("result_opts")
                         ),
                         column(
-                            4,
+                            3,
                             h5("Result score"),
                             textOutput("res_score")
                         ),
                         column(
-                            4,
+                            3,
                             h5("Column score"),
                             textOutput("col_score")
+                        ),
+                        column(
+                            3,
+                            h5("Total score"),
+                            textOutput("total_score")
                         )
                     )
                 )
