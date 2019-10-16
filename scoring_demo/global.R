@@ -2,11 +2,13 @@ library(shiny)
 library(listviewer)
 library(DT)
 library(shinyjs)
+library(tibble)
+library(purrr)
+library(dplyr)
 
-
-submission_data <- readr::read_file("../test_rembrandt.json") %>% 
+submission_data <- readr::read_file("../scoring/test_rembrandt.json") %>%
   jsonlite::fromJSON(simplifyVector = FALSE)
-submission_annotated <- readr::read_file("../annotated_rembrandt.json") %>% 
+submission_annotated <- readr::read_file("../scoring/annotated_rembrandt.json") %>%
   jsonlite::fromJSON(simplifyVector = FALSE)
 
 de_wt <- 1.0
