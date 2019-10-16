@@ -67,6 +67,10 @@ shinyServer(function(input, output) {
         sum(selected_col$res_scores[[res_num]]$score, na.rm = TRUE)
     })
     
+    output$col_score <- renderText({
+        get_col_score(selected_col$res_scores, aggregate_by = input$column_aggregate)
+    })
+
     output$sub_de_table <- renderDT({
         res_num <- as.integer(input$result)
         de_df <- get_de_table(selected_col$sub_data, res_num)
