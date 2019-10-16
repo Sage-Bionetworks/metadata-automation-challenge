@@ -59,7 +59,7 @@ shinyUI(fluidPage(
                     fluidRow(
                         column(
                             12,
-                            numericInput("vd_wt", "VD Coverage",
+                            numericInput("vd_wt", "VD Coverage", min = 0, max = 1,
                                          value = 0.5, width = "100%")
                         )
                     ),
