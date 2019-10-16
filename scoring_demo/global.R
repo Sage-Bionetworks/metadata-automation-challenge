@@ -11,19 +11,17 @@ submission_data <- readr::read_file("../scoring/test_rembrandt.json") %>%
 submission_annotated <- readr::read_file("../scoring/annotated_rembrandt.json") %>%
   jsonlite::fromJSON(simplifyVector = FALSE)
 
-de_wt <- 1.0
-dec_wt <- 1.0
-top_wt <- 2.0
-vd_wt <- 0.5
-
-score_checks <- tribble(
-  ~step, ~check, ~nextIfTrue, ~nextIfFalse, ~pointsIfTrue,
-  1L, "Result matches Gold Standard?", 2L, 3L, de_wt,
-  2L, "Top Result = Gold Standard?", NA, 3L, top_wt,
-  3L, "'Good' DEC Concept Codes Match?", NA, 4L, dec_wt,
-  4L, "'Good' VD Coverage?", NA, 5L, vd_wt,
-  5L, "[HR] Better Match?", NA, NA, 1
-)
+get_score_checks <- function(de_wt=1.0, dec_wt=1.0, top_wt=2.0, vd_wt=.5) {
+  score_checks <- tribble(
+    ~step, ~check, ~nextIfTrue, ~nextIfFalse, ~pointsIfTrue,
+    1L, "Result matches Gold Standard?", 2L, 3L, de_wt,
+    2L, "Top Result = Gold Standard?", NA, 3L, top_wt,
+    3L, "'Good' DEC Concept Codes Match?", NA, 4L, dec_wt,
+    4L, "'Good' VD Coverage?", NA, 5L, vd_wt,
+    5L, "[HR] Better Match?", NA, NA, 1
+  )
+  score_checks
+}
 
 jaccard <- function(list_a, list_b) {
   n <- length(intersect(list_a, list_b))
@@ -45,7 +43,7 @@ get_observed_values <- function(col_data, res_num = 1) {
 }
 
 
-get_res_score <- function(sub_data, anno_data, res_num,
+get_res_score <- function(sub_data, anno_data, res_num, score_checks,
                           overlap_thresh = 0.5,
                           coverage_thresh = 0.8) {
   sub_c_ids <- get_dec_concepts(sub_data, res_num)

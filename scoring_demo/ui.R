@@ -40,29 +40,30 @@ shinyUI(fluidPage(
                     fluidRow(
                         column(
                             6,
-                            textInput("de_wt", "DE", 
-                                      value = 1.0, width = "100%")
+                            numericInput("de_wt", "DE",
+                                         value = 1.0, width = "100%")
                         ),
                         column(
                             6,
-                            textInput("dec_wt", "DEC", 
-                                      value = 1.0, width = "100%")
+                            numericInput("dec_wt", "DEC",
+                                         value = 1.0, width = "100%")
                         )
                     ),
                     fluidRow(
                         column(
                             12,
-                            textInput("top_wt", "Top Result", 
-                                      value = 2.0, width = "100%")
+                            numericInput("top_wt", "Top Result",
+                                         value = 2.0, width = "100%")
                         )
                     ),
                     fluidRow(
                         column(
                             12,
-                            textInput("vd_wt", "VD Coverage", 
-                                      value = 0.5, width = "100%")
+                            numericInput("vd_wt", "VD Coverage",
+                                         value = 0.5, width = "100%")
                         )
-                    )
+                    ),
+                    actionButton("update_weighting", "Update Weightings")
                 )
             ),
             h6(strong("Metric Cutoffs")),
@@ -72,15 +73,15 @@ shinyUI(fluidPage(
                     fluidRow(
                         column(
                             12,
-                            sliderInput("overlap_thresh", "Overlap (Jaccard)", min = 0, max = 1,
-                                        step = 0.1, value = 0.5, width = "100%")
+                            numericInput("overlap_thresh", "Overlap (Jaccard)", min = 0, max = 1,
+                                         value = 0.5, width = "100%")
                         )
                     ),
                     fluidRow(
                         column(
                             12,
-                            sliderInput("coverage_thresh", "VD Coverage", min = 0, max = 1,
-                                        step = 0.1, value = 0.8, width = "100%")
+                            numericInput("coverage_thresh", "VD Coverage", min = 0, max = 1,
+                                         value = 0.8, width = "100%")
                         )
                     ),
                     actionButton("update_cutoff", "Update Cutoffs")
