@@ -25,10 +25,6 @@ shinyServer(function(input, output) {
                           overlap_thresh = input$overlap_thresh,
                           coverage_thresh = input$coverage_thresh)
         })
-        selected_col$anno_de <- get_de_table(selected_col$anno_data)
-        selected_col$anno_dec <- get_dec_table(selected_col$anno_data)
-        selected_col$anno_dec_concepts <- get_dec_concepts(selected_col$anno_data)
-        selected_col$anno_ovs <- get_observed_values(selected_col$anno_data)
     })
 
     observeEvent(input$update_cutoff, {
@@ -40,10 +36,6 @@ shinyServer(function(input, output) {
                           overlap_thresh = input$overlap_thresh,
                           coverage_thresh = input$coverage_thresh)
         })
-        selected_col$anno_de <- get_de_table(selected_col$anno_data)
-        selected_col$anno_dec <- get_dec_table(selected_col$anno_data)
-        selected_col$anno_dec_concepts <- get_dec_concepts(selected_col$anno_data)
-        selected_col$anno_ovs <- get_observed_values(selected_col$anno_data)
     })
 
     observeEvent(input$column, {
