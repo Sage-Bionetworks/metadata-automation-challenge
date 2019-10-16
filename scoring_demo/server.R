@@ -11,9 +11,24 @@
 shinyServer(function(input, output) {
 
     selected_col <- reactiveValues()
-    
+
+    observeEvent(input$update_cutoff, {
+        selected_col$res_scores <- map(1:selected_col$num_res, function(r) {
+            get_res_score(selected_col$sub_data,
+                          selected_col$anno_data,
+                          r,
+                          overlap_thresh = input$overlap_thresh,
+                          coverage_thresh = input$coverage_thresh)
+        })
+        selected_col$anno_de <- get_de_table(selected_col$anno_data)
+        selected_col$anno_dec <- get_dec_table(selected_col$anno_data)
+        selected_col$anno_dec_concepts <- get_dec_concepts(selected_col$anno_data)
+        selected_col$anno_ovs <- get_observed_values(selected_col$anno_data)
+    })
+
     observeEvent(input$column, {
         selected_col$col_num <- input$column
+
         selected_col$sub_data <- purrr::keep(
             submission_data$columns, ~ .x$columnNumber == input$column
         ) %>% 
@@ -26,7 +41,9 @@ shinyServer(function(input, output) {
         selected_col$res_scores <- map(1:selected_col$num_res, function(r) {
             get_res_score(selected_col$sub_data,
                           selected_col$anno_data,
-                          r)
+                          r,
+                          overlap_thresh = input$overlap_thresh,
+                          coverage_thresh = input$coverage_thresh)
         })
         selected_col$anno_de <- get_de_table(selected_col$anno_data)
         selected_col$anno_dec <- get_dec_table(selected_col$anno_data)

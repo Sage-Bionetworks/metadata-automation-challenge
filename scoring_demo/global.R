@@ -45,10 +45,9 @@ get_observed_values <- function(col_data, res_num = 1) {
 }
 
 
-get_res_score <- function(sub_data, anno_data, res_num) {
-  overlap_thresh <- 0.5
-  coverage_thresh <- 0.8
-
+get_res_score <- function(sub_data, anno_data, res_num,
+                          overlap_thresh = 0.5,
+                          coverage_thresh = 0.8) {
   sub_c_ids <- get_dec_concepts(sub_data, res_num)
   anno_c_ids <- get_dec_concepts(anno_data)
   metric_3 <- jaccard(sub_c_ids, anno_c_ids)

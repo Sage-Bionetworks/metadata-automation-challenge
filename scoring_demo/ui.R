@@ -72,17 +72,18 @@ shinyUI(fluidPage(
                     fluidRow(
                         column(
                             12,
-                            textInput("overlap_thresh", "Overlap (Jaccard)", 
-                                      value = 0.5, width = "100%")
+                            sliderInput("overlap_thresh", "Overlap (Jaccard)", min = 0, max = 1,
+                                        step = 0.1, value = 0.5, width = "100%")
                         )
                     ),
                     fluidRow(
                         column(
                             12,
-                            textInput("coverage_thresh", "VD Coverage", 
-                                      value = 0.8, width = "100%")
+                            sliderInput("coverage_thresh", "VD Coverage", min = 0, max = 1,
+                                        step = 0.1, value = 0.8, width = "100%")
                         )
-                    )
+                    ),
+                    actionButton("update_cutoff", "Update Cutoffs")
                 )
             )
 
