@@ -129,7 +129,9 @@ find_mismatch_rows <- function(df_a, df_b, col_name = "id") {
   df_a[[col_name]][!(df_a[[col_name]] %in% df_b[[col_name]])]
 }
 
-get_overall_score <- function(sub_data, anno_data, aggregate_by="max") {
+get_overall_score <- function(sub_data, anno_data, score_check, aggregate_by="max",
+                              overlap_thresh = 0.5,
+                              coverage_thresh = 0.8) {
   number_of_columns = c(1:length(sub_data$columns))
   column_scores = sapply(number_of_columns, function(column) {
     sub_data_result <- purrr::keep(
@@ -144,7 +146,9 @@ get_overall_score <- function(sub_data, anno_data, aggregate_by="max") {
 
     num_res <- length(sub_data_result$result)
     res_scores <- map(1:num_res, function(r) {
-      get_res_score(sub_data_result, anno_data_result, r)
+      get_res_score(sub_data_result, anno_data_result, r, score_check,
+                    overlap_thresh = overlap_thresh,
+                    coverage_thresh = coverage_thresh)
     })
     get_col_score(res_scores, aggregate_by = aggregate_by)
   })
