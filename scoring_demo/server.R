@@ -111,8 +111,6 @@ shinyServer(function(input, output) {
     })
 
     output$overall_score <- renderText({
-        print(selected_col$overlap_thresh)
-        print(selected_col$coverage_thresh)
         get_overall_score(submission_data, submission_annotated, selected_col$score_checks,
                           overlap_thresh = selected_col$overlap_thresh,
                           coverage_thresh = selected_col$coverage_thresh,
