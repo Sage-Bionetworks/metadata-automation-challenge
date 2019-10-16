@@ -56,7 +56,7 @@
                                         "id": {
                                             "type": "string",
                                             "description": "The unique identifier in the caDSR of the data element concept (DEC)",
-                                            "examples" [
+                                            "examples": [
                                                 "2958442"
                                             ]
                                         },
@@ -70,34 +70,41 @@
                                         "concepts": {
                                             "type": "array",
                                             "items": {
-                                                "type": "object",
-                                                "properties": {
-                                                    "id": {
-                                                        "type": "string"
-                                                    },
-                                                    "name": {
-                                                        "type": "string"
-                                                    }
-                                                }
-                                            }
+                                                "type": "string"
+                                            },
+                                            "examples": [
+                                                "ncit:C70699", "ncit:C25364"
+                                            ]
                                         }
                                     }
                                 },
-                                "permissibleValues": {
+                                "observedValues": {
                                     "type": "array",
                                     "items": {
                                         "type": "object",
                                         "properties": {
-                                            "name": {
-                                                "type": "string"
+                                            "value": {
+                                                "type": "string",
+                                                "examples": [ 
+                                                    "900_00_1961"
+                                                ]
                                             },
-                                            "id": {
-                                                "type": "string"
-                                            },
-                                            "instances": {
+                                            "concept": {
                                                 "type": "array",
                                                 "items": {
-                                                    "type": "string"
+                                                    "type": "object",
+                                                    "properties": {
+                                                        "name": {
+                                                            "type": "string",
+                                                            "examples": [
+                                                                "CONFORMING", "NONCONFORMING"
+                                                            ]
+                                                        },
+                                                        "id": {
+                                                            "type": "string",
+                                                            "example": null
+                                                        }
+                                                    }
                                                 }
                                             }
                                         }
