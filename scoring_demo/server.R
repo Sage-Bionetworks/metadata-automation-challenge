@@ -68,7 +68,7 @@ shinyServer(function(input, output) {
     })
     
     output$col_score <- renderText({
-        get_col_score(selected_col$res_scores)
+        get_col_score(selected_col$res_scores, aggregate_by = input$column_aggregate)
     })
 
     output$sub_de_table <- renderDT({
