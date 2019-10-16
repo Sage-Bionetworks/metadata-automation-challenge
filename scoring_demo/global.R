@@ -132,7 +132,7 @@ find_mismatch_rows <- function(df_a, df_b, col_name = "id") {
   df_a[[col_name]][!(df_a[[col_name]] %in% df_b[[col_name]])]
 }
 
-get_total_score <- function(sub_data, anno_data, aggregate_by="max") {
+get_overall_score <- function(sub_data, anno_data, aggregate_by="max") {
   number_of_columns = c(1:length(sub_data$columns))
   column_scores = sapply(number_of_columns, function(column) {
     sub_data_result <- purrr::keep(

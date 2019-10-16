@@ -114,8 +114,8 @@ shinyUI(fluidPage(
                         ),
                         column(
                             3,
-                            h5("Total score"),
-                            textOutput("total_score")
+                            h5("Overall score"),
+                            textOutput("overall_score")
                         )
                     )
                 )

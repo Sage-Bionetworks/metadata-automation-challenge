@@ -72,9 +72,9 @@ shinyServer(function(input, output) {
                       aggregate_by = input$column_aggregate)
     })
 
-    output$total_score <- renderText({
-        get_total_score(submission_data, submission_annotated,
-                        aggregate_by = input$column_aggregate)
+    output$overall_score <- renderText({
+        get_overall_score(submission_data, submission_annotated,
+                          aggregate_by = input$column_aggregate)
     })
 
     output$sub_de_table <- renderDT({
