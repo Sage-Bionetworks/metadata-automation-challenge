@@ -124,23 +124,22 @@
                                             },
                                             "concept": {
                                                 "type": "object",
-                                                "items": {
-                                                    "type": "object",
-                                                    "required": [
-                                                        "properties",
-                                                        "id"
-                                                    ],
-                                                    "properties": {
-                                                        "name": {
-                                                            "type": "string",
-                                                            "examples": [
-                                                                "CONFORMING", "NONCONFORMING"
-                                                            ]
-                                                        },
-                                                        "id": {
-                                                            "type": "string",
-                                                            "example": null
-                                                        }
+                                                "required": [
+                                                    "name",
+                                                    "id"
+                                                ],
+                                                "properties": {
+                                                    "name": {
+                                                        "type": "string",
+                                                        "examples": [
+                                                            "CONFORMING", "NONCONFORMING"
+                                                        ]
+                                                    },
+                                                    "id": {
+                                                        "type": [
+                                                            "string", "null"
+                                                        ],
+                                                        "example": null
                                                     }
                                                 }
                                             }
