@@ -20,28 +20,6 @@ format_column_names <- function(table, num_results = 3, offset = 0) {
   col_names
 }
 
-# format_column_names_old <- function(table) {
-#   col_names <- table %>% tidyr::gather(col, val) %>% 
-#     dplyr::mutate(col_num = readr::parse_number(col)) %>% 
-#     dplyr::mutate(col_type = dplyr::case_when(
-#       (col_num %% 2) == 0 ~ "result",
-#       TRUE ~ "value"
-#     )) %>%
-#     dplyr::mutate(col_num = dplyr::case_when(
-#       (col_num %% 2) == 0 ~ (col_num - 1),
-#       TRUE ~ col_num
-#     )) %>%
-#     dplyr::group_by(col_num) %>% 
-#     dplyr::mutate(group_num = dplyr::group_indices()) %>% 
-#     dplyr::ungroup() %>% 
-#     dplyr::mutate(
-#       col_label = stringr::str_c("column", group_num, "_", col_type),
-#     ) %>%
-#     distinct(col_label) %>%
-#     dplyr::pull(col_label) 
-#   col_names
-# }
-
 get_header_data <- function(table) {
   header_data <- table %>% 
     slice(1) %>% 
@@ -82,7 +60,6 @@ parse_de <- function(de_str) {
 }
 
 parse_dec <- function(dec_str) {
-  # print(dec_str)
   dec_str <- stringr::str_trim(dec_str)
   dec_id <- clean_id(stringr::str_extract(dec_str, "DEC:[0-9]*"))
   dec_parts <- stringr::str_replace(dec_str, "DEC:[0-9]*", "") %>% 
@@ -91,16 +68,11 @@ parse_dec <- function(dec_str) {
     stringr::str_split("(\\|| )") %>% 
     .[[1]] %>% 
     collect_dec_parts()
-  # dec_concepts <- purrr::map(clean_dec_parts(dec_parts), parse_concept)
-  # dec_name <- dec_concepts %>%
-  #   purrr::map(purrr::pluck("name")) %>%
-  #   purrr::flatten_chr() %>%
-  #   stringr::str_c(collapse = " ")
+  
   list(id = dec_id,
        name = dec_parts$name,
        concepts = dec_parts$concepts
   )
-  # dec_parts
 }
 
 collect_dec_parts <- function(dec_parts) {
@@ -136,8 +108,6 @@ clean_id <- function(id_str) {
   stringr::str_replace(id_str, ".*:", "")
 }
 
-
-
 parse_column <- function(column_number, column_data) {
   col_val = column_data %>% 
     dplyr::filter(source == "value") %>% 
@@ -145,35 +115,11 @@ parse_column <- function(column_number, column_data) {
   col_res = column_data %>% 
     dplyr::filter(source == "result") %>% 
     collect_results()
-  
-  # if (col_res$dataElement$id == "NOMATCH") {
-  #   col_res <- list()
-  # } else {
-  #   col_res <- list(col_res)
-  # }
-  
+
   list(columnNumber = column_number,
        headerValue = col_val,
        results = col_res)
 }
-
-# permissible_values_to_list <- function(pv_df) {
-#   pv_df %>% 
-#     filter(!is.na(permissibleValue)) %>% 
-#     filter(!str_detect(permissibleValue, "NOMATCH")) %>% 
-#     deframe() %>% 
-#     imap(function(x, n) {
-#       concept <- parse_concept(n)
-#       if (concept[["name"]] != "NUMBER") {
-#         concept[["instances"]] <- as.list(x)
-#       } else {
-#         concept[["instances"]] <- list()
-#       }
-#       concept
-#     }) %>% 
-#     as.vector() %>%
-#     set_names(NULL)
-# }
 
 observed_values_to_list <- function(ov_df) {
   ov_df %>% 
@@ -186,20 +132,6 @@ observed_values_to_list <- function(ov_df) {
       
     })
 }
-
-# collate_permissible_values <- function(row_data) {
-#   row_data %>% 
-#     gather(col, val) %>%
-#     separate(col, c("columnNumber", "source")) %>%
-#     group_by(columnNumber, source) %>%
-#     mutate(row = row_number()) %>%
-#     group_by(columnNumber, row) %>%
-#     summarize(vals = str_c(val, collapse = ";")) %>%
-#     distinct(columnNumber, vals) %>%
-#     separate(vals, c("value", "permissibleValue"), sep = ";") %>%
-#     group_by(columnNumber, permissibleValue) %>%
-#     summarize(instances = list(value))
-# }
 
 collate_observed_values <- function(row_data) {
   row_data_spread <- row_data %>% 
@@ -232,13 +164,14 @@ get_observed_data <- function(table) {
 
 table2json <- function(table) {
   header_data <- get_header_data(table)
-
   ov_data <- get_observed_data(table)
   
   list(
     columns = header_data %>%
-         dplyr::left_join(ov_data, 
-                          by = c("columnNumber", "source_num" = "resultNumber")) %>% 
+         dplyr::left_join(
+           ov_data, 
+           by = c("columnNumber", "source_num" = "resultNumber")
+         ) %>% 
          dplyr::group_by(columnNumber) %>%
          tidyr::nest() %>%
          dplyr::ungroup() %>%
@@ -248,8 +181,6 @@ table2json <- function(table) {
   ) %>%
   jsonlite::toJSON(auto_unbox = TRUE, pretty = TRUE)
 }
-
-
 
 # execute -----------------------------------------------------------------
 
