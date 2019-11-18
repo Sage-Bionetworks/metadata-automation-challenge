@@ -126,11 +126,11 @@ clean_dec <- function(dec_str) {
   dec_str
 }
 
-# parse_concept <- function(concept_str) {
-#   concept_parts <- stringr::str_split(concept_str, "\\|")[[1]]
-#   list(name = concept_parts[1],
-#        id = concept_parts[2])
-# }
+parse_concept <- function(concept_str) {
+  concept_parts <- stringr::str_split(concept_str, "\\|")[[1]]
+  list(name = concept_parts[1],
+       id = concept_parts[2])
+}
 
 clean_id <- function(id_str) {
   stringr::str_replace(id_str, ".*:", "")
@@ -233,7 +233,7 @@ get_observed_data <- function(table) {
 table2json <- function(table) {
   header_data <- get_header_data(table)
 
-  ov_data <- get_observed_data()
+  ov_data <- get_observed_data(table)
   
   list(
     columns = header_data %>%
@@ -253,17 +253,17 @@ table2json <- function(table) {
 
 # execute -----------------------------------------------------------------
 
-table_file <- "data/testing-Annotated/Annotated-REMBRANDT.tsv"
-# table_file <- "scoring/Annotated-REMBRANDT-ForTestingScoring.txt"
+# table_file <- "data/testing-Annotated/Annotated-REMBRANDT.tsv"
+table_file <- "scoring/Annotated-REMBRANDT-ForTestingScoringV2.txt"
 # table_file <- "scoring/Annotated-REMBRANDT-ForTestingScoring_JE.txt"
 
 table <- readr::read_tsv(table_file,
                          col_names = FALSE)
 # 
-table[, 1:32] %>%
+x <- table[, 1:32] %>%
   set_names(format_column_names(., 3)) %>%
   table2json() %>% 
-  write_file("test_rembrandt.json")
+  write_file("annotated_rembrandt.json")
 # # header_data <- get_header_data(table)
 # # readr::write_file(table2json(table), "test_apollo.json")
 
