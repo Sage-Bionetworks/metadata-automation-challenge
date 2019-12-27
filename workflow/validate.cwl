@@ -4,11 +4,11 @@
 #
 cwlVersion: v1.0
 class: CommandLineTool
-baseCommand: python
+baseCommand: validate.py
 
 hints:
   DockerRequirement:
-    dockerPull: python:3.7
+    dockerPull: docker.synapse.org/syn18065892/scoring_harness
 
 inputs:
 
@@ -18,44 +18,17 @@ inputs:
     type: File?
 
 arguments:
-  - valueFrom: validate.py
   - valueFrom: $(inputs.inputfile)
-    prefix: -s
+    prefix: --submission_file
   - valueFrom: results.json
-    prefix: -r
+    prefix: --results
   - valueFrom: $(inputs.entity_type)
-    prefix: -e
+    prefix: --entity_type
+  - valueFrom: '/output-schema.json'
+    prefix: --schema_filepath
 
 requirements:
   - class: InlineJavascriptRequirement
-  - class: InitialWorkDirRequirement
-    listing:
-      - entryname: validate.py
-        entry: |
-          #!/usr/bin/env python
-          import argparse
-          import json
-          parser = argparse.ArgumentParser()
-          parser.add_argument("-r", "--results", required=True, help="validation results")
-          parser.add_argument("-e", "--entity_type", required=True, help="synapse entity type downloaded")
-          parser.add_argument("-s", "--submission_file", help="Submission File")
-
-          args = parser.parse_args()
-          
-          if args.submission_file is None:
-              prediction_file_status = "INVALID"
-              invalid_reasons = ['Expected FileEntity type but found ' + args.entity_type]
-          else:
-              with open(args.submission_file,"r") as sub_file:
-                  message = sub_file.read()
-              invalid_reasons = []
-              prediction_file_status = "VALIDATED"
-              if not message.startswith("test"):
-                  invalid_reasons.append("Submission must have test column")
-                  prediction_file_status = "INVALID"
-          result = {'prediction_file_errors':"\n".join(invalid_reasons),'prediction_file_status':prediction_file_status}
-          with open(args.results, 'w') as o:
-              o.write(json.dumps(result))
      
 outputs:
 
