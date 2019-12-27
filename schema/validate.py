@@ -1,9 +1,9 @@
+#!/usr/bin/env python3
 """Validate input json against json schema"""
 import json
 
 import click
 from jsonschema import Draft7Validator
-
 
 
 def _validate_json(json_filepath, schema_filepath):
