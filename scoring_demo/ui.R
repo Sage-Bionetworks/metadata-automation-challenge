@@ -98,6 +98,9 @@ shinyUI(fluidPage(
         mainPanel(
             width = 9,
             fluidRow(
+                span(
+                    h4("Overall score:", textOutput("overall_score", inline = TRUE))
+                ),
                 wellPanel(
                     fluidRow(
                         column(
@@ -113,11 +116,6 @@ shinyUI(fluidPage(
                             3,
                             h5("Column score"),
                             textOutput("col_score")
-                        ),
-                        column(
-                            3,
-                            h5("Overall score"),
-                            textOutput("overall_score")
                         )
                     )
                 )
