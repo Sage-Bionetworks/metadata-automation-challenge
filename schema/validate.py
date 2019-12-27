@@ -43,7 +43,7 @@ def validate_input(json_filepath, schema_filepath):
         for error in errors:
             print(error)
     else:
-        print("Your submission in valid!")
+        print("Your JSON file is valid!")
 
 
 @cli.command()
