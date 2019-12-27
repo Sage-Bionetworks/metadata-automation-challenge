@@ -1,0 +1,520 @@
+---
+title: "Metadata Automation Challenge - Baseline Tool"
+output: html_notebook
+---
+
+
+# Summary
+
+
+
+
+# Setup
+
+## Load packages and scoring functions
+
+```{r, message=FALSE, warning=FALSE}
+library(tidyverse)
+library(fuzzyjoin)
+source("scoring/score_submission.R")
+```
+
+## Load reference data
+
+```{r}
+cadsr_df <- readr::read_tsv("data/caDSR-dump-20190528-1320.tsv")
+```
+
+## Construct reference tables
+
+I'll start by normalizing the caDSR dump table into a two-column dataframe with data element (DE) identifiers (CDE IDs) mapped to all corresponding synonyms. Rather than trying to directly match column headers in the input table to standard data element names, I'll use synonyms to give a bit more flexibility and hopefully increase the number of hits.
+
+```{r}
+# Convenience function to combine string operations: (1) convert to lowercase;
+# (2) trim whitespace on both sides
+str_trim_lower <- function(str) {
+  stringr::str_trim(stringr::str_to_lower(str))
+}
+
+# For any DEs with multiple synonyms, parse individual elements between each
+# delimiter, expand into multiple rows, then recombine with any DEs that have
+# a single synonym; ignore any DEs with no listed synonyms
+expand_syns <- function(cadsr_df) {
+  cadsr_df %>%
+  dplyr::filter(!is.na(CDE_SYNONYMS_MACHINE),
+                stringr::str_detect(CDE_SYNONYMS_MACHINE, "\\|")) %>% 
+  dplyr::select(CDE_ID, synonym = CDE_SYNONYMS_MACHINE) %>%
+  dplyr::mutate(synonym = stringr::str_split(synonym, "\\|")) %>%
+  tidyr::unnest(synonym) %>%
+  dplyr::bind_rows(
+    cadsr_df %>%
+      dplyr::filter(!is.na(CDE_SYNONYMS_MACHINE),
+                    !stringr::str_detect(CDE_SYNONYMS_MACHINE, "\\|")) %>% 
+      dplyr::select(CDE_ID, synonym = CDE_SYNONYMS_MACHINE)
+  ) %>% 
+  dplyr::mutate(synonym = str_trim_lower(synonym))
+}
+
+cde_syn_df <- expand_syns(cadsr_df)
+```
+
+I also want to normalize the mapping between caDSR DEs and their respective permissible values (PVs). Let's look at an example with a single DE (2192199 for "Race Category Text"). Here's the string listing all permissible values from the caDSR dump:
+
+```{r}
+pv_str <- cadsr_df %>% 
+  dplyr::filter(CDE_ID == "2192199") %>% 
+  dplyr::select(PERMISSIBLE_VALUES) %>%
+  purrr::flatten_chr()
+
+pv_str
+```
+
+We can parse that string into a structured table as follows:
+
+```{r}
+# Split permissible value string by delimiter and name resulting 'parts' for 
+# each element in the string
+parse_pv <- function(pv) {
+  pv_fields <- pv %>% 
+    stringr::str_split("\\\\") %>% 
+    purrr::flatten()
+  
+  if (length(pv_fields) == 3) {
+      pv_fields %>% 
+        purrr::set_names(c("value", "text_value", "concept_code")) %>% 
+        tibble::as_tibble()
+    }
+}
+
+# Format parsed permissible value string as dataframe with a row for each 
+# elemet in the string, and specific parts for each element divided by column
+pv_to_table <- function(pv_str) {
+  stringr::str_split(pv_str, "\\|") %>% 
+    purrr::flatten_chr() %>% 
+    purrr::map_df(~ parse_pv(.))
+}
+
+pv_to_table(pv_str)
+```
+
+Applying this operation over all DEs in the caDSR dump is fairly time consuming, so I'll 'cache' the results by saving to a file on disk.
+
+```{r, message=FALSE, warning=FALSE}
+# Expand permissible values into tabular format for each data element in input
+# reference dataframe (e.g., caDSR)
+expand_pvs <- function(cadsr_df) {
+  cadsr_df %>% 
+    tidyr::nest(PERMISSIBLE_VALUES) %>%
+    dplyr::mutate(data = purrr::map(data, pv_to_table)) %>%
+    tidyr::unnest(data)
+} 
+
+if (!fs::file_exists("scoring/cadsr_pv_expanded.feather")) {
+  pv_concept_df <- cadsr_df %>%
+    dplyr::filter(VALUE_DOMAIN_TYPE == "Enumerated",
+                  !is.na(PERMISSIBLE_VALUES)) %>% 
+    dplyr::select(CDE_ID, PERMISSIBLE_VALUES) %>%
+    expand_pvs()
+  feather::write_feather(pv_concept_df, "scoring/cadsr_pv_expanded.feather")
+} else {
+  pv_concept_df <- feather::read_feather("scoring/cadsr_pv_expanded.feather")
+}
+
+head(pv_concept_df)
+```
+
+The expanded dataframe includes the full set of information for each PV concept. For the sake of matching to the input data, I'll just keep a single attribute (`text_value`) mapped to the DE identifier. I'll also convert these values to lowercase (and trim whitespace) to help with matching.
+
+```{r}
+cde_pv_df <- pv_concept_df %>% 
+  dplyr::select(CDE_ID, pv = text_value) %>% 
+  dplyr::mutate(pv = str_trim_lower(pv)) %>% 
+  dplyr::distinct()
+
+head(cde_pv_df)
+```
+
+---
+
+# Demo
+
+## Load example data
+
+Let's take a look at some real data. I'll start with one of the four **leaderboard datasets**, the **Apollo2** table. In addition to the input (`input_df`), I also have access to the manually ascribed annotations, which I'll read from the JSON file into a list object (`anno_data`).
+
+**Note:** if I was more thorough in designing my baseline algorithm, I could probably take advantage of the **`readr`** library's inferred types for each column.
+
+```{r}
+dataset_name <- "Apollo2"
+
+# To make things a bit easier for switching between datasets, I'll use a simple
+# template to take advantage of the 'glue' library's string literal features
+path_template <- "data/testing{dir_suffix}/{prefix}{dset_name}.{ext}"
+
+input_df <- readr::read_tsv(
+  glue::glue(path_template,
+             dir_suffix = "",
+             prefix = "",
+             dset_name = dataset_name,
+             ext = "tsv")
+)
+
+anno_data <- jsonlite::read_json(
+  glue::glue(path_template,
+             dir_suffix = "_annotated",
+             prefix = "Annotated-",
+             dset_name = dataset_name,
+             ext = "json")
+)
+```
+
+## Inspecting the data
+
+In order to demonstrate the annotation logic below, I'll focus on the first column in the input data. The primary target of our annotation efforts for this challenge is the overall *column* itself, as encapsulated by the column's header value (HV).
+
+```{r}
+demo_col_num <- 1
+demo_col_hv <- names(input_df)[demo_col_num]
+
+demo_col_hv
+```
+
+Checking the manual annotation for this column, I can see the expected result to semantically describe what the column represents. The annotation includes structured information about the **data element (DE)** — sourced from caDSR — that curators have interpreted to define this particular column of (meta)data based on the header and individual row values.
+
+```{r}
+anno_col_data <- anno_data$columns[[demo_col_num]]
+anno_res_data <- anno_col_data$results[[1]]
+anno_res_hv <- anno_res_data$result
+
+# I find the prettified JSON a bit easier to view than the printed R list
+anno_res_hv %>% jsonlite::toJSON(auto_unbox = TRUE, pretty = TRUE)
+```
+
+Next I'll check out the individual values in the *rows* of the first column. In contrast to the "permissible values" specified for a particular DE, the **observed values (OV)** represent the raw values we find in rows of the data.
+
+```{r}
+# Convenience function to pull out unique values from a specified column, 
+# remove NA values, and simplify to a string vector
+get_col_ov <- function(df, col_num) {
+  input_df[[col_num]] %>% 
+    unique() %>% 
+    na.omit() %>% 
+    as.vector()
+}
+
+demo_col_ov <- get_col_ov(input_df, demo_col_num)
+
+demo_col_ov
+```
+
+Like the column headers, curators have also annotated row values according to standard vocabularies, based on the object and property concepts of the matched DE.
+
+```{r}
+anno_res_ov <- anno_res_data$observedValues
+
+anno_res_ov %>% jsonlite::toJSON(auto_unbox = TRUE, pretty = TRUE)
+```
+
+## Annotating the data
+
+### Matching by similarity between header and DE synonyms
+
+```{r}
+match_hv_syn <- function(hv, cde_syn_df) {
+  hv <- str_trim_lower(hv)
+  cde_syn_df %>% 
+    dplyr::filter(stringr::str_detect(synonym, hv))
+}
+
+demo_col_hv_syn_hits <- match_hv_syn(demo_col_hv, cde_syn_df)
+
+demo_col_hv_syn_hits
+```
+
+### Matching by overlap between observed and permissible values
+
+```{r}
+.ov_pv_fuzzyjoin <- function(ov_df, pv_df) {
+  ov_df %>%
+    fuzzyjoin::stringdist_inner_join(
+      pv_df,
+      by = c("ov" = "pv"),
+      method = "lcs",
+      max_dist = 15,
+    ) %>% 
+    dplyr::mutate(dist = stringdist::stringdist(ov, pv, method = "jaccard")) %>% 
+    dplyr::group_by(ov, CDE_ID) %>% 
+    dplyr::filter(dist == min(dist)) %>% 
+    dplyr::ungroup()
+}
+
+match_ov_pv <- function(ov, cde_pv_df, fuzzy = FALSE, n_hits = NULL) {
+  ov_df <- tibble::tibble(ov) %>% 
+    dplyr::mutate(ov = str_trim_lower(ov)) %>% 
+    dplyr::distinct()
+
+  if (!fuzzy) {
+    hits_df <- ov_df %>%
+      dplyr::inner_join(cde_pv_df, by = c("ov" = "pv"))
+  } else {
+    hits_df <- .ov_pv_fuzzyjoin(ov_df, cde_pv_df) %>%
+      dplyr::group_by(CDE_ID) %>%
+      dplyr::summarize(coverage = dplyr::n_distinct(ov), 
+                       mean_dist = mean(dist)) %>% 
+      dplyr::ungroup() %>% 
+      dplyr::arrange(dplyr::desc(coverage), mean_dist)
+
+  }
+  
+  if (!is.null(n_hits)) {
+    dplyr::slice(hits_df, 1:n_hits)
+  } else
+    hits_df
+}
+
+demo_col_ov_pv_hits <- match_ov_pv(demo_col_ov, cde_pv_df)
+
+demo_col_ov_pv_hits
+```
+
+
+### Combining matches
+
+```{r}
+demo_col_de_hits <- demo_col_hv_syn_hits %>% 
+  dplyr::inner_join(demo_col_ov_pv_hits, by = "CDE_ID") %>% 
+  dplyr::distinct(CDE_ID)
+
+demo_col_de_hits
+```
+
+
+### Ranking and filtering matches
+
+```{r}
+n_results <- 3
+
+is_enum_de <- nrow(demo_col_de_hits) > 0
+is_nonenum_de <- !is_enum_de & (nrow(demo_col_hv_syn_hits) > 0)
+
+if (is_enum_de) {
+  demo_col_de_results <- cde_pv_df %>% 
+    dplyr::filter(CDE_ID %in% demo_col_de_hits$CDE_ID) %>% 
+    match_ov_pv(demo_col_ov, ., fuzzy = TRUE, n_results)
+} else if (is_nonenum_de) {
+  demo_col_de_results <- cadsr_df %>% 
+    dplyr::filter(CDE_ID %in% demo_col_hv_syn_hits$CDE_ID,
+                  !VALUE_DOMAIN_TYPE == "Enumerated") %>% 
+    dplyr::select(CDE_ID) %>% 
+    dplyr::mutate(coverage = NA, mean_dist = NA) %>% 
+    dplyr::sample_n(n_results)
+}
+
+demo_col_de_results
+```
+
+
+### Collecting and formatting results
+
+```{r}
+collect_result_hv <- function(cadsr_df, de_id) {
+  de_hit_df <- cadsr_df %>% 
+    dplyr::filter(CDE_ID == de_id) %>% 
+    dplyr::select(CDE_ID, CDE_LONG_NAME, DEC_ID, DEC_LONG_NAME, 
+                  OBJECT_CLASS_IDS, PROPERTY_IDS) %>% 
+    tidyr::unite(concepts, OBJECT_CLASS_IDS:PROPERTY_IDS, sep = "|", 
+                 remove = TRUE) %>% 
+    dplyr::mutate(concepts = stringr::str_split(concepts, "\\|"))
+  
+  list(
+    "dataElement" = list(
+      "id" = de_hit_df$CDE_ID,
+      "name" = de_hit_df$CDE_LONG_NAME
+    ),
+    "dataElementConcept" = list(
+      "id" = de_hit_df$DEC_ID,
+      "name" = de_hit_df$DEC_LONG_NAME,
+      "concepts" = as.list(purrr::flatten_chr(de_hit_df$concepts))
+    )
+  )
+}
+
+de_id <- demo_col_de_results$CDE_ID[1]
+collect_result_hv(cadsr_df, de_id)
+```
+
+
+```{r, message=FALSE, warning=FALSE}
+get_matched_pvs <- function(ov, pv_df) {
+  ov_df <- tibble(ov) %>% 
+    dplyr::mutate(ov = str_trim_lower(ov)) %>% 
+    dplyr::distinct()
+  
+  .ov_pv_fuzzyjoin(ov_df, pv_df) %>% 
+    dplyr::mutate(optdist = stringdist::stringdist(ov, pv, method = "osa")) %>% 
+    dplyr::group_by(ov) %>% 
+    dplyr::filter(optdist == min(optdist)) %>% 
+    dplyr::sample_n(1) %>% 
+    dplyr::ungroup()
+}
+
+collect_result_ov <- function(cadsr_df, de_id, ov, enum = TRUE) {
+  ov_df <- tibble::tibble(ov) %>%
+    dplyr::distinct()
+
+  if (enum) {
+    pv_hit_df <- cadsr_df %>%
+      dplyr::filter(CDE_ID == de_id) %>%
+      expand_pvs() %>%
+      dplyr::select(CDE_ID, value, text_value, concept_code) %>%
+      dplyr::mutate(pv = str_trim_lower(value)) %>%
+      dplyr::distinct() %>%
+      get_matched_pvs(ov, .) %>%
+      fuzzyjoin::stringdist_left_join(
+        ov_df, .,
+        method = "osa",
+        ignore_case = TRUE
+      ) %>%
+      dplyr::select(ov = `ov.x`, name = value, id = concept_code) %>%
+      tidyr::replace_na(list(name = "NOMATCH"))
+  } else {
+    pv_hit_df <- ov_df %>% 
+      dplyr::mutate(id = NA, name = "CONFORMING")
+  }
+
+  pv_hit_df %>%
+    purrr::pmap(function(ov, id, name) {
+      list(
+        "value" = ov,
+        "concept" = list(
+          "id" = id,
+          "name" = name
+        )
+      )
+    })
+}
+
+collect_result_ov(cadsr_df, de_id, demo_col_ov, enum = is_enum_de) %>% 
+  jsonlite::toJSON(auto_unbox = TRUE, pretty = TRUE)
+```
+
+
+```{r, message=FALSE, warning=FALSE}
+collect_result <- function(result_num, de_id, ov, cadsr_df, enum = TRUE) {
+  if (is.null(de_id)) {
+    list(
+      "resultNumber" = 1,
+      "result" = "NOMATCH",
+      "observedValues" = purrr::map(ov, function(v) {
+        list(
+          "value" = v,
+          "concept" = list(
+            "id" = NULL,
+            "name" = "NOMATCH"
+          )
+        )
+      })
+    )
+  } else {
+    list(
+      "resultNumber" = result_num,
+      "result" = collect_result_hv(cadsr_df, de_id),
+      "observedValues" = collect_result_ov(cadsr_df, de_id, ov, enum)
+    )
+  }
+}
+
+collect_result(1, de_id, demo_col_ov, cadsr_df, enum = is_enum_de) %>% 
+  jsonlite::toJSON(auto_unbox = TRUE, pretty = TRUE)
+```
+
+
+---
+
+Putting it all together...
+
+# Testing
+
+```{r, message=FALSE, warning=FALSE}
+annotate_column <- function(input_df, col_num, n_results, cadsr_df) {
+  col_hv <- names(input_df)[col_num]
+  col_ov <- get_col_ov(input_df, col_num)
+  col_hv_syn_hits <- match_hv_syn(col_hv, cde_syn_df)
+
+  col_ov_pv_hits <- match_ov_pv(col_ov, cde_pv_df)
+  col_de_hits <- col_hv_syn_hits %>% 
+    dplyr::inner_join(col_ov_pv_hits, by = "CDE_ID") %>% 
+    dplyr::distinct(CDE_ID)
+  
+  is_enum_de <- TRUE
+  if (nrow(col_de_hits) == 0) {
+    enum_hits <- cadsr_df %>% 
+      filter(CDE_ID %in% col_hv_syn_hits$CDE_ID,
+             VALUE_DOMAIN_TYPE == "Enumerated")
+    is_enum_de <- nrow(enum_hits) > 0
+    col_de_hits <- col_hv_syn_hits
+  }
+  is_nonenum_de <- !is_enum_de & (nrow(col_hv_syn_hits) > 0)
+
+  if (is_enum_de) {
+    col_de_results <- cde_pv_df %>% 
+      dplyr::filter(CDE_ID %in% col_de_hits$CDE_ID) %>% 
+      match_ov_pv(col_ov, ., fuzzy = TRUE, n_results)
+  } else if (is_nonenum_de) {
+    set.seed(0)
+    col_de_results <- cadsr_df %>% 
+      dplyr::filter(CDE_ID %in% col_hv_syn_hits$CDE_ID,
+                    !VALUE_DOMAIN_TYPE == "Enumerated") %>% 
+      dplyr::select(CDE_ID) %>% 
+      dplyr::mutate(coverage = NA, mean_dist = NA) %>% 
+      dplyr::sample_n(n_results, replace = TRUE) %>% 
+      dplyr::distinct()
+  } else {
+    col_de_results <- cde_pv_df %>% 
+      dplyr::slice(0)
+  }
+
+  if (nrow(col_de_results) > 0) {
+    col_de_results %>%
+      dplyr::mutate(result_num = dplyr::row_number()) %>%
+      purrr::pluck("CDE_ID") %>%
+      purrr::imap(~ collect_result(.y, .x, col_ov, cadsr_df, is_enum_de))
+    
+  } else {
+    list(collect_result(1, NULL, col_ov, cadsr_df))
+  }
+}
+
+n_results <- 3
+annotate_column(input_df, demo_col_num, n_results, cadsr_df) %>% 
+  jsonlite::toJSON(auto_unbox = TRUE, pretty = TRUE)
+```
+
+
+---
+
+# Evaluate results
+
+```{r, warning=FALSE, message=FALSE}
+submission_data <- list(
+  "columns" = purrr::imap(names(input_df), function(.x, .y) {
+    print(paste0(.y, ": ", .x))
+    list(
+      "columnNumber" = .y,
+      "headerValue" = .x,
+      "results" = annotate_column(input_df, .y, n_results, cadsr_df)
+    )
+  })
+)
+
+submission_data %>% 
+  jsonlite::toJSON(auto_unbox = TRUE, pretty = TRUE) %>%
+  readr::write_file("scoring/Apollo2_baseline.json")
+```
+
+
+```{r}
+suppressWarnings(get_overall_score(submission_data, anno_data))
+```
+
+
