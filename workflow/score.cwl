@@ -6,6 +6,10 @@ cwlVersion: v1.0
 class: CommandLineTool
 baseCommand: python
 
+hints:
+  DockerRequirement:
+    dockerPull: python:3.7
+
 inputs:
   - id: inputfile
     type: File
@@ -30,9 +34,7 @@ requirements:
       - entryname: score.py
         entry: |
           #!/usr/bin/env python
-          import synapseclient
           import argparse
-          import os
           import json
           parser = argparse.ArgumentParser()
           parser.add_argument("-f", "--submissionfile", required=True, help="Submission File")

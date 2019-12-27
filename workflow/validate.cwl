@@ -6,6 +6,10 @@ cwlVersion: v1.0
 class: CommandLineTool
 baseCommand: python
 
+hints:
+  DockerRequirement:
+    dockerPull: python:3.7
+
 inputs:
 
   - id: entity_type
@@ -29,9 +33,7 @@ requirements:
       - entryname: validate.py
         entry: |
           #!/usr/bin/env python
-          import synapseclient
           import argparse
-          import os
           import json
           parser = argparse.ArgumentParser()
           parser.add_argument("-r", "--results", required=True, help="validation results")
