@@ -30,6 +30,19 @@ outputs: []
 
 steps:
 
+  set_permissions:
+    run: set_permissions.cwl
+    in:
+      - id: entityid
+        source: "#submitterUploadSynId"
+      - id: principalid
+        valueFrom: "3384689"
+      - id: permissions
+        valueFrom: "download"
+      - id: synapse_config
+        source: "#synapseConfig"
+    out: []
+
   notify_participants:
     run:  https://raw.githubusercontent.com/Sage-Bionetworks/ChallengeWorkflowTemplates/v2.1/notification_email.cwl
     in:
