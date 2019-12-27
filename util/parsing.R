@@ -30,6 +30,12 @@ get_header_data <- function(table) {
 }
 
 parse_result <- function(result_number, result) {
+  if (result == "NOMATCH") {
+    return(
+      list(resultNumber = as.integer(result_number),
+           result = "NOMATCH")
+    )
+  }
   result_data <- stringr::str_split(result, "\\\\")[[1]]
   result_val <- list(dataElement = parse_de(result_data[1]),
                  dataElementConcept = parse_dec(result_data[2]))
@@ -182,20 +188,25 @@ table2json <- function(table) {
   jsonlite::toJSON(auto_unbox = TRUE, pretty = TRUE)
 }
 
+get_filepath_base <- function(filepath) {
+  fs::path_ext_remove(filepath)
+}
+
+format_submission <- function(filepath, num_results = 3) {
+  fp_base <- get_filepath_base(filepath)
+  table <- readr::read_tsv(table_file,
+                           col_names = FALSE) %>% 
+    slice(1, 42:51)
+  table %>%
+    purrr::set_names(format_column_names(., num_results)) %>%
+    table2json() %>%
+    readr::write_file(paste0(fp_base, "_demo.json"))
+}
+
 # execute -----------------------------------------------------------------
 
-# table_file <- "data/testing-Annotated/Annotated-REMBRANDT.tsv"
-table_file <- "scoring/Annotated-REMBRANDT-ForTestingScoringV2.txt"
-# table_file <- "scoring/Annotated-REMBRANDT-ForTestingScoring_JE.txt"
+table_file <- "data/validation_annotated/Annotated-Apollo5.tsv"
+format_submission(table_file, num_results = 1)
 
-table <- readr::read_tsv(table_file,
-                         col_names = FALSE)
-# 
-x <- table[, 1:32] %>%
-  set_names(format_column_names(., 3)) %>%
-  table2json() %>% 
-  write_file("annotated_rembrandt.json")
-# # header_data <- get_header_data(table)
-# # readr::write_file(table2json(table), "test_apollo.json")
 
 

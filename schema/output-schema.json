@@ -21,10 +21,11 @@
                     },
                     "headerValue": {
                         "type": "string",
-                        "description": "The header value from the input table."
+                        "description": "The header value from the input table"
                     },
                     "results": {
                         "type": "array",
+                        "description": "Annotation details (data element, data element concepts, observed values) for a selected column",
                         "items": {
                             "type": "object",
                             "required": [
@@ -36,7 +37,7 @@
                             "properties": {
                                 "resultNumber": {
                                     "type": "integer",
-                                    "description": "The result number from the input table",
+                                    "description": "Rank of predicted match to be evaluated",
                                     "minimum": 1
                                 },
                                 "result": {
@@ -45,7 +46,7 @@
                                         "dataElement",
                                         "dataElementConcept"
                                     ],
-                                    "description": "Annotation details (data element, data element concepts, permissable values for a selected column",
+                                    "description": "Annotation details (data element, data element concepts, observed values) for a selected column and current result",
                                     "properties": {
                                         "dataElement": {
                                             "type": "object",
@@ -64,7 +65,7 @@
                                                 },
                                                 "name": {
                                                     "type": "string",
-                                                    "description": "The descriptive set of words by which a CDE is known. It is constructed from a terminology’s preferred names for the DEC and Value Domain",
+                                                    "description": "The descriptive set of words by which a CDE is known; constructed from a terminology’s preferred names for the DEC and value domain",
                                                     "examples": [
                                                         "APGAR Test Breathing Effort Score"
                                                     ]
@@ -89,7 +90,7 @@
                                                 },
                                                 "name": {
                                                     "type": "string",
-                                                    "description": "A concept that can be represented in the form of a data element, using a unique combination of its Object Class and Property. A DEC is described independently of any particular representation or value domain",
+                                                    "description": "A unique combination of the data element Object Class and Property vocabulary names used to represent the concept",
                                                     "examples": [
                                                         "Assessment Multiple Birth"
                                                     ]
@@ -109,6 +110,7 @@
                                 },
                                 "observedValues": {
                                     "type": "array",
+                                    "description": "Mapping of unique observed values to matched concepts",
                                     "items": {
                                         "type": "object",
                                         "required": [
@@ -118,7 +120,7 @@
                                         "properties": {
                                             "value": {
                                                 "type": "string",
-                                                "examples": [ 
+                                                "examples": [
                                                     "900_00_1961"
                                                 ]
                                             },
