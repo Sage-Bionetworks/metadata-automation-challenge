@@ -55,4 +55,4 @@ def validate_json_submission(submission_file, schema_filepath, entity_type,
 
 
 if __name__ == "__main__":
-    validate_json_submission()
+    validate_json_submission() # pylint: disable=no-value-for-parameter
