@@ -27,7 +27,7 @@ def _validate_json(json_filepath, schema_filepath):
 
 
 @click.command()
-@click.option('--submission_file', help='Submission file', required=True)
+@click.option('--submission_file', help='Submission file')
 @click.option('--schema_filepath', help='Json schema filepath',
               required=True)
 @click.option('--entity_type', help='Submission entity type',
