@@ -18,6 +18,7 @@ inputs:
     type: File?
 
 arguments:
+  - validate-json-submission
   - valueFrom: $(inputs.inputfile)
     prefix: --submission_file
   - valueFrom: results.json

@@ -6,6 +6,11 @@ import click
 from jsonschema import Draft7Validator
 
 
+@click.group()
+def cli():
+    """Validation of input for participants and CWL tool"""
+
+
 def _validate_json(json_filepath, schema_filepath):
     """Validates json with schema
 
@@ -26,7 +31,22 @@ def _validate_json(json_filepath, schema_filepath):
     return errors
 
 
-@click.command()
+@cli.command()
+@click.option('--json_filepath', help='Submission file',
+              type=click.Path(exists=True))
+@click.option('--schema_filepath', help='Json schema filepath',
+              default="/output-schema.json", type=click.Path(exists=True))
+def validate_input(json_filepath, schema_filepath):
+    """Validates input json"""
+    errors = _validate_json(json_filepath, schema_filepath)
+    if errors:
+        for error in errors:
+            print(error)
+    else:
+        print("Your submission in valid!")
+
+
+@cli.command()
 @click.option('--submission_file', help='Submission file')
 @click.option('--schema_filepath', help='Json schema filepath',
               required=True)
@@ -55,4 +75,4 @@ def validate_json_submission(submission_file, schema_filepath, entity_type,
 
 
 if __name__ == "__main__":
-    validate_json_submission() # pylint: disable=no-value-for-parameter
+    cli()
