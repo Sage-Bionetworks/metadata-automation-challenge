@@ -183,9 +183,7 @@ get_overall_score <- function(sub_data,
   n_columns <- length(sub_data$columns)
   col_scores <- purrr::map(c(1:n_columns), function(col) {
     sub_col_data <- get_column_data(sub_data, col)
-    
     anno_col_data <- get_column_data(anno_data, col)
-    
     n_res <- max(purrr::map_dbl(sub_col_data$results, "resultNumber"))
     
     res_scores <- purrr::map(1:n_res, function(r) {
@@ -203,3 +201,5 @@ get_overall_score <- function(sub_data,
     purrr::flatten_dbl()
   sum(col_scores) / length(col_scores)
 }
+
+
