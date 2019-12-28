@@ -1,0 +1,302 @@
+---
+title: "Metadata Automation Challenge - Baseline Tool"
+output: html_notebook
+---
+
+
+# Summary
+
+...
+
+
+# Setup
+
+## Load packages and scoring functions
+
+```{r, message=FALSE, warning=FALSE}
+library(tidyverse)
+library(fuzzyjoin)
+source("../R/baseline_annotator.R")
+source("../R/scoring.R")
+```
+
+## Load reference data
+
+```{r}
+cadsr_df <- readr::read_tsv("/data/caDSR-dump-20190528-1320.tsv")
+```
+
+## Construct reference tables
+
+I'll start by normalizing the caDSR dump table into a two-column dataframe with data element (DE) identifiers (CDE IDs) mapped to all corresponding synonyms. Rather than trying to directly match column headers in the input table to standard data element names, I'll use synonyms to give a bit more flexibility and hopefully increase the number of hits.
+
+```{r}
+cde_syn_df <- expand_syns(cadsr_df)
+```
+
+I also want to normalize the mapping between caDSR DEs and their respective permissible values (PVs). Let's look at an example with a single DE (2192199 for "Race Category Text"). Here's the string listing all permissible values from the caDSR dump:
+
+```{r}
+pv_str <- cadsr_df %>% 
+  dplyr::filter(CDE_ID == "2192199") %>% 
+  dplyr::select(PERMISSIBLE_VALUES) %>%
+  purrr::flatten_chr()
+
+pv_str
+```
+
+We can parse that string into a structured table as follows:
+
+```{r}
+pv_to_table(pv_str)
+```
+
+Applying this operation over all DEs in the caDSR dump is fairly time consuming, so I'll 'cache' the results by saving to a file on disk.
+
+```{r, message=FALSE, warning=FALSE}
+cadsr_pv_expanded_file = "/data/cadsr_pv_expanded.feather"
+if (!fs::file_exists(cadsr_pv_expanded_file)) {
+  pv_concept_df <- cadsr_df %>%
+    dplyr::filter(VALUE_DOMAIN_TYPE == "Enumerated",
+                  !is.na(PERMISSIBLE_VALUES)) %>% 
+    dplyr::select(CDE_ID, PERMISSIBLE_VALUES) %>%
+    expand_pvs()
+  feather::write_feather(pv_concept_df, cadsr_pv_expanded_file)
+} else {
+  pv_concept_df <- feather::read_feather(cadsr_pv_expanded_file)
+}
+
+head(pv_concept_df)
+```
+
+The expanded dataframe includes the full set of information for each PV concept. For the sake of matching to the input data, I'll just keep a single attribute (`text_value`) mapped to the DE identifier. I'll also convert these values to lowercase (and trim whitespace) to help with matching.
+
+```{r}
+cde_pv_df <- pv_concept_df %>% 
+  dplyr::select(CDE_ID, pv = text_value) %>% 
+  dplyr::mutate(pv = str_trim_lower(pv)) %>% 
+  dplyr::distinct()
+
+head(cde_pv_df)
+```
+
+---
+
+# Demo
+
+## Load example data
+
+Let's take a look at some real data. I'll start with one of the four **leaderboard datasets**, the **Apollo2** table. In addition to the input (`input_df`), I also have access to the manually ascribed annotations, which I'll read from the JSON file into a list object (`anno_data`).
+
+**Note:** if I was more thorough in designing my baseline algorithm, I could probably take advantage of the **`readr`** library's inferred types for each column.
+
+```{r}
+datasets <- c(
+  "Apollo2",
+  "Outcome-Predictors",
+  "REMBRANDT",
+  "ROI-Masks"
+)
+missing_anno_cols <- c("neoplasm_histologic_grade_1", 
+                       "Neurological Exam Outcome")
+
+dataset_name <- datasets[1]
+
+# To make things a bit easier for switching between datasets, I'll use a simple
+# template to take advantage of the 'glue' library's string literal features
+path_template <- "../data/testing{dir_suffix}/{prefix}{dset_name}.{ext}"
+
+input_df <- readr::read_tsv(
+  glue::glue(path_template,
+             dir_suffix = "",
+             prefix = "",
+             dset_name = dataset_name,
+             ext = "tsv")
+) %>% 
+  dplyr::select_at(dplyr::vars(-dplyr::one_of(missing_anno_cols)))
+
+anno_data <- jsonlite::read_json(
+  glue::glue(path_template,
+             dir_suffix = "_annotated",
+             prefix = "Annotated-",
+             dset_name = dataset_name,
+             ext = "json")
+)
+```
+
+## Inspecting the data
+
+In order to demonstrate the annotation logic below, I'll focus on the first column in the input data. The primary target of our annotation efforts for this challenge is the overall *column* itself, as encapsulated by the column's header value (HV).
+
+```{r}
+demo_col_num <- 1
+demo_col_hv <- names(input_df)[demo_col_num]
+
+demo_col_hv
+```
+
+Checking the manual annotation for this column, I can see the expected result to semantically describe what the column represents. The annotation includes structured information about the **data element (DE)** — sourced from caDSR — that curators have interpreted to define this particular column of (meta)data based on the header and individual row values.
+
+```{r}
+anno_col_data <- anno_data$columns[[demo_col_num]]
+anno_res_data <- anno_col_data$results[[1]]
+anno_res_hv <- anno_res_data$result
+
+# I find the prettified JSON a bit easier to view than the printed R list
+anno_res_hv %>% 
+  jsonlite::toJSON(auto_unbox = TRUE, pretty = TRUE)
+```
+
+Next I'll check out the individual values in the *rows* of the first column. In contrast to the "permissible values" specified for a particular DE, the **observed values (OV)** represent the raw values we find in rows of the data.
+
+```{r}
+demo_col_ov <- get_col_ov(input_df, demo_col_num)
+
+head(demo_col_ov)
+```
+
+Like the column headers, curators have also annotated row values according to standard vocabularies, based on the object and property concepts of the matched DE.
+
+```{r}
+anno_res_ov <- anno_res_data$observedValues
+
+anno_res_ov %>% 
+  head() %>% 
+  jsonlite::toJSON(auto_unbox = TRUE, pretty = TRUE)
+```
+
+## Annotating the data
+
+### Matching by similarity between header and DE synonyms
+
+```{r}
+demo_col_hv_syn_hits <- match_hv_syn(demo_col_hv, cde_syn_df)
+
+demo_col_hv_syn_hits
+```
+
+### Matching by overlap between observed and permissible values
+
+```{r}
+demo_col_ov_pv_hits <- match_ov_pv(demo_col_ov, cde_pv_df)
+
+demo_col_ov_pv_hits
+```
+
+
+### Combining matches
+
+```{r}
+demo_col_de_hits <- demo_col_hv_syn_hits %>% 
+  dplyr::inner_join(demo_col_ov_pv_hits, by = "CDE_ID") %>% 
+  dplyr::distinct(CDE_ID)
+
+demo_col_de_hits
+```
+
+
+### Ranking and filtering matches
+
+```{r}
+n_results <- 3
+
+is_enum_de <- TRUE
+if (nrow(demo_col_de_hits) == 0) {
+  enum_hits <- cadsr_df %>% 
+    filter(CDE_ID %in% demo_col_hv_syn_hits$CDE_ID,
+           VALUE_DOMAIN_TYPE == "Enumerated")
+  is_enum_de <- nrow(enum_hits) > 0
+  demo_col_de_hits <- demo_col_hv_syn_hits
+}
+is_nonenum_de <- !is_enum_de & (nrow(demo_col_hv_syn_hits) > 0)
+
+if (is_enum_de) {
+  demo_col_de_results <- cde_pv_df %>% 
+    dplyr::filter(CDE_ID %in% demo_col_de_hits$CDE_ID) %>% 
+    match_ov_pv(demo_col_ov, ., fuzzy = TRUE, n_results)
+} else if (is_nonenum_de) {
+  set.seed(0)
+  demo_col_de_results <- cadsr_df %>% 
+    dplyr::filter(CDE_ID %in% demo_col_hv_syn_hits$CDE_ID,
+                  !VALUE_DOMAIN_TYPE == "Enumerated") %>% 
+    dplyr::select(CDE_ID) %>% 
+    dplyr::mutate(coverage = NA, mean_dist = NA) %>% 
+    dplyr::sample_n(n_results)
+}
+
+demo_col_de_results
+```
+
+
+### Collecting and formatting results
+
+```{r}
+de_id <- demo_col_de_results$CDE_ID[1]
+
+collect_result_hv(cadsr_df, de_id) %>% 
+    jsonlite::toJSON(auto_unbox = TRUE, pretty = TRUE)
+```
+
+
+```{r, message=FALSE, warning=FALSE}
+collect_result_ov(cadsr_df, de_id, demo_col_ov, enum = is_enum_de) %>% 
+  head() %>% 
+  jsonlite::toJSON(auto_unbox = TRUE, pretty = TRUE)
+```
+
+
+```{r, message=FALSE, warning=FALSE}
+collect_result(1, de_id, demo_col_ov, cadsr_df, enum = is_enum_de) %>% 
+  modify_depth(1, head) %>% 
+  jsonlite::toJSON(auto_unbox = TRUE, pretty = TRUE)
+```
+
+
+---
+
+Putting it all together...
+
+# Testing
+
+```{r, message=FALSE, warning=FALSE}
+n_results <- 3
+annotate_column(
+  input_df, demo_col_num, n_results, cadsr_df, cde_syn_df, cde_pv_df
+) %>% 
+  modify_depth(2, head) %>% 
+  jsonlite::toJSON(auto_unbox = TRUE, pretty = TRUE)
+```
+
+
+---
+
+# Evaluate results
+
+```{r, warning=FALSE, message=FALSE}
+submission_data <- list(
+  "columns" = purrr::imap(names(input_df), function(.x, .y) {
+    print(paste0(.y, ": ", .x))
+    list(
+      "columnNumber" = .y,
+      "headerValue" = .x,
+      "results" = annotate_column(
+        input_df, 
+        .y, 
+        n_results, 
+        cadsr_df,
+        cde_syn_df,
+        cde_pv_df
+      )
+    )
+  })
+)
+```
+
+
+```{r}
+suppressWarnings(get_overall_score(submission_data, anno_data))
+```
+
+
+
+

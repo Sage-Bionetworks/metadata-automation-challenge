@@ -1,21 +1,3 @@
-library(shiny)
-library(shinycssloaders)
-library(listviewer)
-library(DT)
-library(shinyjs)
-library(tibble)
-library(purrr)
-library(dplyr)
-
-submission_data <- readr::read_file("data/Apollo2_baseline.json") %>%
-  jsonlite::fromJSON(simplifyVector = FALSE)
-annotated_data <- readr::read_file("data/Annotated-Apollo2.json") %>%
-  jsonlite::fromJSON(simplifyVector = FALSE)
-# submission_data <- readr::read_file("data/test_rembrandt.json") %>%
-#   jsonlite::fromJSON(simplifyVector = FALSE)
-# submission_annotated <- readr::read_file("data/annotated_rembrandt.json") %>%
-#   jsonlite::fromJSON(simplifyVector = FALSE)
-
 get_score_checks <- function(de_wt=1.0, dec_wt=1.0, top_wt=2.0, vd_wt=.5) {
   score_checks <- tibble::tribble(
     ~step, ~check, ~nextIfTrue, ~nextIfFalse, ~pointsIfTrue,
@@ -201,9 +183,7 @@ get_overall_score <- function(sub_data,
   n_columns <- length(sub_data$columns)
   col_scores <- purrr::map(c(1:n_columns), function(col) {
     sub_col_data <- get_column_data(sub_data, col)
-    
     anno_col_data <- get_column_data(anno_data, col)
-    
     n_res <- max(purrr::map_dbl(sub_col_data$results, "resultNumber"))
     
     res_scores <- purrr::map(1:n_res, function(r) {
@@ -221,3 +201,5 @@ get_overall_score <- function(sub_data,
     purrr::flatten_dbl()
   sum(col_scores) / length(col_scores)
 }
+
+

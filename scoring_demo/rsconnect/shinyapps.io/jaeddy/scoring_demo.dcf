@@ -1,0 +1,10 @@
+name: scoring_demo
+title:
+username:
+account: jaeddy
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 1350319
+bundleId: 2549653
+url: https://jaeddy.shinyapps.io/scoring_demo/
+when: 1572390169.1332

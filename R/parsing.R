@@ -38,7 +38,7 @@ parse_result <- function(result_number, result) {
   }
   result_data <- stringr::str_split(result, "\\\\")[[1]]
   result_val <- list(dataElement = parse_de(result_data[1]),
-                 dataElementConcept = parse_dec(result_data[2]))
+                     dataElementConcept = parse_dec(result_data[2]))
   list(resultNumber = as.integer(result_number),
        result = result_val)
 }
@@ -121,7 +121,7 @@ parse_column <- function(column_number, column_data) {
   col_res = column_data %>% 
     dplyr::filter(source == "result") %>% 
     collect_results()
-
+  
   list(columnNumber = column_number,
        headerValue = col_val,
        results = col_res)
@@ -174,18 +174,18 @@ table2json <- function(table) {
   
   list(
     columns = header_data %>%
-         dplyr::left_join(
-           ov_data, 
-           by = c("columnNumber", "source_num" = "resultNumber")
-         ) %>% 
-         dplyr::group_by(columnNumber) %>%
-         tidyr::nest() %>%
-         dplyr::ungroup() %>%
-         dplyr::mutate(columnNumber = readr::parse_number(columnNumber)) %>%
-         dplyr::mutate(col_data = map2(columnNumber, data, parse_column)) %>%
-         dplyr::pull(col_data)
+      dplyr::left_join(
+        ov_data, 
+        by = c("columnNumber", "source_num" = "resultNumber")
+      ) %>% 
+      dplyr::group_by(columnNumber) %>%
+      tidyr::nest() %>%
+      dplyr::ungroup() %>%
+      dplyr::mutate(columnNumber = readr::parse_number(columnNumber)) %>%
+      dplyr::mutate(col_data = map2(columnNumber, data, parse_column)) %>%
+      dplyr::pull(col_data)
   ) %>%
-  jsonlite::toJSON(auto_unbox = TRUE, pretty = TRUE)
+    jsonlite::toJSON(auto_unbox = TRUE, pretty = TRUE)
 }
 
 get_filepath_base <- function(filepath) {
@@ -195,8 +195,7 @@ get_filepath_base <- function(filepath) {
 format_submission <- function(filepath, num_results = 3) {
   fp_base <- get_filepath_base(filepath)
   table <- readr::read_tsv(table_file,
-                           col_names = FALSE) %>% 
-    slice(1, 42:51)
+                           col_names = FALSE)
   table %>%
     purrr::set_names(format_column_names(., num_results)) %>%
     table2json() %>%
@@ -205,8 +204,5 @@ format_submission <- function(filepath, num_results = 3) {
 
 # execute -----------------------------------------------------------------
 
-table_file <- "data/validation_annotated/Annotated-Apollo5.tsv"
+table_file <- "data/testing_annotated/Annotated-REMBRANDT.tsv"
 format_submission(table_file, num_results = 1)
-
-
-

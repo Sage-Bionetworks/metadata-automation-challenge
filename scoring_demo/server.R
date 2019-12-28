@@ -19,26 +19,30 @@ shinyServer(function(input, output) {
                                                      dec_wt = input$dec_wt,
                                                      top_wt = input$top_wt,
                                                      vd_wt = input$vd_wt)
-        selected_col$res_scores <- map(1:selected_col$num_res, function(r) {
-            get_res_score(selected_col$sub_data,
-                          selected_col$anno_data,
-                          r,
-                          selected_col$score_checks,
-                          overlap_thresh = input$overlap_thresh,
-                          coverage_thresh = input$coverage_thresh)
+        selected_col$res_scores <- map(1:selected_col$n_res, function(r) {
+            get_res_score(
+                selected_col$sub_col_data,
+                selected_col$anno_col_data,
+                r,
+                selected_col$score_checks,
+                overlap_thresh = input$overlap_thresh,
+                coverage_thresh = input$coverage_thresh
+            )
         })
     })
 
     observeEvent(input$update_cutoff, {
         selected_col$overlap_thresh = input$overlap_thresh
         selected_col$coverage_thresh = input$coverage_thresh
-        selected_col$res_scores <- map(1:selected_col$num_res, function(r) {
-            get_res_score(selected_col$sub_data,
-                          selected_col$anno_data,
-                          r,
-                          selected_col$score_checks,
-                          overlap_thresh = input$overlap_thresh,
-                          coverage_thresh = input$coverage_thresh)
+        selected_col$res_scores <- map(1:selected_col$n_res, function(r) {
+            get_res_score(
+                selected_col$sub_col_data,
+                selected_col$anno_col_data,
+                r,
+                selected_col$score_checks,
+                overlap_thresh = input$overlap_thresh,
+                coverage_thresh = input$coverage_thresh
+            )
         })
     })
 
@@ -46,31 +50,34 @@ shinyServer(function(input, output) {
         selected_col$col_num <- input$column
         selected_col$overlap_thresh = input$overlap_thresh
         selected_col$coverage_thresh = input$coverage_thresh
-        selected_col$sub_data <- purrr::keep(
-            submission_data$columns, ~ .x$columnNumber == input$column
-        ) %>% 
-            pluck(1)
-        selected_col$anno_data <- purrr::keep(
-            submission_annotated$columns, ~ .x$columnNumber == input$column
-        ) %>% 
-            pluck(1)
-        selected_col$num_res <- length(selected_col$sub_data$result)
+        selected_col$sub_col_data <- get_column_data(
+            submission_data, input$column
+        )
+        selected_col$anno_col_data <- get_column_data(
+            annotated_data, input$column
+        )
+        selected_col$n_res <- length(selected_col$sub_col_data$result)
         selected_col$score_checks = get_score_checks(de_wt = input$de_wt,
                                                      dec_wt = input$dec_wt,
                                                      top_wt = input$top_wt,
                                                      vd_wt = input$vd_wt)
-        selected_col$res_scores <- map(1:selected_col$num_res, function(r) {
-            get_res_score(selected_col$sub_data,
-                          selected_col$anno_data,
-                          r,
-                          selected_col$score_checks,
-                          overlap_thresh = input$overlap_thresh,
-                          coverage_thresh = input$coverage_thresh)
+        selected_col$anno_res_data <- get_result_data(
+            selected_col$anno_col_data
+        )
+        selected_col$res_scores <- map(1:selected_col$n_res, function(r) {
+            get_res_score(
+                selected_col$sub_col_data,
+                selected_col$anno_col_data,
+                r,
+                selected_col$score_checks,
+                overlap_thresh = input$overlap_thresh,
+                coverage_thresh = input$coverage_thresh
+            )
         })
-        selected_col$anno_de <- get_de_table(selected_col$anno_data)
-        selected_col$anno_dec <- get_dec_table(selected_col$anno_data)
-        selected_col$anno_dec_concepts <- get_dec_concepts(selected_col$anno_data)
-        selected_col$anno_ovs <- get_observed_values(selected_col$anno_data)
+        selected_col$anno_de <- get_de_table(selected_col$anno_col_data)
+        selected_col$anno_dec <- get_dec_table(selected_col$anno_col_data)
+        selected_col$anno_dec_concepts <- get_dec_concepts(selected_col$anno_res_data)
+        selected_col$anno_ovs <- get_observed_values(selected_col$anno_res_data)
     })
     
     output$col_number <- renderText({
@@ -78,13 +85,13 @@ shinyServer(function(input, output) {
     })
     
     output$header_val <- renderText({
-       selected_col$sub_data$headerValue
+       selected_col$sub_col_data$headerValue
     })
     
     output$result_opts <- renderUI({
         selectInput("result",
                     "Result number",
-                    choices = 1:selected_col$num_res,
+                    choices = 1:selected_col$n_res,
                     selected = 1)
     })
     
@@ -111,15 +118,19 @@ shinyServer(function(input, output) {
     })
 
     output$overall_score <- renderText({
-        get_overall_score(submission_data, submission_annotated, selected_col$score_checks,
-                          overlap_thresh = selected_col$overlap_thresh,
-                          coverage_thresh = selected_col$coverage_thresh,
-                          aggregate_by = input$column_aggregate)
+        get_overall_score(
+            submission_data, 
+            annotated_data, 
+            selected_col$score_checks,
+            overlap_thresh = selected_col$overlap_thresh,
+            coverage_thresh = selected_col$coverage_thresh,
+            aggregate_by = input$column_aggregate
+        )
     })
 
     output$sub_de_table <- renderDT({
         res_num <- as.integer(input$result)
-        de_df <- get_de_table(selected_col$sub_data, res_num)
+        de_df <- get_de_table(selected_col$sub_col_data, res_num)
         mismatch_cols <- find_mismatch_cols(de_df, selected_col$anno_de)
         de_dt <- de_df %>% 
             datatable(
@@ -143,7 +154,7 @@ shinyServer(function(input, output) {
     
     output$sub_dec_table <- renderDT({
         res_num <- as.integer(input$result)
-        de_df <- get_dec_table(selected_col$sub_data, res_num)
+        de_df <- get_dec_table(selected_col$sub_col_data, res_num)
         mismatch_cols <- find_mismatch_cols(de_df, selected_col$anno_dec)
         de_dt <- de_df %>% 
             datatable(
@@ -167,7 +178,8 @@ shinyServer(function(input, output) {
     
     output$sub_concepts <- renderDT({
         res_num <- as.integer(input$result)
-        c_ids <- get_dec_concepts(selected_col$sub_data, res_num)
+        sub_res_data <- get_result_data(selected_col$sub_col_data, res_num)
+        c_ids <- get_dec_concepts(sub_res_data)
         c_df <- tibble(concepts = c_ids) 
         mismatch_rows <- find_mismatch_rows(
             c_df, 
@@ -204,13 +216,15 @@ shinyServer(function(input, output) {
     
     output$concept_overlap <- renderText({
         res_num <- as.integer(input$result)
-        c_ids <- get_dec_concepts(selected_col$sub_data, res_num)
+        sub_res_data <- get_result_data(selected_col$sub_col_data, res_num)
+        c_ids <- get_dec_concepts(sub_res_data)
         jaccard(c_ids, selected_col$anno_dec_concepts)
     })
     
     output$sub_ovs <- renderDT({
         res_num <- as.integer(input$result)
-        ov_df <- get_observed_values(selected_col$sub_data, res_num)
+        sub_res_data <- get_result_data(selected_col$sub_col_data, res_num)
+        ov_df <- get_observed_values(sub_res_data)
         if ("id" %in% names(ov_df)) {
             check_col <- "id"
         } else {
@@ -247,7 +261,8 @@ shinyServer(function(input, output) {
     
     output$ov_coverage <- renderText({
         res_num <- as.integer(input$result)
-        sub_ovs <- get_observed_values(selected_col$sub_data, res_num)
+        sub_res_data <- get_result_data(selected_col$sub_col_data, res_num)
+        sub_ovs <- get_observed_values(sub_res_data)
         anno_ovs <- selected_col$anno_ovs
         if ("id" %in% names(sub_ovs)) {
             check_col <- "id"
@@ -321,7 +336,7 @@ shinyServer(function(input, output) {
     
     output$sub_json <- renderJsonedit({
         jsonedit(
-            selected_col$sub_data,
+            selected_col$sub_col_data,
             "change" = htmlwidgets::JS('function(){
                 console.log( event.currentTarget.parentNode.editor.get() )
               }')
