@@ -20,8 +20,12 @@ def _validate_json(json_filepath, schema_filepath):
 
     Returns:
         List of errors, empty if no errors"""
-    with open(json_filepath, "r") as json_file:
-        data = json.load(json_file)
+    try:
+        with open(json_filepath, "r") as json_file:
+            data = json.load(json_file)
+    except json.decoder.JSONDecodeError:
+        errors = ['Submission is not a valid JSON file']
+        return errors
     with open(schema_filepath, "r") as schema_file:
         schema = json.load(schema_file)
     # Check schema is correct first

@@ -98,15 +98,18 @@ def main(syn, args):
     # Must make the directory or else it will be mounted into docker as a file
     os.mkdir(output_dir)
     input_dir = args.input_dir
-
+    filename = os.path.basename(input_dir)
+    data_dir = args.data_dir
+    mount_input = os.path.join('/input', filename)
     print("mounting volumes")
     # These are the locations on the docker that you want your mounted
     # volumes to be + permissions in docker (ro, rw)
     # It has to be in this format '/output:rw'
     mounted_volumes = {output_dir: '/output:rw',
-                       input_dir: '/input:ro'}
+                       data_dir: '/data:ro',
+                       input_dir: mount_input + ':ro'}
     #All mounted volumes here in a list
-    all_volumes = [output_dir, input_dir]
+    all_volumes = [output_dir, input_dir, data_dir]
     #Mount volumes
     volumes = {}
     for vol in all_volumes:
@@ -130,7 +133,6 @@ def main(syn, args):
         print("running container")
         try:
             container = client.containers.run(docker_image,
-                                              'bash /app/train.sh',
                                               detach=True, volumes=volumes,
                                               name=args.submissionid,
                                               network_disabled=True,
@@ -212,6 +214,8 @@ if __name__ == '__main__':
                         help="Docker Digest")
     parser.add_argument("-i", "--input_dir", required=True,
                         help="Input Directory")
+    parser.add_argument("--data_dir", required=True,
+                        help="Data Directory")
     parser.add_argument("-c", "--synapse_config", required=True,
                         help="credentials file")
     parser.add_argument("--parentid", required=True,
