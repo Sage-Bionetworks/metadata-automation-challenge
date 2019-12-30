@@ -142,7 +142,7 @@ steps:
       - id: input_dir
         # Replace this with correct datapath
         # valueFrom: "/home/tyu/data"
-        default:  ['/home/tyu/input/Apollo2.tsv', '/home/tyu/input/Outcome-Predictors.tsv', '/home/tyu/input/REMBRANDT.tsv', '/home/tyu/input/ROI-Masks.tsv']
+        default:  ['Apollo2', 'Outcome-Predictors', 'REMBRANDT', 'ROI-Masks']
       - id: data_dir
         # Replace this with correct datapath
         valueFrom: "/home/tyu/data"

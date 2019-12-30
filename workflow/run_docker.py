@@ -92,15 +92,15 @@ def main(syn, args):
 
     #Add docker.config file
     docker_image = args.docker_repository + "@" + args.docker_digest
+    dataset = args.input_dir
 
     #These are the volumes that you want to mount onto your docker container
-    output_dir = os.path.join(os.getcwd(), "output")
+    output_dir = os.path.join(os.getcwd(), "output", dataset)
     # Must make the directory or else it will be mounted into docker as a file
-    os.mkdir(output_dir)
-    input_dir = args.input_dir
-    filename = os.path.basename(input_dir)
+    os.makedirs(output_dir, exist_ok=True)
     data_dir = args.data_dir
-    mount_input = os.path.join('/input', filename)
+    input_dir = os.path.join("/home/tyu/input", dataset + ".tsv")
+    mount_input = os.path.join('/input', dataset + ".tsv")
     print("mounting volumes")
     # These are the locations on the docker that you want your mounted
     # volumes to be + permissions in docker (ro, rw)
@@ -120,7 +120,7 @@ def main(syn, args):
     print("checking for containers")
     container = None
     errors = None
-    container_name = args.submissionid + '_' + filename.replace('.tsv', '')
+    container_name = args.submissionid + '_' + dataset
     for cont in client.containers.list(all=True):
         if container_name in cont.name:
             # Must remove container if the container wasn't killed properly
@@ -184,7 +184,8 @@ def main(syn, args):
     # CWL has a limit of the array of files it can accept in a folder
     # therefore creating a tarball is sometimes necessary
     # tar(output_dir, 'outputs.tar.gz')
-
+    os.rename(os.path.join(output_folder, "predictions.csv"),
+              os.path.join(output_folder, dataset + ".json"))
 
 def quitting(signo, _frame, submissionid=None, docker_image=None,
              parentid=None, syn=None):

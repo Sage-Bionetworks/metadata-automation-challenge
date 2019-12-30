@@ -62,4 +62,4 @@ outputs:
   predictions:
     type: File
     outputBinding:
-      glob: output/predictions.csv
+      glob: output/$input_dir/*.json
