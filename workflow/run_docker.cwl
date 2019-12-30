@@ -62,4 +62,4 @@ outputs:
   predictions:
     type: File
     outputBinding:
-      glob: output/$input_dir/*.json
+      glob: output/$(inputs.input_dir)/*.json
