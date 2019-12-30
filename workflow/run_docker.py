@@ -120,8 +120,9 @@ def main(syn, args):
     print("checking for containers")
     container = None
     errors = None
+    container_name = args.submissionid + filename.replace('.tsv', '')
     for cont in client.containers.list(all=True):
-        if args.submissionid in cont.name:
+        if container_name in cont.name:
             # Must remove container if the container wasn't killed properly
             if cont.status == "exited":
                 cont.remove()
@@ -134,16 +135,16 @@ def main(syn, args):
         try:
             container = client.containers.run(docker_image,
                                               detach=True, volumes=volumes,
-                                              name=args.submissionid + filename,
+                                              name=container_name,
                                               network_disabled=True,
                                               mem_limit='10g', stderr=True)
         except docker.errors.APIError as err:
-            remove_docker_container(args.submissionid)
+            remove_docker_container(container_name)
             errors = str(err) + "\n"
 
     print("creating logfile")
     # Create the logfile
-    log_filename = args.submissionid + "_log.txt"
+    log_filename = container_name + "_log.txt"
     # Open log file first
     open(log_filename, 'w').close()
 
@@ -177,7 +178,7 @@ def main(syn, args):
     if not output_folder:
         raise Exception("No 'predictions.csv' file written to /output, "
                         "please check inference docker")
-    elif "predictions.csv" not in output_folder:
+    if "predictions.csv" not in output_folder:
         raise Exception("No 'predictions.csv' file written to /output, "
                         "please check inference docker")
     # CWL has a limit of the array of files it can accept in a folder
