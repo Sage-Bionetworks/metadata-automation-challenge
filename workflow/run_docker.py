@@ -120,7 +120,7 @@ def main(syn, args):
     print("checking for containers")
     container = None
     errors = None
-    container_name = args.submissionid + filename.replace('.tsv', '')
+    container_name = args.submissionid + '_' + filename.replace('.tsv', '')
     for cont in client.containers.list(all=True):
         if container_name in cont.name:
             # Must remove container if the container wasn't killed properly
