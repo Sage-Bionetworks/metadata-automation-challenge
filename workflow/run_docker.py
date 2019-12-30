@@ -134,7 +134,7 @@ def main(syn, args):
         try:
             container = client.containers.run(docker_image,
                                               detach=True, volumes=volumes,
-                                              name=args.submissionid,
+                                              name=args.submissionid + filename,
                                               network_disabled=True,
                                               mem_limit='10g', stderr=True)
         except docker.errors.APIError as err:
