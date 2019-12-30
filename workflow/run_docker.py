@@ -184,8 +184,8 @@ def main(syn, args):
     # CWL has a limit of the array of files it can accept in a folder
     # therefore creating a tarball is sometimes necessary
     # tar(output_dir, 'outputs.tar.gz')
-    os.rename(os.path.join(output_folder, "predictions.csv"),
-              os.path.join(output_folder, dataset + ".json"))
+    os.rename(os.path.join(output_dir, "predictions.csv"),
+              os.path.join(output_dir, dataset + ".json"))
 
 def quitting(signo, _frame, submissionid=None, docker_image=None,
              parentid=None, syn=None):
