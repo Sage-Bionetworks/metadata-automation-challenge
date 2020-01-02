@@ -139,7 +139,7 @@ steps:
         source: "#submitterUploadSynId"
       - id: synapse_config
         source: "#synapseConfig"
-      - id: input_dir
+      - id: dataset
         # Replace this with correct datapath
         # valueFrom: "/home/tyu/data"
         default:  ['Apollo2', 'Outcome-Predictors', 'REMBRANDT', 'ROI-Masks']
