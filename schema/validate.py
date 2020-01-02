@@ -31,7 +31,8 @@ def _validate_json(json_filepath, schema_filepath):
     # Check schema is correct first
     Draft7Validator.check_schema(schema)
     schema_validator = Draft7Validator(schema)
-    errors = sorted(schema_validator.iter_errors(data), key=str)
+    # Extract error messages
+    errors = [error.message for error in schema_validator.iter_errors(data)]
     return errors
 
 
