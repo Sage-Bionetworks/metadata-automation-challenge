@@ -23,7 +23,7 @@ inputs:
     type: string
   - id: synapse_config
     type: File
-  - id: input_dir
+  - id: dataset
     type: string
   - id: data_dir
     type: string
@@ -44,8 +44,8 @@ arguments:
     prefix: --parentid
   - valueFrom: $(inputs.synapse_config.path)
     prefix: -c
-  - valueFrom: $(inputs.input_dir)
-    prefix: -i
+  - valueFrom: $(inputs.dataset)
+    prefix: --dataset
   - valueFrom: $(inputs.data_dir)
     prefix: --data_dir
 
@@ -62,4 +62,4 @@ outputs:
   predictions:
     type: File
     outputBinding:
-      glob: output/$(inputs.input_dir)/*.json
+      glob: output/$(inputs.dataset)/Annotated-$(inputs.dataset).json

@@ -121,7 +121,7 @@ steps:
 
   run_docker:
     run: run_docker.cwl
-    scatter: input_dir
+    scatter: dataset
     in:
       - id: docker_repository
         source: "#get_docker_submission/docker_repository"
@@ -139,7 +139,7 @@ steps:
         source: "#submitterUploadSynId"
       - id: synapse_config
         source: "#synapseConfig"
-      - id: input_dir
+      - id: dataset
         # Replace this with correct datapath
         # valueFrom: "/home/tyu/data"
         default:  ['Apollo2', 'Outcome-Predictors', 'REMBRANDT', 'ROI-Masks']
