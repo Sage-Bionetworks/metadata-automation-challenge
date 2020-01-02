@@ -360,7 +360,7 @@ run_annotator <- function(
     cde_pv_df = ref_tables$cde_pv_df
   )
   
-  submission_file <- glue::glue("/output/{dset_name}_baseline.json", 
+  submission_file <- glue::glue("/output/Annotated-{dset_name}.json", 
                                 dset_name = dataset_name)
   submission_data %>%
     jsonlite::toJSON(auto_unbox = TRUE, pretty = TRUE) %>%
