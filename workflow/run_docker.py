@@ -92,21 +92,24 @@ def main(syn, args):
 
     #Add docker.config file
     docker_image = args.docker_repository + "@" + args.docker_digest
+    dataset = args.input_dir
 
     #These are the volumes that you want to mount onto your docker container
-    output_dir = os.path.join(os.getcwd(), "output")
+    output_dir = os.path.join(os.getcwd(), "output", dataset)
     # Must make the directory or else it will be mounted into docker as a file
-    os.mkdir(output_dir)
-    input_dir = args.input_dir
-
+    os.makedirs(output_dir, exist_ok=True)
+    data_dir = args.data_dir
+    input_dir = os.path.join("/home/tyu/input", dataset + ".tsv")
+    mount_input = os.path.join('/input', dataset + ".tsv")
     print("mounting volumes")
     # These are the locations on the docker that you want your mounted
     # volumes to be + permissions in docker (ro, rw)
     # It has to be in this format '/output:rw'
     mounted_volumes = {output_dir: '/output:rw',
-                       input_dir: '/input:ro'}
+                       data_dir: '/data:ro',
+                       input_dir: mount_input + ':ro'}
     #All mounted volumes here in a list
-    all_volumes = [output_dir, input_dir]
+    all_volumes = [output_dir, input_dir, data_dir]
     #Mount volumes
     volumes = {}
     for vol in all_volumes:
@@ -117,8 +120,9 @@ def main(syn, args):
     print("checking for containers")
     container = None
     errors = None
+    container_name = args.submissionid + '_' + dataset
     for cont in client.containers.list(all=True):
-        if args.submissionid in cont.name:
+        if container_name in cont.name:
             # Must remove container if the container wasn't killed properly
             if cont.status == "exited":
                 cont.remove()
@@ -130,18 +134,17 @@ def main(syn, args):
         print("running container")
         try:
             container = client.containers.run(docker_image,
-                                              'bash /app/train.sh',
                                               detach=True, volumes=volumes,
-                                              name=args.submissionid,
+                                              name=container_name,
                                               network_disabled=True,
                                               mem_limit='10g', stderr=True)
         except docker.errors.APIError as err:
-            remove_docker_container(args.submissionid)
+            remove_docker_container(container_name)
             errors = str(err) + "\n"
 
     print("creating logfile")
     # Create the logfile
-    log_filename = args.submissionid + "_log.txt"
+    log_filename = container_name + "_log.txt"
     # Open log file first
     open(log_filename, 'w').close()
 
@@ -175,13 +178,14 @@ def main(syn, args):
     if not output_folder:
         raise Exception("No 'predictions.csv' file written to /output, "
                         "please check inference docker")
-    elif "predictions.csv" not in output_folder:
+    if "predictions.csv" not in output_folder:
         raise Exception("No 'predictions.csv' file written to /output, "
                         "please check inference docker")
     # CWL has a limit of the array of files it can accept in a folder
     # therefore creating a tarball is sometimes necessary
     # tar(output_dir, 'outputs.tar.gz')
-
+    os.rename(os.path.join(output_dir, "predictions.csv"),
+              os.path.join(output_dir, dataset + ".json"))
 
 def quitting(signo, _frame, submissionid=None, docker_image=None,
              parentid=None, syn=None):
@@ -212,6 +216,8 @@ if __name__ == '__main__':
                         help="Docker Digest")
     parser.add_argument("-i", "--input_dir", required=True,
                         help="Input Directory")
+    parser.add_argument("--data_dir", required=True,
+                        help="Data Directory")
     parser.add_argument("-c", "--synapse_config", required=True,
                         help="credentials file")
     parser.add_argument("--parentid", required=True,

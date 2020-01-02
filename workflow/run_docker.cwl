@@ -25,6 +25,8 @@ inputs:
     type: File
   - id: input_dir
     type: string
+  - id: data_dir
+    type: string
   - id: docker_script
     type: File
 
@@ -44,6 +46,8 @@ arguments:
     prefix: -c
   - valueFrom: $(inputs.input_dir)
     prefix: -i
+  - valueFrom: $(inputs.data_dir)
+    prefix: --data_dir
 
 requirements:
   - class: InitialWorkDirRequirement
@@ -58,4 +62,4 @@ outputs:
   predictions:
     type: File
     outputBinding:
-      glob: output/predictions.csv
+      glob: output/$(inputs.input_dir)/*.json
