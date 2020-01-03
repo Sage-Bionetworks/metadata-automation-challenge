@@ -92,7 +92,7 @@ def main(syn, args):
 
     #Add docker.config file
     docker_image = args.docker_repository + "@" + args.docker_digest
-    dataset = args.input_dir
+    dataset = args.dataset
 
     #These are the volumes that you want to mount onto your docker container
     output_dir = os.path.join(os.getcwd(), "output", dataset)
@@ -133,7 +133,7 @@ def main(syn, args):
         #Run as detached, logs will stream below
         print("running container")
         try:
-            container = client.containers.run(docker_image,
+            container = client.containers.run(docker_image, dataset,
                                               detach=True, volumes=volumes,
                                               name=container_name,
                                               network_disabled=True,
@@ -175,17 +175,17 @@ def main(syn, args):
     remove_docker_image(docker_image)
 
     output_folder = os.listdir(output_dir)
+    expected_json = "Annotated-{}.json".format(dataset)
     if not output_folder:
-        raise Exception("No 'predictions.csv' file written to /output, "
-                        "please check inference docker")
-    if "predictions.csv" not in output_folder:
-        raise Exception("No 'predictions.csv' file written to /output, "
-                        "please check inference docker")
+        raise Exception("No '{}' file written to /output, "
+                        "please check inference docker".format(expected_json))
+    if expected_json not in output_folder:
+        raise Exception("No '{}' file written to /output, "
+                        "please check inference docker".format(expected_json))
     # CWL has a limit of the array of files it can accept in a folder
     # therefore creating a tarball is sometimes necessary
     # tar(output_dir, 'outputs.tar.gz')
-    os.rename(os.path.join(output_dir, "predictions.csv"),
-              os.path.join(output_dir, dataset + ".json"))
+
 
 def quitting(signo, _frame, submissionid=None, docker_image=None,
              parentid=None, syn=None):
@@ -214,8 +214,8 @@ if __name__ == '__main__':
                         help="Docker Repository")
     parser.add_argument("-d", "--docker_digest", required=True,
                         help="Docker Digest")
-    parser.add_argument("-i", "--input_dir", required=True,
-                        help="Input Directory")
+    parser.add_argument("--dataset", required=True,
+                        help="Dataset name")
     parser.add_argument("--data_dir", required=True,
                         help="Data Directory")
     parser.add_argument("-c", "--synapse_config", required=True,
