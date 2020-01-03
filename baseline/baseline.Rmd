@@ -1,6 +1,8 @@
 ---
 title: "Metadata Automation Challenge - Baseline Tool"
-output: html_notebook
+output: 
+  html_notebook: 
+    code_folding: hide
 ---
 
 
@@ -8,6 +10,7 @@ output: html_notebook
 
 ...
 
+---
 
 # Setup
 
@@ -16,14 +19,39 @@ output: html_notebook
 ```{r, message=FALSE, warning=FALSE}
 library(tidyverse)
 library(fuzzyjoin)
+library(synapser)
 source("../R/baseline_annotator.R")
 source("../R/scoring.R")
 ```
 
-## Load reference data
+
+## Specify file locations
+
+I've chosen to use folders at the root of my system path to store various inputs and outputs for the demo — as this matches the expected setup for the Docker image I'll eventually need to create. However, you might need special privilages to create these folders on your local machine.
+
+You can change these paths as needed to point to other locations (including the current working directory).
 
 ```{r}
-cadsr_df <- readr::read_tsv("/data/caDSR-dump-20190528-1320.tsv")
+input_dir <- "/input/"
+output_dir <- "/output/"
+data_dir <- "/data/"
+```
+
+
+## Load reference data
+
+The **caDSR dump** table can be accessed and downloaded from Synapse [here](https://www.synapse.org/#!Synapse:syn20540628). Alternatively, I can use
+the **`synapser`** package to fetch the data via the Synapse API.
+
+```{r}
+synapser::synLogin()
+cadsr_entity <- synapser::synGet("syn20540628", downloadLocation = data_dir)
+cadsr_entity$path
+```
+
+```{r}
+# Read the 'caDSR-dump-20190528-1320.tsv' file, wherever it's stored
+cadsr_df <- readr::read_tsv(cadsr_entity$path)
 ```
 
 ## Construct reference tables
@@ -54,7 +82,7 @@ pv_to_table(pv_str)
 Applying this operation over all DEs in the caDSR dump is fairly time consuming, so I'll 'cache' the results by saving to a file on disk.
 
 ```{r, message=FALSE, warning=FALSE}
-cadsr_pv_expanded_file = "/data/cadsr_pv_expanded.feather"
+cadsr_pv_expanded_file = fs::path_join(c(data_dir, "cadsr_pv_expanded.feather"))
 if (!fs::file_exists(cadsr_pv_expanded_file)) {
   pv_concept_df <- cadsr_df %>%
     dplyr::filter(VALUE_DOMAIN_TYPE == "Enumerated",
@@ -86,29 +114,63 @@ head(cde_pv_df)
 
 ## Load example data
 
-Let's take a look at some real data. I'll start with one of the four **leaderboard datasets**, the **Apollo2** table. In addition to the input (`input_df`), I also have access to the manually ascribed annotations, which I'll read from the JSON file into a list object (`anno_data`).
+Let's take a look at some real data. I'll start with one of the four **leaderboard datasets**, the **Apollo2** table. 
+
+The **Apollo2** input table can be accessed and downloaded from Synapse [here](https://www.synapse.org/#!Synapse:syn21088742). Alternatively, I can use
+the **`synapser`** package to fetch the data via the Synapse API.
+
+**Note:** while the examples and explanations below use the **Apollo2** dataset, you can switch between other datasets by changing the value of `dataset_num`. The rest of the code *should* still work (even if the text doesn't match).
+
+```{r}
+dataset_ids <- list(
+  "Apollo2" = "syn21088742",
+  "Outcome-Predictors" = "syn21088743",
+  "REMBRANDT" = "syn21088744",
+  "ROI-Masks" = "syn21088745"
+)
+
+datasets <- names(dataset_ids)
+dataset_num <- 1
+dataset_name <- datasets[dataset_num]
+
+dataset_entity <- synapser::synGet(dataset_ids[[dataset_name]], 
+                                   downloadLocation = input_dir,
+                                   ifcollision = "overwrite.local")
+dataset_entity$path
+```
+
+I also have access to the manually ascribed annotations, stored in Synapse as structured JSON files. I can download the annotation for **Apollo2**  [here](https://www.synapse.org/#!Synapse:syn21431292) or use **`synapser`**.
+
+```{r}
+anno_dataset_ids <- list(
+  "Apollo2" = "syn21431292",
+  "Outcome-Predictors" = "syn21431291",
+  "REMBRANDT" = "syn21431290",
+  "ROI-Masks" = "syn21431289"
+)
+
+anno_dataset_entity <- synapser::synGet(anno_dataset_ids[[dataset_name]], 
+                                        downloadLocation = data_dir,
+                                        ifcollision = "overwrite.local")
+anno_dataset_entity$path
+```
+
+In addition to the input (`input_df`), I also have access to the manually ascribed annotations, which I'll read from the JSON file into a list object (`anno_data`).
 
 **Note:** if I was more thorough in designing my baseline algorithm, I could probably take advantage of the **`readr`** library's inferred types for each column.
 
+
 ```{r}
-datasets <- c(
-  "Apollo2",
-  "Outcome-Predictors",
-  "REMBRANDT",
-  "ROI-Masks"
-)
 missing_anno_cols <- c("neoplasm_histologic_grade_1", 
                        "Neurological Exam Outcome")
 
-dataset_name <- datasets[1]
-
 # To make things a bit easier for switching between datasets, I'll use a simple
 # template to take advantage of the 'glue' library's string literal features
-path_template <- "../data/testing{dir_suffix}/{prefix}{dset_name}.{ext}"
+path_template <- "{dir_name}{prefix}{dset_name}.{ext}"
 
 input_df <- readr::read_tsv(
   glue::glue(path_template,
-             dir_suffix = "",
+             dir_name = input_dir,
              prefix = "",
              dset_name = dataset_name,
              ext = "tsv")
@@ -117,7 +179,7 @@ input_df <- readr::read_tsv(
 
 anno_data <- jsonlite::read_json(
   glue::glue(path_template,
-             dir_suffix = "_annotated",
+             dir_name = data_dir,
              prefix = "Annotated-",
              dset_name = dataset_name,
              ext = "json")
@@ -247,7 +309,7 @@ collect_result_ov(cadsr_df, de_id, demo_col_ov, enum = is_enum_de) %>%
 
 ```{r, message=FALSE, warning=FALSE}
 collect_result(1, de_id, demo_col_ov, cadsr_df, enum = is_enum_de) %>% 
-  modify_depth(1, head) %>% 
+  purrr::modify_depth(1, head) %>% 
   jsonlite::toJSON(auto_unbox = TRUE, pretty = TRUE)
 ```
 
@@ -263,7 +325,7 @@ n_results <- 3
 annotate_column(
   input_df, demo_col_num, n_results, cadsr_df, cde_syn_df, cde_pv_df
 ) %>% 
-  modify_depth(2, head) %>% 
+  purrr::modify_depth(2, head) %>% 
   jsonlite::toJSON(auto_unbox = TRUE, pretty = TRUE)
 ```
 
