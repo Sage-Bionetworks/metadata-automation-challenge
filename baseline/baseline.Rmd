@@ -1,14 +1,19 @@
 ---
-title: "Metadata Automation Challenge - Baseline Tool"
+title: "Metadata Automation Challenge - Baseline Tool Demo"
+author: James Eddy
+date: January 3rd, 2020
 output: 
   html_notebook: 
-    code_folding: hide
+    highlight: pygments
+    theme: yeti
 ---
 
 
 # Summary
 
-...
+This demonstration servers two purposes: (1) illustrate elements and characteristics of input data, reference standards, and annotation results that are relevant to participants developing tools for the challenge; and (2) step through the process used by a simple "baseline" tool to produce results for an input dataset.
+
+I acknowledge that there are a number of flaws and limitations in my approach below. My intent is to provide an orientation to how others might tackle challenge tasks. I expect that participants will be able to devise more creative and more sophisticated solutions that outperform my baseline tool!
 
 ---
 
@@ -54,15 +59,41 @@ cadsr_entity$path
 cadsr_df <- readr::read_tsv(cadsr_entity$path)
 ```
 
+
 ## Construct reference tables
 
 I'll start by normalizing the caDSR dump table into a two-column dataframe with data element (DE) identifiers (CDE IDs) mapped to all corresponding synonyms. Rather than trying to directly match column headers in the input table to standard data element names, I'll use synonyms to give a bit more flexibility and hopefully increase the number of hits.
+
+Let's look at an example with a single DE (`2192199` for `"Race Category Text"`).
+
+```{r}
+syn_str <- cadsr_df %>% 
+  dplyr::filter(CDE_ID == "2192199") %>% 
+  dplyr::select(CDE_SYNONYMS_MACHINE) %>%
+  purrr::flatten_chr()
+
+syn_str
+```
+
+Based on the description of the **`CDE_SYNONYMS_MACHINE`** column on the [**Reference Standards** page](https://www.synapse.org/#!Synapse:syn18065892/wiki/599381), I can figure out what the various pieces of this string represent:
+
+> Collection of CDE short name and *all* computer-friendly alternate names. The names in the collection are pipe-delimited.
+
+Using this information, I can use a function I wrote (`expand_syns()`) to parse and expand the list of synonyms so there is a separate row for each.
+
+```{r}
+cadsr_df %>% 
+  dplyr::filter(CDE_ID == "2192199") %>% 
+  expand_syns()
+```
+
+I'll apply this expansion to the full caDSR table and save for later use.
 
 ```{r}
 cde_syn_df <- expand_syns(cadsr_df)
 ```
 
-I also want to normalize the mapping between caDSR DEs and their respective permissible values (PVs). Let's look at an example with a single DE (2192199 for "Race Category Text"). Here's the string listing all permissible values from the caDSR dump:
+I also want to normalize the mapping between caDSR DEs and their respective permissible values (PVs). Looking at the same example DE (`"Race Category Text"`), here's the string listing all permissible values from the caDSR dump:
 
 ```{r}
 pv_str <- cadsr_df %>% 
@@ -73,13 +104,17 @@ pv_str <- cadsr_df %>%
 pv_str
 ```
 
-We can parse that string into a structured table as follows:
+Based on the description of the **`PERMISSIBLE_VALUES`** column on the [**Reference Standards** page](https://www.synapse.org/#!Synapse:syn18065892/wiki/599381), I can figure out what the various pieces of this string represent:
+
+> Collection of **Permissible Values (PV)**; each PV entry has the PV value, the value-description, and the vocabulary concept identifiers (if they exist). Each PV entry in the collection is pipe-delimited; the PV sub-fields are back slash-delimited (i.e., value\text-value\concept-code)
+
+Using this information, I can use a function I wrote (`pv_to_table()`) to parse that string into a structured table as follows
 
 ```{r}
 pv_to_table(pv_str)
 ```
 
-Applying this operation over all DEs in the caDSR dump is fairly time consuming, so I'll 'cache' the results by saving to a file on disk.
+Applying this operation over all DEs in the caDSR dump is fairly time consuming, so I'll 'cache' the results by saving to a file on disk. The function doing most of the work here is `expand_pvs()`, which iteratively applies the `pv_to_table()` transformation to each row before flattening results into a single, expanded dataframe.
 
 ```{r, message=FALSE, warning=FALSE}
 cadsr_pv_expanded_file = fs::path_join(c(data_dir, "cadsr_pv_expanded.feather"))
@@ -97,7 +132,7 @@ if (!fs::file_exists(cadsr_pv_expanded_file)) {
 head(pv_concept_df)
 ```
 
-The expanded dataframe includes the full set of information for each PV concept. For the sake of matching to the input data, I'll just keep a single attribute (`text_value`) mapped to the DE identifier. I'll also convert these values to lowercase (and trim whitespace) to help with matching.
+The expanded dataframe includes the full set of information for each PV concept. For the sake of matching to the input data, I'll just keep a single attribute (`text_value`) mapped to the DE identifier. I'll also convert these values to lowercase (and trim whitespace) to help with matching. The **`str_trim_lower()`** function is one I wrote to combine steps for convenience.
 
 ```{r}
 cde_pv_df <- pv_concept_df %>% 
@@ -155,9 +190,9 @@ anno_dataset_entity <- synapser::synGet(anno_dataset_ids[[dataset_name]],
 anno_dataset_entity$path
 ```
 
-In addition to the input (`input_df`), I also have access to the manually ascribed annotations, which I'll read from the JSON file into a list object (`anno_data`).
+I can now read the input table into a dataframe (`input_df`) and the annotated JSON file into a list object (`anno_data`).
 
-**Note:** if I was more thorough in designing my baseline algorithm, I could probably take advantage of the **`readr`** library's inferred types for each column.
+**Note:** if I was more thorough in designing my baseline algorithm, I could probably take advantage of the **`readr`** library's inferred types for each column (see the `Parsed with column specification:` message below).
 
 
 ```{r}
@@ -186,9 +221,10 @@ anno_data <- jsonlite::read_json(
 )
 ```
 
+
 ## Inspecting the data
 
-In order to demonstrate the annotation logic below, I'll focus on the first column in the input data. The primary target of our annotation efforts for this challenge is the overall *column* itself, as encapsulated by the column's header value (HV).
+In order to demonstrate the annotation logic below, I'll focus on the first column in the input data. The primary target of our annotation efforts for this challenge is the overall *column* itself, as encapsulated by the column's **header value (HV)**.
 
 ```{r}
 demo_col_num <- 1
@@ -204,10 +240,12 @@ anno_col_data <- anno_data$columns[[demo_col_num]]
 anno_res_data <- anno_col_data$results[[1]]
 anno_res_hv <- anno_res_data$result
 
-# I find the prettified JSON a bit easier to view than the printed R list
+# I find the 'prettified' JSON a bit easier to view than the printed R list
 anno_res_hv %>% 
   jsonlite::toJSON(auto_unbox = TRUE, pretty = TRUE)
 ```
+
+So, I know that curators chose DE `2192199` or `"Race Category Text"` as the best match for the `"race"` column. I'll see if I can develop an algorithm to produce the same result automatically...
 
 Next I'll check out the individual values in the *rows* of the first column. In contrast to the "permissible values" specified for a particular DE, the **observed values (OV)** represent the raw values we find in rows of the data.
 
@@ -217,9 +255,9 @@ demo_col_ov <- get_col_ov(input_df, demo_col_num)
 head(demo_col_ov)
 ```
 
-Like the column headers, curators have also annotated row values according to standard vocabularies, based on the object and property concepts of the matched DE.
+Like the column headers, curators have also annotated row values according to standard vocabularies, based on the object and property concepts of the matched DE (**`OBJECT_CLASS_IDS`** and **`PROPERTY_IDS`** columns in the caDSR table, respectively).
 
-```{r}
+```{r,}
 anno_res_ov <- anno_res_data$observedValues
 
 anno_res_ov %>% 
@@ -227,9 +265,14 @@ anno_res_ov %>%
   jsonlite::toJSON(auto_unbox = TRUE, pretty = TRUE)
 ```
 
+
 ## Annotating the data
 
+Getting to the interesting stuff... For the sake of demonstrating a baseline tool, I plan to *only* use the caDSR export content to identify and select matches. While all results must correspond to existing caDSR standards, participants can use whatever other sources or strategies they choose to discover the best match.
+
 ### Matching by similarity between header and DE synonyms
+
+I'll start by searching for any DEs for which one or more synonyms *contain* the HV for the current column. This search (using the the HV as a regular expression) and any preprocessing (conversion to lowercase, trimming of whitespace) is performed by the **`match_hv_syn()`** function (i.e., match DEs based on similarity between input HV and caDSR synonyms).
 
 ```{r}
 demo_col_hv_syn_hits <- match_hv_syn(demo_col_hv, cde_syn_df)
@@ -237,7 +280,13 @@ demo_col_hv_syn_hits <- match_hv_syn(demo_col_hv, cde_syn_df)
 demo_col_hv_syn_hits
 ```
 
+While it's great that I got some candidate hits, I'd obviously like to narrow the results down a bit from `r nrow(demo_col_hv_syn_hits)`.
+
 ### Matching by overlap between observed and permissible values
+
+I'm making the fairly naive assumption that values in the rows of a column are "enumerated" (i.e., fall within a pre-defined range of options). I'll include some checks later on to guess whether the column might actually be some other datatype... but to keep things simple, I'll stick to a default next step of matching OVs to PVs.
+
+The **`match_ov_pv()`** function performs a basic *inner join* to find the intersection between unique OVs in the column and expanded PVs in the dataframe I constructed above.
 
 ```{r}
 demo_col_ov_pv_hits <- match_ov_pv(demo_col_ov, cde_pv_df)
@@ -245,8 +294,11 @@ demo_col_ov_pv_hits <- match_ov_pv(demo_col_ov, cde_pv_df)
 demo_col_ov_pv_hits
 ```
 
+I now have two different sets of match candidates of different sizes, with (presumably) some overlapping and some non-overlapping DEs.
 
 ### Combining matches
+
+I'll use a simple inner join here to get the intersection between the HV- and OV-based match candidates collected above.
 
 ```{r}
 demo_col_de_hits <- demo_col_hv_syn_hits %>% 
@@ -256,12 +308,13 @@ demo_col_de_hits <- demo_col_hv_syn_hits %>%
 demo_col_de_hits
 ```
 
+I still have a bunch of hits, so I'll need to find a way to rank these results and select the best candidates.
 
 ### Ranking and filtering matches
 
-```{r}
-n_results <- 3
+This step is a bit of a hack... I previously mentioned that my default assumption is that each column is enumerated. If I don't find any hits under this assumption, then I double check whether there were any matches only based on the HV compared to synonyms — in this case, I treat the column as *non-enumerated*. If neither of these conditions is satisfied, then I settle for *no match*.
 
+```{r}
 is_enum_de <- TRUE
 if (nrow(demo_col_de_hits) == 0) {
   enum_hits <- cadsr_df %>% 
@@ -271,6 +324,18 @@ if (nrow(demo_col_de_hits) == 0) {
   demo_col_de_hits <- demo_col_hv_syn_hits
 }
 is_nonenum_de <- !is_enum_de & (nrow(demo_col_hv_syn_hits) > 0)
+
+glue::glue("Enumerated? {is_enum_de}\nNon-enumerated? {is_nonenum_de}")
+```
+
+If the column appears to be enumerated, I'll try to expand/improve my results a bit by doing a "fuzzy" search* — capturing DEs for which PVs partially (but not exactly) match OVs. Based on these results, I'll select the top 3 results based on (a) which fraction of the columns OVs are covered and (b) the minimum average string distance between OVs and PVs. Any tiebreakers are broken at random.
+
+\*The logic used by **`match_ov_pv()`** when `fuzzy = TRUE` is pretty messy, so I won't get into it here, but you can check out the code on GitHub [here](https://github.com/Sage-Bionetworks/metadata-automation-challenge/blob/master/R/baseline_annotator.R#L79-L110).
+
+If I think the column is non-enumerated, I'll just pick the top 3 DE results at random.
+
+```{r}
+n_results <- 3
 
 if (is_enum_de) {
   demo_col_de_results <- cde_pv_df %>% 
@@ -289,8 +354,20 @@ if (is_enum_de) {
 demo_col_de_results
 ```
 
+Taking a look at my top results...
+
+```{r}
+cadsr_df %>% 
+  dplyr::select(CDE_ID, CDE_LONG_NAME, DEFINITION) %>% 
+  dplyr::left_join(demo_col_de_results, ., by = "CDE_ID") %>% 
+  dplyr::select(-coverage, -mean_dist)
+```
+
+The manually annotated DE (`"Race Category Text"`) is my third best result... so it won't get me max points — but still not bad.
 
 ### Collecting and formatting results
+
+The next few functions are designed to convert results in tabular (dataframe) format into the structured JSON required for submissions.
 
 ```{r}
 de_id <- demo_col_de_results$CDE_ID[1]
@@ -306,6 +383,7 @@ collect_result_ov(cadsr_df, de_id, demo_col_ov, enum = is_enum_de) %>%
   jsonlite::toJSON(auto_unbox = TRUE, pretty = TRUE)
 ```
 
+The **`collect_result()`** function combines the **`collect_result_hv()`** and **`collect_result_ov()`** functions to aggregate and format results for a single result for the current column.
 
 ```{r, message=FALSE, warning=FALSE}
 collect_result(1, de_id, demo_col_ov, cadsr_df, enum = is_enum_de) %>% 
@@ -313,12 +391,13 @@ collect_result(1, de_id, demo_col_ov, cadsr_df, enum = is_enum_de) %>%
   jsonlite::toJSON(auto_unbox = TRUE, pretty = TRUE)
 ```
 
-
 ---
 
 Putting it all together...
 
-# Testing
+# Annotating tables
+
+The **`annotate_column()`** function combines all of the steps above to produce properly formatted results for a single column.
 
 ```{r, message=FALSE, warning=FALSE}
 n_results <- 3
@@ -329,15 +408,12 @@ annotate_column(
   jsonlite::toJSON(auto_unbox = TRUE, pretty = TRUE)
 ```
 
+I can now apply the `annotate_column()` function across all columns in the table to generate the full results. I'll include a little message showing the input column number and HV to track progress.
 
----
-
-# Evaluate results
-
-```{r, warning=FALSE, message=FALSE}
+```{r, warning=FALSE}
 submission_data <- list(
   "columns" = purrr::imap(names(input_df), function(.x, .y) {
-    print(paste0(.y, ": ", .x))
+    cat(paste0(.y, ": ", .x, "\n"))
     list(
       "columnNumber" = .y,
       "headerValue" = .x,
@@ -354,11 +430,23 @@ submission_data <- list(
 )
 ```
 
+---
+
+# Evaluating results
+
+Finally, I can use the **`get_overall_score()`** function to compare the baseline tool's results to the manual annotations.
 
 ```{r}
-suppressWarnings(get_overall_score(submission_data, anno_data))
+get_overall_score(submission_data, anno_data)
 ```
 
+---
+
+# Session info
+
+```{r}
+sessionInfo()
+```
 
 
 
