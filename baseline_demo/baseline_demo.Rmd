@@ -45,7 +45,7 @@ data_dir <- "/data/"
 
 ## Load reference data
 
-The **caDSR dump** table can be accessed and downloaded from Synapse [here](https://www.synapse.org/#!Synapse:syn20540628). Alternatively, I can use
+The **caDSR dump** table can be accessed and downloaded from Synapse [**here**](https://www.synapse.org/#!Synapse:syn20540628). Alternatively, I can use
 the **`synapser`** package to fetch the data via the Synapse API.
 
 ```{r}
@@ -106,15 +106,15 @@ pv_str
 
 Based on the description of the **`PERMISSIBLE_VALUES`** column on the [**Reference Standards** page](https://www.synapse.org/#!Synapse:syn18065892/wiki/599381), I can figure out what the various pieces of this string represent:
 
-> Collection of **Permissible Values (PV)**; each PV entry has the PV value, the value-description, and the vocabulary concept identifiers (if they exist). Each PV entry in the collection is pipe-delimited; the PV sub-fields are back slash-delimited (i.e., value\text-value\concept-code)
+> Collection of **Permissible Values (PV)**; each PV entry has the PV value, the value-description, and the vocabulary concept identifiers (if they exist). Each PV entry in the collection is pipe-delimited; the PV sub-fields are back slash-delimited (i.e., value\\text-value\\concept-code)
 
-Using this information, I can use a function I wrote (`pv_to_table()`) to parse that string into a structured table as follows
+Using this information, I can use a function I wrote (**`pv_to_table()`**) to parse that string into a structured table as follows
 
 ```{r}
 pv_to_table(pv_str)
 ```
 
-Applying this operation over all DEs in the caDSR dump is fairly time consuming, so I'll 'cache' the results by saving to a file on disk. The function doing most of the work here is `expand_pvs()`, which iteratively applies the `pv_to_table()` transformation to each row before flattening results into a single, expanded dataframe.
+Applying this operation over all DEs in the caDSR dump is fairly time consuming, so I'll 'cache' the results by saving to a file on disk. The function doing most of the work here is **`expand_pvs()`**, which iteratively applies the **`pv_to_table()`** transformation to each row before flattening results into a single, expanded dataframe.
 
 ```{r, message=FALSE, warning=FALSE}
 cadsr_pv_expanded_file = fs::path_join(c(data_dir, "cadsr_pv_expanded.feather"))
@@ -151,7 +151,7 @@ head(cde_pv_df)
 
 Let's take a look at some real data. I'll start with one of the four **leaderboard datasets**, the **Apollo2** table. 
 
-The **Apollo2** input table can be accessed and downloaded from Synapse [here](https://www.synapse.org/#!Synapse:syn21088742). Alternatively, I can use
+The **Apollo2** input table can be accessed and downloaded from Synapse [**here**](https://www.synapse.org/#!Synapse:syn21088742). Alternatively, I can use
 the **`synapser`** package to fetch the data via the Synapse API.
 
 **Note:** while the examples and explanations below use the **Apollo2** dataset, you can switch between other datasets by changing the value of `dataset_num`. The rest of the code *should* still work (even if the text doesn't match).
@@ -174,7 +174,7 @@ dataset_entity <- synapser::synGet(dataset_ids[[dataset_name]],
 dataset_entity$path
 ```
 
-I also have access to the manually ascribed annotations, stored in Synapse as structured JSON files. I can download the annotation for **Apollo2**  [here](https://www.synapse.org/#!Synapse:syn21431292) or use **`synapser`**.
+I also have access to the manually ascribed annotations, stored in Synapse as structured JSON files. I can download the annotation for **Apollo2** [**here**](https://www.synapse.org/#!Synapse:syn21431292) or use **`synapser`**.
 
 ```{r}
 anno_dataset_ids <- list(
@@ -330,7 +330,7 @@ glue::glue("Enumerated? {is_enum_de}\nNon-enumerated? {is_nonenum_de}")
 
 If the column appears to be enumerated, I'll try to expand/improve my results a bit by doing a "fuzzy" search* — capturing DEs for which PVs partially (but not exactly) match OVs. Based on these results, I'll select the top 3 results based on (a) which fraction of the columns OVs are covered and (b) the minimum average string distance between OVs and PVs. Any tiebreakers are broken at random.
 
-\*The logic used by **`match_ov_pv()`** when `fuzzy = TRUE` is pretty messy, so I won't get into it here, but you can check out the code on GitHub [here](https://github.com/Sage-Bionetworks/metadata-automation-challenge/blob/master/R/baseline_annotator.R#L79-L110).
+\*The logic used by **`match_ov_pv()`** when `fuzzy = TRUE` is pretty messy, so I won't get into it here, but you can check out the code on GitHub [**here**](https://github.com/Sage-Bionetworks/metadata-automation-challenge/blob/master/R/baseline_annotator.R#L79-L110).
 
 If I think the column is non-enumerated, I'll just pick the top 3 DE results at random.
 
@@ -408,7 +408,7 @@ annotate_column(
   jsonlite::toJSON(auto_unbox = TRUE, pretty = TRUE)
 ```
 
-I can now apply the `annotate_column()` function across all columns in the table to generate the full results. I'll include a little message showing the input column number and HV to track progress.
+I can now apply the **`annotate_column()`** function across all columns in the table to generate the full results. I'll include a little message showing the input column number and HV to track progress.
 
 ```{r, warning=FALSE}
 submission_data <- list(
