@@ -15,13 +15,11 @@ import synapseclient
 
 def create_log_file(log_filename, log_text=None):
     """Create log file"""
-    with open(log_filename, 'w') as log_file:
+    with open(log_filename, 'w', encoding="utf-8") as log_file:
         if log_text is not None:
             # Convert log_text to str if bytes
             if isinstance(log_text, bytes):
-                print(log_text)
                 log_text = log_text.decode('utf-8')
-            print(log_text)
             log_file.write(log_text)
         else:
             log_file.write("No Logs")
