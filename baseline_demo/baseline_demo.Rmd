@@ -40,6 +40,7 @@ You can change these paths as needed to point to other locations (including the 
 input_dir <- "/input/"
 output_dir <- "/output/"
 data_dir <- "/data/"
+user_data_dir <- "./"
 ```
 
 
@@ -117,7 +118,8 @@ pv_to_table(pv_str)
 Applying this operation over all DEs in the caDSR dump is fairly time consuming, so I'll 'cache' the results by saving to a file on disk. The function doing most of the work here is **`expand_pvs()`**, which iteratively applies the **`pv_to_table()`** transformation to each row before flattening results into a single, expanded dataframe.
 
 ```{r, message=FALSE, warning=FALSE}
-cadsr_pv_expanded_file = fs::path_join(c(data_dir, "cadsr_pv_expanded.feather"))
+cadsr_pv_expanded_file = fs::path_join(c(user_data_dir, 
+                                         "cadsr_pv_expanded.feather"))
 if (!fs::file_exists(cadsr_pv_expanded_file)) {
   pv_concept_df <- cadsr_df %>%
     dplyr::filter(VALUE_DOMAIN_TYPE == "Enumerated",
