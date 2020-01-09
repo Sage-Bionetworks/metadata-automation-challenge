@@ -151,16 +151,16 @@ head(cde_pv_df)
 
 ## Load example data
 
-Let's take a look at some real data. I'll start with one of the four **leaderboard datasets**, the **Apollo2** table. 
+Let's take a look at some real data. I'll start with one of the four **leaderboard datasets**, the **APOLLO-2** table. 
 
-The **Apollo2** input table can be accessed and downloaded from Synapse [**here**](https://www.synapse.org/#!Synapse:syn21088742). Alternatively, I can use
+The **APOLLO-2** input table can be accessed and downloaded from Synapse [**here**](https://www.synapse.org/#!Synapse:syn21088742). Alternatively, I can use
 the **`synapser`** package to fetch the data via the Synapse API.
 
-**Note:** while the examples and explanations below use the **Apollo2** dataset, you can switch between other datasets by changing the value of `dataset_num`. The rest of the code *should* still work (even if the text doesn't match).
+**Note:** while the examples and explanations below use the **APOLLO-2** dataset, you can switch between other datasets by changing the value of `dataset_num`. The rest of the code *should* still work (even if the text doesn't match).
 
 ```{r}
 dataset_ids <- list(
-  "Apollo2" = "syn21088742",
+  "APOLLO-2" = "syn21088742",
   "Outcome-Predictors" = "syn21088743",
   "REMBRANDT" = "syn21088744",
   "ROI-Masks" = "syn21088745"
@@ -176,11 +176,11 @@ dataset_entity <- synapser::synGet(dataset_ids[[dataset_name]],
 dataset_entity$path
 ```
 
-I also have access to the manually ascribed annotations, stored in Synapse as structured JSON files. I can download the annotation for **Apollo2** [**here**](https://www.synapse.org/#!Synapse:syn21431292) or use **`synapser`**.
+I also have access to the manually ascribed annotations, stored in Synapse as structured JSON files. I can download the annotation for **APOLLO-2** [**here**](https://www.synapse.org/#!Synapse:syn21431292) or use **`synapser`**.
 
 ```{r}
 anno_dataset_ids <- list(
-  "Apollo2" = "syn21431292",
+  "APOLLO-2" = "syn21431292",
   "Outcome-Predictors" = "syn21431291",
   "REMBRANDT" = "syn21431290",
   "ROI-Masks" = "syn21431289"
