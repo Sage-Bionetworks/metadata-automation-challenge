@@ -37,7 +37,7 @@ steps:
       - id: entityid
         source: "#submitterUploadSynId"
       - id: principalid
-        valueFrom: "3384689"
+        valueFrom: "3401978"
       - id: permissions
         valueFrom: "download"
       - id: synapse_config
