@@ -331,7 +331,7 @@ annotate_table <- function(
 run_annotator <- function(
   dataset_name, 
   cadsr_file = "/data/caDSR-dump-20190528-1320.tsv", 
-  cadsr_pv_expanded_file = "/data/cadsr_pv_expanded.feather",
+  cadsr_pv_expanded_file = "/cadsr_pv_expanded.feather",
   n_results = 3
 ) {
   path_template <- "/input/{dset_name}.tsv"
