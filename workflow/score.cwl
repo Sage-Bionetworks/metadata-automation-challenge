@@ -15,12 +15,15 @@ inputs:
     type: File
   - id: goldstandard
     type: File
+  - id: dataset
+    type: string
 
 arguments:
   - valueFrom: run_scoring.R
   - valueFrom: $(inputs.inputfile.path)
   - valueFrom: $(inputs.goldstandard.path)
   - valueFrom: results.json
+  - valueFrom: $(inputs.dataset)
 
 requirements:
   - class: InlineJavascriptRequirement
