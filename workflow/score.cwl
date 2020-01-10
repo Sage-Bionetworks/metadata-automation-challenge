@@ -8,7 +8,7 @@ baseCommand: python
 
 hints:
   DockerRequirement:
-    dockerPull: python:3.7
+    dockerPull: docker.synapse.org/syn18065892/scoring_harness
 
 inputs:
   - id: inputfile
@@ -19,11 +19,9 @@ inputs:
 arguments:
   - valueFrom: score.py
   - valueFrom: $(inputs.inputfile.path)
-    prefix: -f
   - valueFrom: $(inputs.goldstandard.path)
-    prefix: -g
   - valueFrom: results.json
-    prefix: -r
+
 
 requirements:
   - class: InlineJavascriptRequirement
