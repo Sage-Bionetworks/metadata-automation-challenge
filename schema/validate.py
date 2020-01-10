@@ -73,8 +73,8 @@ def validate_json_submission(submission_file, schema_filepath, entity_type,
         else:
             prediction_file_status = "VALIDATED"
 
-    result = {'prediction_file_errors':"\n".join(invalid_reasons),
-              'prediction_file_status':prediction_file_status}
+    result = {'prediction_file_errors': "\n".join(invalid_reasons)[:500],
+              'prediction_file_status': prediction_file_status}
     with open(results, 'w') as out:
         out.write(json.dumps(result))
 
