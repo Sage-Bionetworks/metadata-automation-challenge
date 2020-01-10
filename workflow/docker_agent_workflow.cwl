@@ -26,6 +26,7 @@ inputs:
   - id: synapseConfig
     type: File
   - id: dataset
+    type: string[]
     default: ['Apollo2', 'Outcome-Predictors', 'REMBRANDT', 'ROI-Masks']
 
 # there are no output at the workflow engine level.  Everything is uploaded to Synapse
