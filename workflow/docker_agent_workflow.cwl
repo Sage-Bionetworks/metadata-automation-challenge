@@ -79,12 +79,19 @@ steps:
       - id: docker_registry
       - id: docker_authentication
 
+  get_goldstandard_id:
+    run: get_goldstandard_synid.cwl
+    in:
+      - id: dataset
+        source: "#dataset"
+    out:
+      - id: synid
+
   download_goldstandard:
     run: https://raw.githubusercontent.com/Sage-Bionetworks/synapse-client-cwl-tools/v0.1/synapse-get-tool.cwl
     in:
       - id: synapseid
-        #This is a dummy syn id, replace when you use your own workflow
-        valueFrom: "syn18081597"
+        source: "#get_goldstandard_id/synid"
       - id: synapse_config
         source: "#synapseConfig"
     out:
