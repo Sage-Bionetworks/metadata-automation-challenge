@@ -172,24 +172,6 @@ steps:
       - id: uploaded_file_version
       - id: results
 
-  annotate_docker_upload_results:
-    run: https://raw.githubusercontent.com/Sage-Bionetworks/ChallengeWorkflowTemplates/v2.1/annotate_submission.cwl
-    scatter: annotation_values
-    in:
-      - id: submissionid
-        source: "#submissionId"
-      - id: annotation_values
-        source: "#upload_results/results"
-      - id: to_public
-        default: true
-      - id: force_change_annotation_acl
-        default: true
-      - id: synapse_config
-        source: "#synapseConfig"
-      - id: previous_annotation_finished
-        source: "#annotate_docker_validation_with_output/finished"
-    out: [finished]
-
   validation:
     run: validate.cwl
     scatter: inputfile
@@ -218,25 +200,6 @@ steps:
         source: "#validation/status"
       - id: invalid_reasons
         source: "#validation/invalid_reasons"
-    out: [finished]
-
-  annotate_validation_with_output:
-    run: https://raw.githubusercontent.com/Sage-Bionetworks/ChallengeWorkflowTemplates/v2.1/annotate_submission.cwl
-    scatter: [annotation_values, previous_annotation_finished]
-    scatterMethod: dotproduct
-    in:
-      - id: submissionid
-        source: "#submissionId"
-      - id: annotation_values
-        source: "#validation/results"
-      - id: to_public
-        default: true
-      - id: force_change_annotation_acl
-        default: true
-      - id: synapse_config
-        source: "#synapseConfig"
-      - id: previous_annotation_finished
-        source: "#annotate_docker_upload_results/finished"
     out: [finished]
 
   check_status:
@@ -277,22 +240,3 @@ steps:
       - id: results
         source: "#scoring/results"
     out: []
-
-  annotate_submission_with_output:
-    run: https://raw.githubusercontent.com/Sage-Bionetworks/ChallengeWorkflowTemplates/v2.1/annotate_submission.cwl
-    scatter: [annotation_values, previous_annotation_finished]
-    scatterMethod: dotproduct
-    in:
-      - id: submissionid
-        source: "#submissionId"
-      - id: annotation_values
-        source: "#scoring/results"
-      - id: to_public
-        default: true
-      - id: force_change_annotation_acl
-        default: true
-      - id: synapse_config
-        source: "#synapseConfig"
-      - id: previous_annotation_finished
-        source: "#annotate_validation_with_output/finished"
-    out: [finished]
