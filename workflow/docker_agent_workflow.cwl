@@ -204,7 +204,7 @@ steps:
 
   scoring:
     run: score.cwl
-    scatter: [inputfile, check_validation_finished]
+    scatter: inputfile
     scatterMethod: dotproduct
     in:
       - id: inputfile
