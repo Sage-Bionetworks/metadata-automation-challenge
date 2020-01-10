@@ -25,6 +25,8 @@ inputs:
     type: string
   - id: synapseConfig
     type: File
+  - id: dataset
+    default: ['Apollo2', 'Outcome-Predictors', 'REMBRANDT', 'ROI-Masks']
 
 # there are no output at the workflow engine level.  Everything is uploaded to Synapse
 outputs: []
@@ -79,16 +81,6 @@ steps:
       - id: docker_registry
       - id: docker_authentication
 
-  download_goldstandard:
-    run: https://raw.githubusercontent.com/Sage-Bionetworks/synapse-client-cwl-tools/v0.1/synapse-get-tool.cwl
-    in:
-      - id: synapseid
-        #This is a dummy syn id, replace when you use your own workflow
-        valueFrom: "syn18081597"
-      - id: synapse_config
-        source: "#synapseConfig"
-    out:
-      - id: filepath
 
   validate_docker:
     run: https://raw.githubusercontent.com/Sage-Bionetworks/ChallengeWorkflowTemplates/v2.1/validate_docker.cwl
@@ -141,8 +133,9 @@ steps:
         source: "#synapseConfig"
       - id: dataset
         # Replace this with correct datapath
+        source: "#dataset"
         # valueFrom: "/home/tyu/data"
-        default:  ['Apollo2', 'Outcome-Predictors', 'REMBRANDT', 'ROI-Masks']
+        # default:  ['Apollo2', 'Outcome-Predictors', 'REMBRANDT', 'ROI-Masks']
       - id: data_dir
         # Replace this with correct datapath
         valueFrom: "/home/tyu/data"
@@ -202,10 +195,19 @@ steps:
         source: "#validation/invalid_reasons"
     out: [finished]
 
+  download_goldstandard:
+    run: https://raw.githubusercontent.com/Sage-Bionetworks/synapse-client-cwl-tools/v0.1/synapse-get-tool.cwl
+    in:
+      - id: synapseid
+        #This is a dummy syn id, replace when you use your own workflow
+        valueFrom: "syn18081597"
+      - id: synapse_config
+        source: "#synapseConfig"
+    out:
+      - id: filepath
   scoring:
     run: score.cwl
     scatter: inputfile
-    scatterMethod: dotproduct
     in:
       - id: inputfile
         source: "#run_docker/predictions"
