@@ -202,6 +202,17 @@ steps:
         source: "#validation/invalid_reasons"
     out: [finished]
 
+  check_status:
+    run: https://raw.githubusercontent.com/Sage-Bionetworks/ChallengeWorkflowTemplates/v2.1/check_status.cwl
+    scatter: [status, previous_annotation_finished, previous_email_finished]
+    scatterMethod: dotproduct
+    in:
+      - id: status
+        source: "#validation/status"
+      - id: previous_email_finished
+        source: "#validation_email/finished"
+    out: [finished]
+
   scoring:
     run: score.cwl
     scatter: inputfile
