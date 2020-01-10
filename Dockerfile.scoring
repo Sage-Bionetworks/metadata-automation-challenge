@@ -1,0 +1,6 @@
+FROM rocker/tidyverse:3.6.2
+
+COPY bin/score_submission.R /usr/local/bin/run_scoring.R
+COPY R/scoring.R /usr/local/bin/R/scoring.R
+
+RUN chmod +x /usr/local/bin/run_scoring.py
