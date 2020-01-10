@@ -211,8 +211,6 @@ steps:
         source: "#run_docker/predictions"
       - id: goldstandard
         source: "#download_goldstandard/filepath"
-      - id: check_validation_finished 
-        source: "#check_status/finished"
     out:
       - id: results
       
