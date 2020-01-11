@@ -29,7 +29,17 @@ get_result_data <- function(col_data, res_num = 1) {
 
 get_de_id <- function(res_data) {
   suppressWarnings(
-    if (res_data$result == "NOMATCH") {
+    if (res_data$result$dataElement$name == "NOMATCH") {
+      ""
+    } else {
+      res_data$result$dataElement$id
+    }
+  )
+}
+
+get_dec_id <- function(res_data) {
+  suppressWarnings(
+    if (res_data$result$dataElementConcept$name == "NOMATCH") {
       ""
     } else {
       res_data$result$dataElementConcept$id
@@ -39,7 +49,7 @@ get_de_id <- function(res_data) {
 
 get_dec_concepts <- function(res_data) {
   suppressWarnings(
-    if (res_data$result == "NOMATCH") {
+    if (res_data$result$dataElementConcept$name == "NOMATCH") {
       c()
     } else {
       res_data$result$dataElementConcept$concepts %>%
@@ -50,8 +60,9 @@ get_dec_concepts <- function(res_data) {
 
 get_observed_values <- function(res_data) {
   suppressWarnings(
-    if (res_data$result == "NOMATCH") {
-      tibble::tibble(value = "", name = "", id = "")
+    if (res_data$result$dataElement$name == "NOMATCH") {
+      tibble::tibble(value = NA, name = NA, id = NA) %>% 
+        dplyr::filter(complete.cases(.))
     } else {
       res_data$observedValues %>% 
         purrr::map(~ list(value = .$value, 
@@ -72,13 +83,18 @@ score_concept_overlap <- function(sub_res_data, anno_res_data) {
 score_value_coverage <- function(sub_res_data, anno_res_data) {
   sub_ov <- get_observed_values(sub_res_data)
   anno_ov <- get_observed_values(anno_res_data)
-  if ("id" %in% names(sub_ov)) {
-    check_col <- "id"
-  } else {
+  anno_nonenum <- any(stringr::str_detect(anno_ov$name, "CONFORMING"))
+  if (anno_nonenum) {
     check_col <- "name"
+  } else {
+    check_col <- "id"
   }
   mismatch_rows <- find_mismatch_rows(sub_ov, anno_ov, check_col)
-  1 - (length(mismatch_rows) / nrow(anno_ov))
+  if (nrow(anno_ov) & length(mismatch_rows)) {
+    1 - (length(mismatch_rows) / nrow(anno_ov))
+  } else {
+    0
+  }
 }
 
 get_res_score <- function(sub_col_data,
@@ -89,10 +105,14 @@ get_res_score <- function(sub_col_data,
                           coverage_thresh = 0.8) {
   
   sub_res_data <- get_result_data(sub_col_data, res_num)
-  suppressWarnings(sub_no_match <- sub_res_data$result == "NOMATCH")
+  suppressWarnings(
+    sub_no_match <- sub_res_data$result$dataElement$name == "NOMATCH"
+  )
   anno_res_data <- get_result_data(anno_col_data)
-  suppressWarnings(anno_no_match <- anno_res_data$result == "NOMATCH")
-  
+  suppressWarnings(
+    anno_no_match <- anno_res_data$result$dataElement$name == "NOMATCH"
+  )
+
   metric_3 <- score_concept_overlap(sub_res_data, anno_res_data)
   metric_4 <- 0
   
@@ -106,10 +126,9 @@ get_res_score <- function(sub_col_data,
       )
     }
   )
-  
-  check_2 <- NA
-  check_3 <- NA
-  check_4 <- NA
+  check_2 <- FALSE
+  check_3 <- FALSE
+  check_4 <- FALSE
   if (check_1) {
     check_2 <- res_num == 1
     if (!check_2) {
@@ -129,8 +148,8 @@ get_res_score <- function(sub_col_data,
   score_2 <- check_2*score_checks$pointsIfTrue[[2]]
   score_3 <- check_3*metric_3*score_checks$pointsIfTrue[[3]]
   score_4 <- check_4*metric_4*score_checks$pointsIfTrue[[4]]
-  
-  
+
+
   list(step = 1:4,
        metric = c(check_1, check_2, metric_3, metric_4),
        status = c(check_1, check_2, check_3, check_4),

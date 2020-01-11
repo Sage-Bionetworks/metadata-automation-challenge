@@ -33,7 +33,18 @@ parse_result <- function(result_number, result) {
   if (result == "NOMATCH") {
     return(
       list(resultNumber = as.integer(result_number),
-           result = "NOMATCH")
+           result = list(
+             "dataElement" = list(
+               "name" = "NOMATCH",
+               "id" = NA
+             ),
+             "dataElementConcept" = list(
+               "name" = "NOMATCH",
+               "id" = NA,
+               "concepts" = list()
+             )
+           )
+      )
     )
   }
   result_data <- stringr::str_split(result, "\\\\")[[1]]
@@ -58,7 +69,7 @@ collect_results <- function(column_results) {
 parse_de <- function(de_str) {
   de_parts <- stringr::str_split(de_str, " ")[[1]]
   list(
-    id = clean_id(de_parts[1]),
+    id = as.integer(clean_id(de_parts[1])),
     name = stringr::str_trim(
       stringr::str_c(de_parts[-1], collapse = " ")
     )
@@ -67,7 +78,7 @@ parse_de <- function(de_str) {
 
 parse_dec <- function(dec_str) {
   dec_str <- stringr::str_trim(dec_str)
-  dec_id <- clean_id(stringr::str_extract(dec_str, "DEC:[0-9]*"))
+  dec_id <- as.integer(clean_id(stringr::str_extract(dec_str, "DEC:[0-9]*")))
   dec_parts <- stringr::str_replace(dec_str, "DEC:[0-9]*", "") %>% 
     stringr::str_trim() %>% 
     clean_dec() %>% 
@@ -199,10 +210,14 @@ format_submission <- function(filepath, num_results = 3) {
   table %>%
     purrr::set_names(format_column_names(., num_results)) %>%
     table2json() %>%
-    readr::write_file(paste0(fp_base, "_demo.json"))
+    readr::write_file(paste0(fp_base, ".json"))
 }
 
 # execute -----------------------------------------------------------------
 
-table_file <- "data/testing_annotated/Annotated-REMBRANDT.tsv"
-format_submission(table_file, num_results = 1)
+# table_file <- "data/testing_annotated/Annotated-ROI-Masks_noheader.tsv"
+# format_submission(table_file, num_results = 1)
+
+anno_dir <- "data/validation_annotated/"
+fs::dir_ls(anno_dir, glob = "*.tsv") %>% 
+  walk(~ format_submission(., num_results = 1))
