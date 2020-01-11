@@ -57,10 +57,10 @@
                                             "description": "caDSR public ID and long name for a selected data element",
                                             "properties": {
                                                 "id": {
-                                                    "type": "string",
+                                                    "type": ["number", "null"],
                                                     "description": "The unique identifier of the common data element (CDE) in the caDSR",
                                                     "examples": [
-                                                        "3701084"
+                                                        3701084
                                                     ]
                                                 },
                                                 "name": {
@@ -82,10 +82,10 @@
                                             "description": "caDSR public ID and long name for a selected data element concept",
                                             "properties": {
                                                 "id": {
-                                                    "type": "string",
+                                                    "type": ["number", "null"],
                                                     "description": "The unique identifier in the caDSR of the data element concept (DEC)",
                                                     "examples": [
-                                                        "2958442"
+                                                        2958442
                                                     ]
                                                 },
                                                 "name": {
@@ -119,7 +119,7 @@
                                         ],
                                         "properties": {
                                             "value": {
-                                                "type": "string",
+                                                "type": ["string", "number", "null"],
                                                 "examples": [
                                                     "900_00_1961"
                                                 ]
