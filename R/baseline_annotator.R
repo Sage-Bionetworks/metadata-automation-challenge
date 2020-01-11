@@ -194,7 +194,17 @@ collect_result <- function(result_num, de_id, ov, cadsr_df, enum = TRUE) {
   if (is.null(de_id)) {
     list(
       "resultNumber" = 1,
-      "result" = "NOMATCH",
+      "result" = list(
+        "dataElement" = list(
+          "name" = "NOMATCH",
+          "id" = NA
+        ),
+        "dataElementConcept" = list(
+          "name" = "NOMATCH",
+          "id" = NA,
+          "concepts" = list()
+        )
+      ),
       "observedValues" = purrr::map(ov, function(v) {
         list(
           "value" = v,
@@ -330,8 +340,8 @@ annotate_table <- function(
 
 run_annotator <- function(
   dataset_name, 
-  cadsr_file = "/data/caDSR-dump-20190528-1320.tsv", 
-  cadsr_pv_expanded_file = "/cadsr_pv_expanded.feather",
+  cadsr_file = "/data/caDSR-export-20190528-1320.tsv", 
+  cadsr_pv_expanded_file = "/user_data/cadsr_pv_expanded.feather",
   n_results = 3
 ) {
   path_template <- "/input/{dset_name}.tsv"
@@ -360,7 +370,7 @@ run_annotator <- function(
     cde_pv_df = ref_tables$cde_pv_df
   )
   
-  submission_file <- glue::glue("/output/Annotated-{dset_name}.json", 
+  submission_file <- glue::glue("/output/{dset_name}-Submission.json", 
                                 dset_name = dataset_name)
   submission_data %>%
     jsonlite::toJSON(auto_unbox = TRUE, pretty = TRUE) %>%
