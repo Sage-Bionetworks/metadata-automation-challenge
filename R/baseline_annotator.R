@@ -133,7 +133,7 @@ collect_result_hv <- function(cadsr_df, de_id) {
     "dataElementConcept" = list(
       "id" = de_hit_df$DEC_ID,
       "name" = de_hit_df$DEC_LONG_NAME,
-      "concepts" = as.list(purrr::flatten_chr(de_hit_df$concepts))
+      "conceptCodes" = as.list(purrr::flatten_chr(de_hit_df$concepts))
     )
   )
 }
@@ -170,20 +170,20 @@ collect_result_ov <- function(cadsr_df, de_id, ov, enum = TRUE) {
         method = "osa",
         ignore_case = TRUE
       ) %>%
-      dplyr::select(ov = `ov.x`, name = value, id = concept_code) %>%
-      tidyr::replace_na(list(name = "NOMATCH"))
+      dplyr::select(ov = `ov.x`, value, concept_code) %>%
+      tidyr::replace_na(list(value = "NOMATCH"))
   } else {
     pv_hit_df <- ov_df %>% 
-      dplyr::mutate(id = NA, name = "CONFORMING")
+      dplyr::mutate(concept_code = NA, value = "CONFORMING")
   }
   
   pv_hit_df %>%
-    purrr::pmap(function(ov, id, name) {
+    purrr::pmap(function(ov, value, concept_code) {
       list(
-        "value" = ov,
-        "concept" = list(
-          "id" = id,
-          "name" = name
+        "rowValue" = ov,
+        "permissibleValue" = list(
+          "value" = value,
+          "conceptCode" = concept_code
         )
       )
     })
@@ -202,15 +202,15 @@ collect_result <- function(result_num, de_id, ov, cadsr_df, enum = TRUE) {
         "dataElementConcept" = list(
           "name" = "NOMATCH",
           "id" = NA,
-          "concepts" = list()
+          "conceptCodes" = list()
         )
       ),
       "observedValues" = purrr::map(ov, function(v) {
         list(
-          "value" = v,
-          "concept" = list(
-            "id" = NA,
-            "name" = "NOMATCH"
+          "rowValue" = v,
+          "permissibleValue" = list(
+            "value" = "NOMATCH",
+            "conceptCode" = NA
           )
         )
       })
