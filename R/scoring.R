@@ -52,7 +52,7 @@ get_dec_concepts <- function(res_data) {
     if (res_data$result$dataElementConcept$name == "NOMATCH") {
       c()
     } else {
-      res_data$result$dataElementConcept$concepts %>%
+      res_data$result$dataElementConcept$conceptCodes %>%
         purrr::flatten_chr()
     }
   )
@@ -61,17 +61,32 @@ get_dec_concepts <- function(res_data) {
 get_observed_values <- function(res_data) {
   suppressWarnings(
     if (res_data$result$dataElement$name == "NOMATCH") {
-      tibble::tibble(value = NA, name = NA, id = NA) %>% 
+      tibble::tibble(rowvalue = NA, name = NA, id = NA) %>% 
         dplyr::filter(complete.cases(.))
     } else {
       res_data$observedValues %>% 
-        purrr::map(~ list(value = .$value, 
-                          name = .$concept$name, 
-                          id = .$concept$id)) %>% 
+        purrr::map(~ list(rowValue = .$rowValue, 
+                          value = .$permissibleValue$value, 
+                          conceptCode = .$permissibleValue$conceptCode)) %>% 
         purrr::map(~ purrr::discard(., is.null)) %>% 
         purrr::map_df(tibble::as_tibble)
     }
   )
+}
+
+find_mismatch_cols <- function(df_a, df_b) {
+  names(df_a) %>% 
+    purrr::imap(function(n, x) {
+      if (any(df_a[[x]] != df_b[[x]])) {
+        n
+      }
+    }) %>% 
+    purrr::discard(is.null) %>% 
+    purrr::flatten_chr()
+}
+
+find_mismatch_rows <- function(df_a, df_b, col_name = "conceptCode") {
+  df_a[[col_name]][!(df_a[[col_name]] %in% df_b[[col_name]])]
 }
 
 score_concept_overlap <- function(sub_res_data, anno_res_data) {
@@ -83,11 +98,11 @@ score_concept_overlap <- function(sub_res_data, anno_res_data) {
 score_value_coverage <- function(sub_res_data, anno_res_data) {
   sub_ov <- get_observed_values(sub_res_data)
   anno_ov <- get_observed_values(anno_res_data)
-  anno_nonenum <- any(stringr::str_detect(anno_ov$name, "CONFORMING"))
+  anno_nonenum <- any(stringr::str_detect(anno_ov$value, "CONFORMING"))
   if (anno_nonenum) {
-    check_col <- "name"
+    check_col <- "value"
   } else {
-    check_col <- "id"
+    check_col <- "conceptCode"
   }
   mismatch_rows <- find_mismatch_rows(sub_ov, anno_ov, check_col)
   if (nrow(anno_ov) & length(mismatch_rows)) {
@@ -173,23 +188,8 @@ get_de_table <- function(col_data, res_num = 1) {
 
 get_dec_table <- function(col_data, res_num = 1) {
   tibble::as_tibble(col_data$results[[res_num]]$result$dataElementConcept) %>% 
-    dplyr::select(-concepts) %>% 
+    dplyr::select(-conceptCodes) %>% 
     dplyr::distinct()
-}
-
-find_mismatch_cols <- function(df_a, df_b) {
-  names(df_a) %>% 
-    purrr::imap(function(n, x) {
-      if (any(df_a[[x]] != df_b[[x]])) {
-        n
-      }
-    }) %>% 
-    purrr::discard(is.null) %>% 
-    purrr::flatten_chr()
-}
-
-find_mismatch_rows <- function(df_a, df_b, col_name = "id") {
-  df_a[[col_name]][!(df_a[[col_name]] %in% df_b[[col_name]])]
 }
 
 get_overall_score <- function(sub_data,

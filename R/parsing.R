@@ -41,7 +41,7 @@ parse_result <- function(result_number, result) {
              "dataElementConcept" = list(
                "name" = "NOMATCH",
                "id" = NA,
-               "concepts" = list()
+               "conceptCodes" = list()
              )
            )
       )
@@ -86,9 +86,9 @@ parse_dec <- function(dec_str) {
     .[[1]] %>% 
     collect_dec_parts()
   
-  list(id = dec_id,
-       name = dec_parts$name,
-       concepts = dec_parts$concepts
+  list(id = as.integer(stringr::str_trim(dec_id)),
+       name = stringr::str_trim(dec_parts$name),
+       conceptCodes = as.list(stringr::str_trim(dec_parts$concepts))
   )
 }
 
@@ -117,8 +117,8 @@ clean_dec <- function(dec_str) {
 
 parse_concept <- function(concept_str) {
   concept_parts <- stringr::str_split(concept_str, "\\|")[[1]]
-  list(name = concept_parts[1],
-       id = concept_parts[2])
+  list(value = stringr::str_trim(concept_parts[1]),
+       conceptCode = stringr::str_trim(concept_parts[2]))
 }
 
 clean_id <- function(id_str) {
@@ -144,8 +144,8 @@ observed_values_to_list <- function(ov_df) {
     replace_na(list(result = "NOMATCH")) %>% 
     distinct() %>% 
     pmap(function(value, result) {
-      list(value = value,
-           concept = parse_concept(result))
+      list(rowValue = value,
+           permissibleValue = parse_concept(result))
       
     })
 }
@@ -205,7 +205,7 @@ get_filepath_base <- function(filepath) {
 
 format_submission <- function(filepath, num_results = 3) {
   fp_base <- get_filepath_base(filepath)
-  table <- readr::read_tsv(table_file,
+  table <- readr::read_tsv(filepath,
                            col_names = FALSE)
   table %>%
     purrr::set_names(format_column_names(., num_results)) %>%
@@ -215,9 +215,9 @@ format_submission <- function(filepath, num_results = 3) {
 
 # execute -----------------------------------------------------------------
 
-# table_file <- "data/testing_annotated/Annotated-ROI-Masks_noheader.tsv"
-# format_submission(table_file, num_results = 1)
+table_file <- "data/manually-curated_annotated/Annotated-APOLLO-2.tsv"
+format_submission(table_file, num_results = 1)
 
-anno_dir <- "data/validation_annotated/"
+anno_dir <- "data/manually-curated_annotated/"
 fs::dir_ls(anno_dir, glob = "*.tsv") %>% 
-  walk(~ format_submission(., num_results = 1))
+  walk(~ format_submission(filepath = ., num_results = 1))
