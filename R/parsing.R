@@ -29,6 +29,106 @@ get_header_data <- function(table) {
   header_data
 }
 
+clean_id <- function(id_str) {
+  stringr::str_replace(id_str, ".*:", "")
+}
+
+parse_de <- function(de_str) {
+  de_parts <- stringr::str_split(de_str, " ")[[1]]
+  list(
+    id = as.integer(clean_id(de_parts[1])),
+    name = stringr::str_trim(
+      stringr::str_c(de_parts[-1], collapse = " ")
+    )
+  )
+}
+
+collect_dec_parts <- function(dec_parts) {
+  concepts <- purrr::keep(dec_parts, ~ stringr::str_detect(., ":"))
+  list(
+    name = stringr::str_trim(
+      stringr::str_c(setdiff(dec_parts, concepts), collapse = " ")
+    ),
+    concepts = concepts
+  )
+}
+
+clean_dec <- function(dec_str) {
+  dec_parts <- stringr::str_split(dec_str, " ")[[1]]
+  if (sum(str_detect(dec_parts, "\\|")) > 1) {
+    dec_table <- tibble::tibble(part = dec_parts) %>%
+      separate(part, into = c("name", "id"), sep = "\\|") %>% 
+      mutate(id = str_c("ncit:", id, sep = ""))
+    dec_name <- str_c(dec_table$name, collapse = " ")
+    dec_concepts <- str_c(dec_table$id, collapse = " ")
+    dec_str <- paste0(dec_name, "|", dec_concepts)
+  }
+  dec_str
+}
+
+parse_dec <- function(dec_str) {
+  dec_str <- stringr::str_trim(dec_str)
+  dec_id <- as.integer(clean_id(stringr::str_extract(dec_str, "DEC:[0-9]*")))
+  dec_parts <- stringr::str_replace(dec_str, "DEC:[0-9]*", "") %>% 
+    stringr::str_trim() %>% 
+    clean_dec() %>% 
+    stringr::str_split("(\\|| )") %>% 
+    .[[1]] %>% 
+    collect_dec_parts()
+  
+  list(id = as.integer(stringr::str_trim(dec_id)),
+       name = stringr::str_trim(dec_parts$name),
+       conceptCodes = as.list(stringr::str_trim(dec_parts$concepts))
+  )
+}
+
+parse_concept <- function(concept_str) {
+  concept_parts <- stringr::str_split(concept_str, "\\|")[[1]]
+  list(value = stringr::str_trim(concept_parts[1]),
+       conceptCode = stringr::str_trim(concept_parts[2]))
+}
+
+value_domain_to_list <- function(ov_df) {
+  ov_df %>% 
+    filter(!is.na(value)) %>% 
+    replace_na(list(result = "NOMATCH")) %>% 
+    distinct() %>% 
+    pmap(function(value, result) {
+      list(observedValue = value,
+           permissibleValue = parse_concept(result))
+      
+    })
+}
+
+collate_value_domain <- function(row_data) {
+  row_data_spread <- row_data %>% 
+    gather(col, val) %>% 
+    separate(col, c("columnNumber", "source", "source_num")) %>% 
+    group_by(columnNumber, source, source_num) %>% 
+    mutate(row = row_number()) %>% 
+    ungroup()
+  
+  row_data_spread %>% 
+    filter(source == "value") %>%
+    left_join(filter(row_data_spread, source == "result"),
+              by = c("columnNumber", "row")) %>%
+    rename(value = val.x, resultNumber= source_num.y, result = val.y) %>%
+    select(-source.x, -source_num.x, -source.y) %>%
+    select(-row) %>%
+    distinct() %>%
+    group_by(columnNumber, resultNumber) %>%
+    nest()
+}
+
+get_value_domain_data <- function(table) {
+  row_data <- slice(table, -1)
+  
+  row_data %>%
+    collate_value_domain() %>%
+    mutate(data = map(data, value_domain_to_list)) %>%
+    rename(valueDomain = data)
+}
+
 parse_result <- function(result_number, result) {
   if (result == "NOMATCH") {
     return(
@@ -58,71 +158,11 @@ collect_results <- function(column_results) {
   column_results %>% 
     tidyr::nest(-source_num) %>% 
     dplyr::mutate(result_data = purrr::map2(source_num, data, function(x, y) {
-      parsed_res <- pull(y, val) %>%
-        parse_result(x, .)
-      parsed_res[["observedValues"]] <- y$ovs[[1]]
+      parsed_res <- parse_result(x, y$val)
+      parsed_res$result[["valueDomain"]] <- y$valueDomain[[1]]
       parsed_res
     })) %>%
     pull(result_data)
-}
-
-parse_de <- function(de_str) {
-  de_parts <- stringr::str_split(de_str, " ")[[1]]
-  list(
-    id = as.integer(clean_id(de_parts[1])),
-    name = stringr::str_trim(
-      stringr::str_c(de_parts[-1], collapse = " ")
-    )
-  )
-}
-
-parse_dec <- function(dec_str) {
-  dec_str <- stringr::str_trim(dec_str)
-  dec_id <- as.integer(clean_id(stringr::str_extract(dec_str, "DEC:[0-9]*")))
-  dec_parts <- stringr::str_replace(dec_str, "DEC:[0-9]*", "") %>% 
-    stringr::str_trim() %>% 
-    clean_dec() %>% 
-    stringr::str_split("(\\|| )") %>% 
-    .[[1]] %>% 
-    collect_dec_parts()
-  
-  list(id = as.integer(stringr::str_trim(dec_id)),
-       name = stringr::str_trim(dec_parts$name),
-       conceptCodes = as.list(stringr::str_trim(dec_parts$concepts))
-  )
-}
-
-collect_dec_parts <- function(dec_parts) {
-  concepts <- purrr::keep(dec_parts, ~ stringr::str_detect(., ":"))
-  list(
-    name = stringr::str_trim(
-      stringr::str_c(setdiff(dec_parts, concepts), collapse = " ")
-    ),
-    concepts = concepts
-  )
-}
-
-clean_dec <- function(dec_str) {
-  dec_parts <- stringr::str_split(dec_str, " ")[[1]]
-  if (sum(str_detect(dec_parts, "\\|")) > 1) {
-    dec_table <- tibble::tibble(part = dec_parts) %>%
-      separate(part, into = c("name", "id"), sep = "\\|") %>% 
-      mutate(id = str_c("ncit:", id, sep = ""))
-    dec_name <- str_c(dec_table$name, collapse = " ")
-    dec_concepts <- str_c(dec_table$id, collapse = " ")
-    dec_str <- paste0(dec_name, "|", dec_concepts)
-  }
-  dec_str
-}
-
-parse_concept <- function(concept_str) {
-  concept_parts <- stringr::str_split(concept_str, "\\|")[[1]]
-  list(value = stringr::str_trim(concept_parts[1]),
-       conceptCode = stringr::str_trim(concept_parts[2]))
-}
-
-clean_id <- function(id_str) {
-  stringr::str_replace(id_str, ".*:", "")
 }
 
 parse_column <- function(column_number, column_data) {
@@ -138,55 +178,14 @@ parse_column <- function(column_number, column_data) {
        results = col_res)
 }
 
-observed_values_to_list <- function(ov_df) {
-  ov_df %>% 
-    filter(!is.na(value)) %>% 
-    replace_na(list(result = "NOMATCH")) %>% 
-    distinct() %>% 
-    pmap(function(value, result) {
-      list(rowValue = value,
-           permissibleValue = parse_concept(result))
-      
-    })
-}
-
-collate_observed_values <- function(row_data) {
-  row_data_spread <- row_data %>% 
-    gather(col, val) %>% 
-    separate(col, c("columnNumber", "source", "source_num")) %>% 
-    group_by(columnNumber, source, source_num) %>% 
-    mutate(row = row_number()) %>% 
-    ungroup()
-  
-  row_data_spread %>% 
-    filter(source == "value") %>%
-    left_join(filter(row_data_spread, source == "result"),
-              by = c("columnNumber", "row")) %>%
-    rename(value = val.x, resultNumber= source_num.y, result = val.y) %>%
-    select(-source.x, -source_num.x, -source.y) %>%
-    select(-row) %>%
-    distinct() %>%
-    group_by(columnNumber, resultNumber) %>%
-    nest()
-}
-
-get_observed_data <- function(table) {
-  row_data <- slice(table, -1)
-  
-  row_data %>%
-    collate_observed_values() %>%
-    mutate(data = map(data, observed_values_to_list)) %>%
-    rename(ovs = data)
-}
-
 table2json <- function(table) {
   header_data <- get_header_data(table)
-  ov_data <- get_observed_data(table)
+  vd_data <- get_value_domain_data(table)
   
   list(
     columns = header_data %>%
       dplyr::left_join(
-        ov_data, 
+        vd_data, 
         by = c("columnNumber", "source_num" = "resultNumber")
       ) %>% 
       dplyr::group_by(columnNumber) %>%
