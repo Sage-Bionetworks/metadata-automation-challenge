@@ -11,7 +11,7 @@ output:
 
 # Summary
 
-This demonstration servers two purposes: (1) illustrate elements and characteristics of input data, reference standards, and annotation results that are relevant to participants developing tools for the challenge; and (2) step through the process used by a simple "baseline" tool to produce results for an input dataset.
+This demonstration serves two purposes: (1) illustrate elements and characteristics of input data, reference standards, and annotation results that are relevant to participants developing tools for the challenge; and (2) step through the process used by a simple "baseline" tool to produce results for an input dataset.
 
 I acknowledge that there are a number of flaws and limitations in my approach below. My intent is to provide an orientation to how others might tackle challenge tasks. I expect that participants will be able to devise more creative and more sophisticated solutions that outperform my baseline tool!
 
@@ -46,7 +46,7 @@ user_data_dir <- "./"
 
 ## Load reference data
 
-The **caDSR dump** table can be accessed and downloaded from Synapse [**here**](https://www.synapse.org/#!Synapse:syn20540628). Alternatively, I can use
+The **caDSR export** table can be accessed and downloaded from Synapse [**here**](https://www.synapse.org/#!Synapse:syn20540628). Alternatively, I can use
 the **`synapser`** package to fetch the data via the Synapse API.
 
 ```{r}
@@ -56,14 +56,14 @@ cadsr_entity$path
 ```
 
 ```{r}
-# Read the 'caDSR-dump-20190528-1320.tsv' file, wherever it's stored
+# Read the 'caDSR-export-20190528-1320.tsv' file, wherever it's stored
 cadsr_df <- readr::read_tsv(cadsr_entity$path)
 ```
 
 
 ## Construct reference tables
 
-I'll start by normalizing the caDSR dump table into a two-column dataframe with data element (DE) identifiers (CDE IDs) mapped to all corresponding synonyms. Rather than trying to directly match column headers in the input table to standard data element names, I'll use synonyms to give a bit more flexibility and hopefully increase the number of hits.
+I'll start by normalizing the caDSR export table into a two-column dataframe with data element (DE) identifiers (CDE IDs) mapped to all corresponding synonyms. Rather than trying to directly match column headers in the input table to standard data element names, I'll use synonyms to give a bit more flexibility and hopefully increase the number of hits.
 
 Let's look at an example with a single DE (`2192199` for `"Race Category Text"`).
 
@@ -94,7 +94,7 @@ I'll apply this expansion to the full caDSR table and save for later use.
 cde_syn_df <- expand_syns(cadsr_df)
 ```
 
-I also want to normalize the mapping between caDSR DEs and their respective permissible values (PVs). Looking at the same example DE (`"Race Category Text"`), here's the string listing all permissible values from the caDSR dump:
+I also want to normalize the mapping between caDSR DEs and their respective permissible values (PVs). Looking at the same example DE (`"Race Category Text"`), here's the string listing all permissible values from the caDSR export:
 
 ```{r}
 pv_str <- cadsr_df %>% 
@@ -115,7 +115,7 @@ Using this information, I can use a function I wrote (**`pv_to_table()`**) to pa
 pv_to_table(pv_str)
 ```
 
-Applying this operation over all DEs in the caDSR dump is fairly time consuming, so I'll 'cache' the results by saving to a file on disk. The function doing most of the work here is **`expand_pvs()`**, which iteratively applies the **`pv_to_table()`** transformation to each row before flattening results into a single, expanded dataframe.
+Applying this operation over all DEs in the caDSR export is fairly time consuming, so I'll 'cache' the results by saving to a file on disk. The function doing most of the work here is **`expand_pvs()`**, which iteratively applies the **`pv_to_table()`** transformation to each row before flattening results into a single, expanded dataframe.
 
 ```{r, message=FALSE, warning=FALSE}
 cadsr_pv_expanded_file = fs::path_join(c(user_data_dir, 
@@ -151,16 +151,16 @@ head(cde_pv_df)
 
 ## Load example data
 
-Let's take a look at some real data. I'll start with one of the four **leaderboard datasets**, the **Apollo2** table. 
+Let's take a look at some real data. I'll start with one of the four **leaderboard datasets**, the **APOLLO-2** table. 
 
-The **Apollo2** input table can be accessed and downloaded from Synapse [**here**](https://www.synapse.org/#!Synapse:syn21088742). Alternatively, I can use
+The **APOLLO-2** input table can be accessed and downloaded from Synapse [**here**](https://www.synapse.org/#!Synapse:syn21088742). Alternatively, I can use
 the **`synapser`** package to fetch the data via the Synapse API.
 
-**Note:** while the examples and explanations below use the **Apollo2** dataset, you can switch between other datasets by changing the value of `dataset_num`. The rest of the code *should* still work (even if the text doesn't match).
+**Note:** while the examples and explanations below use the **APOLLO-2** dataset, you can switch between other datasets by changing the value of `dataset_num`. The rest of the code *should* still work (even if the text doesn't match).
 
 ```{r}
 dataset_ids <- list(
-  "Apollo2" = "syn21088742",
+  "APOLLO-2" = "syn21088742",
   "Outcome-Predictors" = "syn21088743",
   "REMBRANDT" = "syn21088744",
   "ROI-Masks" = "syn21088745"
@@ -176,11 +176,11 @@ dataset_entity <- synapser::synGet(dataset_ids[[dataset_name]],
 dataset_entity$path
 ```
 
-I also have access to the manually ascribed annotations, stored in Synapse as structured JSON files. I can download the annotation for **Apollo2** [**here**](https://www.synapse.org/#!Synapse:syn21431292) or use **`synapser`**.
+I also have access to the manually ascribed annotations, stored in Synapse as structured JSON files. I can download the annotation for **APOLLO-2** [**here**](https://www.synapse.org/#!Synapse:syn21431292) or use **`synapser`**.
 
 ```{r}
 anno_dataset_ids <- list(
-  "Apollo2" = "syn21431292",
+  "APOLLO-2" = "syn21431292",
   "Outcome-Predictors" = "syn21431291",
   "REMBRANDT" = "syn21431290",
   "ROI-Masks" = "syn21431289"

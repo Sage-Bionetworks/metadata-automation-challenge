@@ -33,7 +33,18 @@ parse_result <- function(result_number, result) {
   if (result == "NOMATCH") {
     return(
       list(resultNumber = as.integer(result_number),
-           result = "NOMATCH")
+           result = list(
+             "dataElement" = list(
+               "name" = "NOMATCH",
+               "id" = NA
+             ),
+             "dataElementConcept" = list(
+               "name" = "NOMATCH",
+               "id" = NA,
+               "conceptCodes" = list()
+             )
+           )
+      )
     )
   }
   result_data <- stringr::str_split(result, "\\\\")[[1]]
@@ -58,7 +69,7 @@ collect_results <- function(column_results) {
 parse_de <- function(de_str) {
   de_parts <- stringr::str_split(de_str, " ")[[1]]
   list(
-    id = clean_id(de_parts[1]),
+    id = as.integer(clean_id(de_parts[1])),
     name = stringr::str_trim(
       stringr::str_c(de_parts[-1], collapse = " ")
     )
@@ -67,7 +78,7 @@ parse_de <- function(de_str) {
 
 parse_dec <- function(dec_str) {
   dec_str <- stringr::str_trim(dec_str)
-  dec_id <- clean_id(stringr::str_extract(dec_str, "DEC:[0-9]*"))
+  dec_id <- as.integer(clean_id(stringr::str_extract(dec_str, "DEC:[0-9]*")))
   dec_parts <- stringr::str_replace(dec_str, "DEC:[0-9]*", "") %>% 
     stringr::str_trim() %>% 
     clean_dec() %>% 
@@ -75,9 +86,9 @@ parse_dec <- function(dec_str) {
     .[[1]] %>% 
     collect_dec_parts()
   
-  list(id = dec_id,
-       name = dec_parts$name,
-       concepts = dec_parts$concepts
+  list(id = as.integer(stringr::str_trim(dec_id)),
+       name = stringr::str_trim(dec_parts$name),
+       conceptCodes = as.list(stringr::str_trim(dec_parts$concepts))
   )
 }
 
@@ -106,8 +117,8 @@ clean_dec <- function(dec_str) {
 
 parse_concept <- function(concept_str) {
   concept_parts <- stringr::str_split(concept_str, "\\|")[[1]]
-  list(name = concept_parts[1],
-       id = concept_parts[2])
+  list(value = stringr::str_trim(concept_parts[1]),
+       conceptCode = stringr::str_trim(concept_parts[2]))
 }
 
 clean_id <- function(id_str) {
@@ -133,8 +144,8 @@ observed_values_to_list <- function(ov_df) {
     replace_na(list(result = "NOMATCH")) %>% 
     distinct() %>% 
     pmap(function(value, result) {
-      list(value = value,
-           concept = parse_concept(result))
+      list(rowValue = value,
+           permissibleValue = parse_concept(result))
       
     })
 }
@@ -194,15 +205,19 @@ get_filepath_base <- function(filepath) {
 
 format_submission <- function(filepath, num_results = 3) {
   fp_base <- get_filepath_base(filepath)
-  table <- readr::read_tsv(table_file,
+  table <- readr::read_tsv(filepath,
                            col_names = FALSE)
   table %>%
     purrr::set_names(format_column_names(., num_results)) %>%
     table2json() %>%
-    readr::write_file(paste0(fp_base, "_demo.json"))
+    readr::write_file(paste0(fp_base, ".json"))
 }
 
 # execute -----------------------------------------------------------------
 
-table_file <- "data/testing_annotated/Annotated-REMBRANDT.tsv"
+table_file <- "data/manually-curated_annotated/Annotated-APOLLO-2.tsv"
 format_submission(table_file, num_results = 1)
+
+anno_dir <- "data/manually-curated_annotated/"
+fs::dir_ls(anno_dir, glob = "*.tsv") %>% 
+  walk(~ format_submission(filepath = ., num_results = 1))
