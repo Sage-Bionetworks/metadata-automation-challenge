@@ -153,7 +153,7 @@ get_matched_pvs <- function(ov, pv_df) {
 }
 
 
-collect_result_ov <- function(cadsr_df, de_id, ov, enum = TRUE) {
+collect_result_vd <- function(cadsr_df, de_id, ov, enum = TRUE) {
   ov_df <- tibble::tibble(ov) %>%
     dplyr::distinct()
   
@@ -180,7 +180,7 @@ collect_result_ov <- function(cadsr_df, de_id, ov, enum = TRUE) {
   pv_hit_df %>%
     purrr::pmap(function(ov, value, concept_code) {
       list(
-        "rowValue" = ov,
+        "observedValue" = ov,
         "permissibleValue" = list(
           "value" = value,
           "conceptCode" = concept_code
@@ -203,24 +203,27 @@ collect_result <- function(result_num, de_id, ov, cadsr_df, enum = TRUE) {
           "name" = "NOMATCH",
           "id" = NA,
           "conceptCodes" = list()
+        ),
+        "valueDomain" = purrr::map(ov, function(v) {
+          list(
+            "observedValue" = v,
+            "permissibleValue" = list(
+              "value" = "NOMATCH",
+              "conceptCode" = NA
+            )
         )
-      ),
-      "observedValues" = purrr::map(ov, function(v) {
-        list(
-          "rowValue" = v,
-          "permissibleValue" = list(
-            "value" = "NOMATCH",
-            "conceptCode" = NA
-          )
-        )
-      })
+        })
+      )
     )
   } else {
-    list(
+    result_data <- list(
       "resultNumber" = result_num,
-      "result" = collect_result_hv(cadsr_df, de_id),
-      "observedValues" = collect_result_ov(cadsr_df, de_id, ov, enum)
+      "result" = collect_result_hv(cadsr_df, de_id)
     )
+    result_data$result[["valueDomain"]] <- collect_result_vd(
+      cadsr_df, de_id, ov, enum
+    )
+    result_data
   }
 }
 
