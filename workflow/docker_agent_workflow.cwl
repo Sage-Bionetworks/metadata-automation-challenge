@@ -296,5 +296,5 @@ steps:
     scatter: dataset
     in:
       - id: dataset
-      - source: "#dataset"
+        source: "#dataset"
     out: []
