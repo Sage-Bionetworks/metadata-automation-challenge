@@ -29,7 +29,6 @@ inputs:
   - id: dataset
     type: string[]
     default: ['Apollo2', 'Outcome-Predictors', 'REMBRANDT', 'ROI-Masks']
-scatter: dataset
 
 # there are no output at the workflow engine level.  Everything is uploaded to Synapse
 outputs: []
