@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 """Run training synthetic docker models"""
 from __future__ import print_function
 import argparse
