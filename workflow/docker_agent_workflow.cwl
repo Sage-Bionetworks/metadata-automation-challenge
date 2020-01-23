@@ -115,6 +115,7 @@ steps:
 
     run_docker:
       run: run_docker.cwl
+      scatter: dataset
       in:
         - id: docker_repository
           source: "#get_docker_submission/docker_repository"
