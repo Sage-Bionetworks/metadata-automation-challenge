@@ -244,7 +244,7 @@ steps:
 
   check_status:
     run: https://raw.githubusercontent.com/Sage-Bionetworks/ChallengeWorkflowTemplates/v2.2/check_status.cwl
-    scatter: [status, previous_annotation_finished, previous_email_finished]
+    scatter: [status, previous_email_finished]
     scatterMethod: dotproduct
     in:
       - id: status
