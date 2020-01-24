@@ -17,6 +17,8 @@ inputs:
     type: File
   - id: dataset
     type: string
+  - id: check_validation_finished
+    type: boolean?
 
 arguments:
   - valueFrom: run_scoring.R

@@ -264,7 +264,7 @@ steps:
 
   scoring:
     run: score.cwl
-    scatter: [inputfile, check_validation_finished, goldstandard]
+    scatter: [inputfile, check_validation_finished, goldstandard, dataset]
     scatterMethod: dotproduct
     in:
       - id: inputfile
@@ -273,6 +273,8 @@ steps:
         source: "#download_goldstandard/filepath"
       - id: check_validation_finished
         source: "#check_status/finished"
+      - id: dataset
+        source: "#dataset"
     out:
       - id: results
 
