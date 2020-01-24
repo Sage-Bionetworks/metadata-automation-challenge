@@ -25,14 +25,16 @@ inputs:
     type: string
   - id: synapseConfig
     type: File
+  - id: dataset
+    type: string[]
+    default: ['Apollo2', 'Outcome-Predictors', 'REMBRANDT', 'ROI-Masks']
 
 # there are no output at the workflow engine level.  Everything is uploaded to Synapse
 outputs: []
 
 steps:
-
   set_permissions:
-    run: https://raw.githubusercontent.com/Sage-Bionetworks/ChallengeWorkflowTemplates/v2.1/set_permissions.cwl
+    run: https://raw.githubusercontent.com/Sage-Bionetworks/ChallengeWorkflowTemplates/v2.2/set_permissions.cwl
     in:
       - id: entityid
         source: "#submitterUploadSynId"
@@ -45,7 +47,7 @@ steps:
     out: []
 
   notify_participants:
-    run:  https://raw.githubusercontent.com/Sage-Bionetworks/ChallengeWorkflowTemplates/v2.1/notification_email.cwl
+    run:  https://raw.githubusercontent.com/Sage-Bionetworks/ChallengeWorkflowTemplates/v2.2/notification_email.cwl
     in:
       - id: submissionid
         source: "#submissionId"
@@ -56,7 +58,7 @@ steps:
     out: []
 
   get_docker_submission:
-    run: https://raw.githubusercontent.com/Sage-Bionetworks/ChallengeWorkflowTemplates/v2.1/get_submission.cwl
+    run: https://raw.githubusercontent.com/Sage-Bionetworks/ChallengeWorkflowTemplates/v2.2/get_submission.cwl
     in:
       - id: submissionid
         source: "#submissionId"
@@ -71,7 +73,7 @@ steps:
       - id: results
 
   get_docker_config:
-    run: https://raw.githubusercontent.com/Sage-Bionetworks/ChallengeWorkflowTemplates/v2.1/get_docker_config.cwl
+    run: https://raw.githubusercontent.com/Sage-Bionetworks/ChallengeWorkflowTemplates/v2.2/get_docker_config.cwl
     in:
       - id: synapse_config
         source: "#synapseConfig"
@@ -79,26 +81,8 @@ steps:
       - id: docker_registry
       - id: docker_authentication
 
-  get_goldstandard_id:
-    run: get_goldstandard_synid.cwl
-    in:
-      - id: dataset
-        source: "#dataset"
-    out:
-      - id: synid
-
-  download_goldstandard:
-    run: https://raw.githubusercontent.com/Sage-Bionetworks/synapse-client-cwl-tools/v0.1/synapse-get-tool.cwl
-    in:
-      - id: synapseid
-        source: "#get_goldstandard_id/synid"
-      - id: synapse_config
-        source: "#synapseConfig"
-    out:
-      - id: filepath
-
   validate_docker:
-    run: https://raw.githubusercontent.com/Sage-Bionetworks/ChallengeWorkflowTemplates/v2.1/validate_docker.cwl
+    run: https://raw.githubusercontent.com/Sage-Bionetworks/ChallengeWorkflowTemplates/v2.2/validate_docker.cwl
     in:
       - id: docker_repository
         source: "#get_docker_submission/docker_repository"
@@ -112,7 +96,7 @@ steps:
       - id: invalid_reasons
 
   annotate_docker_validation_with_output:
-    run: https://raw.githubusercontent.com/Sage-Bionetworks/ChallengeWorkflowTemplates/v2.1/annotate_submission.cwl
+    run: https://raw.githubusercontent.com/Sage-Bionetworks/ChallengeWorkflowTemplates/v2.2/annotate_submission.cwl
     in:
       - id: submissionid
         source: "#submissionId"
@@ -147,9 +131,7 @@ steps:
       - id: synapse_config
         source: "#synapseConfig"
       - id: dataset
-        # Replace this with correct datapath
-        # valueFrom: "/home/tyu/data"
-        default:  ['Apollo2', 'Outcome-Predictors', 'REMBRANDT', 'ROI-Masks']
+        source: "#dataset"
       - id: data_dir
         # Replace this with correct datapath
         valueFrom: "/home/tyu/data"
@@ -161,7 +143,7 @@ steps:
       - id: predictions
 
   upload_results:
-    run: https://raw.githubusercontent.com/Sage-Bionetworks/ChallengeWorkflowTemplates/v2.1/upload_to_synapse.cwl
+    run: https://raw.githubusercontent.com/Sage-Bionetworks/ChallengeWorkflowTemplates/v2.2/upload_to_synapse.cwl
     scatter: infile
     in:
       - id: infile
@@ -180,8 +162,7 @@ steps:
       - id: results
 
   # annotate_docker_upload_results:
-  #   run: https://raw.githubusercontent.com/Sage-Bionetworks/ChallengeWorkflowTemplates/v2.1/annotate_submission.cwl
-  #   scatter: annotation_values
+  #   run: https://raw.githubusercontent.com/Sage-Bionetworks/ChallengeWorkflowTemplates/v2.2/annotate_submission.cwl
   #   in:
   #     - id: submissionid
   #       source: "#submissionId"
@@ -211,9 +192,9 @@ steps:
       - id: results
       - id: status
       - id: invalid_reasons
-  
+
   validation_email:
-    run: https://raw.githubusercontent.com/Sage-Bionetworks/ChallengeWorkflowTemplates/v2.1/validate_email.cwl
+    run: https://raw.githubusercontent.com/Sage-Bionetworks/ChallengeWorkflowTemplates/v2.2/validate_email.cwl
     scatter: [status, invalid_reasons]
     scatterMethod: dotproduct
     in:
@@ -225,10 +206,32 @@ steps:
         source: "#validation/status"
       - id: invalid_reasons
         source: "#validation/invalid_reasons"
+      - id: errors_only
+        default: true
     out: [finished]
 
+  get_goldstandard_id:
+    run: get_goldstandard_synid.cwl
+    scatter: dataset
+    in:
+      - id: dataset
+        source: "#dataset"
+    out:
+      - id: synid
+
+  download_goldstandard:
+    run: https://raw.githubusercontent.com/Sage-Bionetworks/synapse-client-cwl-tools/v0.1/synapse-get-tool.cwl
+    scatter: synapseid
+    in:
+      - id: synapseid
+        source: "#get_goldstandard_id/synid"
+      - id: synapse_config
+        source: "#synapseConfig"
+    out:
+      - id: filepath
+
   # annotate_validation_with_output:
-  #   run: https://raw.githubusercontent.com/Sage-Bionetworks/ChallengeWorkflowTemplates/v2.1/annotate_submission.cwl
+  #   run: https://raw.githubusercontent.com/Sage-Bionetworks/ChallengeWorkflowTemplates/v2.2/annotate_submission.cwl
   #   scatter: [annotation_values, previous_annotation_finished]
   #   scatterMethod: dotproduct
   #   in:
@@ -247,8 +250,7 @@ steps:
   #   out: [finished]
 
   check_status:
-    run: https://raw.githubusercontent.com/Sage-Bionetworks/ChallengeWorkflowTemplates/v2.1/check_status.cwl
-    # scatter: [status, previous_annotation_finished, previous_email_finished]
+    run: https://raw.githubusercontent.com/Sage-Bionetworks/ChallengeWorkflowTemplates/v2.2/check_status.cwl
     scatter: [status, previous_email_finished]
     scatterMethod: dotproduct
     in:
@@ -262,20 +264,20 @@ steps:
 
   scoring:
     run: score.cwl
-    scatter: [inputfile, check_validation_finished]
+    scatter: [inputfile, check_validation_finished, goldstandard]
     scatterMethod: dotproduct
     in:
       - id: inputfile
         source: "#run_docker/predictions"
       - id: goldstandard
         source: "#download_goldstandard/filepath"
-      - id: check_validation_finished 
+      - id: check_validation_finished
         source: "#check_status/finished"
     out:
       - id: results
-      
+
   score_email:
-    run: https://raw.githubusercontent.com/Sage-Bionetworks/ChallengeWorkflowTemplates/v2.1/score_email.cwl
+    run: https://raw.githubusercontent.com/Sage-Bionetworks/ChallengeWorkflowTemplates/v2.2/score_email.cwl
     scatter: results
     in:
       - id: submissionid
@@ -287,9 +289,7 @@ steps:
     out: []
 
   # annotate_submission_with_output:
-  #   run: https://raw.githubusercontent.com/Sage-Bionetworks/ChallengeWorkflowTemplates/v2.1/annotate_submission.cwl
-  #   scatter: [annotation_values, previous_annotation_finished]
-  #   scatterMethod: dotproduct
+  #   run: https://raw.githubusercontent.com/Sage-Bionetworks/ChallengeWorkflowTemplates/v2.2/annotate_submission.cwl
   #   in:
   #     - id: submissionid
   #       source: "#submissionId"

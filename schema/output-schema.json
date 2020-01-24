@@ -30,8 +30,7 @@
                             "type": "object",
                             "required": [
                                 "resultNumber",
-                                "result",
-                                "observedValues"
+                                "result"
                             ],
                             "description": "Results",
                             "properties": {
@@ -44,9 +43,10 @@
                                     "type": "object",
                                     "required": [
                                         "dataElement",
-                                        "dataElementConcept"
+                                        "dataElementConcept",
+                                        "valueDomain"
                                     ],
-                                    "description": "Annotation details (data element, data element concepts, observed values) for a selected column and current result",
+                                    "description": "Annotation details (matched data element, data element concepts, value domain) for a selected column and current result",
                                     "properties": {
                                         "dataElement": {
                                             "type": "object",
@@ -57,10 +57,10 @@
                                             "description": "caDSR public ID and long name for a selected data element",
                                             "properties": {
                                                 "id": {
-                                                    "type": "string",
+                                                    "type": ["number", "null"],
                                                     "description": "The unique identifier of the common data element (CDE) in the caDSR",
                                                     "examples": [
-                                                        "3701084"
+                                                        3701084
                                                     ]
                                                 },
                                                 "name": {
@@ -77,15 +77,15 @@
                                             "required": [
                                                 "id",
                                                 "name",
-                                                "concepts"
+                                                "conceptCodes"
                                             ],
                                             "description": "caDSR public ID and long name for a selected data element concept",
                                             "properties": {
                                                 "id": {
-                                                    "type": "string",
+                                                    "type": ["number", "null"],
                                                     "description": "The unique identifier in the caDSR of the data element concept (DEC)",
                                                     "examples": [
-                                                        "2958442"
+                                                        2958442
                                                     ]
                                                 },
                                                 "name": {
@@ -95,7 +95,7 @@
                                                         "Assessment Multiple Birth"
                                                     ]
                                                 },
-                                                "concepts": {
+                                                "conceptCodes": {
                                                     "type": "array",
                                                     "items": {
                                                         "type": "string"
@@ -105,43 +105,43 @@
                                                     ]
                                                 }
                                             }
-                                        }
-                                    }
-                                },
-                                "observedValues": {
-                                    "type": "array",
-                                    "description": "Mapping of unique observed values to matched concepts",
-                                    "items": {
-                                        "type": "object",
-                                        "required": [
-                                            "value",
-                                            "concept"
-                                        ],
-                                        "properties": {
-                                            "value": {
-                                                "type": "string",
-                                                "examples": [
-                                                    "900_00_1961"
-                                                ]
-                                            },
-                                            "concept": {
+                                        },
+                                        "valueDomain": {
+                                            "type": "array",
+                                            "description": "Mapping of unique observed values in rows to matched permissible values and concepts in the data element's value domain",
+                                            "items": {
                                                 "type": "object",
                                                 "required": [
-                                                    "name",
-                                                    "id"
+                                                    "observedValue",
+                                                    "permissibleValue"
                                                 ],
                                                 "properties": {
-                                                    "name": {
-                                                        "type": "string",
+                                                    "observedValue": {
+                                                        "type": ["string", "number", "null"],
                                                         "examples": [
-                                                            "CONFORMING", "NONCONFORMING"
+                                                            "900_00_1961"
                                                         ]
                                                     },
-                                                    "id": {
-                                                        "type": [
-                                                            "string", "null"
+                                                    "permissibleValue": {
+                                                        "type": "object",
+                                                        "required": [
+                                                            "value",
+                                                            "conceptCode"
                                                         ],
-                                                        "example": null
+                                                        "properties": {
+                                                            "value": {
+                                                                "type": "string",
+                                                                "examples": [
+                                                                    "CONFORMING", "NONCONFORMING"
+                                                                ]
+                                                            },
+                                                            "conceptCode": {
+                                                                "type": [
+                                                                    "string", "null"
+                                                                ],
+                                                                "example": null
+                                                            }
+                                                        }
                                                     }
                                                 }
                                             }

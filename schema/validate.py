@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Validate input json against json schema"""
 import json
+import itertools
 
 import click
 from jsonschema import Draft7Validator
@@ -32,8 +33,25 @@ def _validate_json(json_filepath, schema_filepath):
     Draft7Validator.check_schema(schema)
     schema_validator = Draft7Validator(schema)
     # Extract error messages
-    errors = [error.message for error in schema_validator.iter_errors(data)]
+    errors = [(error.message, error.absolute_path)
+              for error in schema_validator.iter_errors(data)]
     return errors
+
+
+def _grouper(n, iterable, fillvalue=None):
+    "grouper(3, 'ABCDEFG', 'x') --> ABC DEF Gxx"
+    args = [iter(iterable)] * n
+    return itertools.zip_longest(*args, fillvalue=fillvalue)
+
+
+def _parse_path(error_path):
+    path_parts = []
+    for field_loc in _grouper(2, error_path):
+        field, loc = field_loc
+        if type(loc) == str:
+            loc = f'"{loc}""'
+        path_parts.append(f'{field}[{loc}]')
+    return '::'.join(path_parts)
 
 
 @cli.command()
@@ -46,7 +64,7 @@ def validate_input(json_filepath, schema_filepath):
     errors = _validate_json(json_filepath, schema_filepath)
     if errors:
         for error in errors:
-            print(error)
+            print(f'Error: {error[0]}\n  at {_parse_path(error[1])}')
     else:
         print("Your JSON file is valid!")
 

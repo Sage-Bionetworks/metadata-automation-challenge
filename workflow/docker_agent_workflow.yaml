@@ -1,7 +1,7 @@
-submissionId: 9697108
-adminUploadSynId: "syn4990358"
-submitterUploadSynId: "syn4990358"
+submissionId: 9697544
+adminUploadSynId: "syn21542720"
+submitterUploadSynId: "syn21542721"
 workflowSynapseId: "syn4990358"
 synapseConfig:
   class: File
-  path: /Users/ThomasY/.synapseConfig
+  path: /home/tyu/.synapseConfig
