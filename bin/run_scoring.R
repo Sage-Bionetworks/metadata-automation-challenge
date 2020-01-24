@@ -15,9 +15,8 @@ main <- function() {
   message(glue::glue("Scoring annotation submitted for '{dset_name}' dataset",
                      dset_name = dataset_name))
   
-  suppressWarnings(
-    score = get_overall_score(submission_data, anno_data)
-  )
+  
+  score = suppressWarnings(get_overall_score(submission_data, anno_data))
   result_list = list()
   key = paste0(dataset_name, "_score")
   result_list[[key]] = score
