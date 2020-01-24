@@ -8,7 +8,7 @@ baseCommand: validate.py
 
 hints:
   DockerRequirement:
-    dockerPull: docker.synapse.org/syn18065892/scoring_harness
+    dockerPull: docker.synapse.org/syn18065892/validation
 
 inputs:
 

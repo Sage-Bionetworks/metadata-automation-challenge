@@ -133,7 +133,7 @@ collect_result_hv <- function(cadsr_df, de_id) {
     "dataElementConcept" = list(
       "id" = de_hit_df$DEC_ID,
       "name" = de_hit_df$DEC_LONG_NAME,
-      "concepts" = as.list(purrr::flatten_chr(de_hit_df$concepts))
+      "conceptCodes" = as.list(purrr::flatten_chr(de_hit_df$concepts))
     )
   )
 }
@@ -153,7 +153,7 @@ get_matched_pvs <- function(ov, pv_df) {
 }
 
 
-collect_result_ov <- function(cadsr_df, de_id, ov, enum = TRUE) {
+collect_result_vd <- function(cadsr_df, de_id, ov, enum = TRUE) {
   ov_df <- tibble::tibble(ov) %>%
     dplyr::distinct()
   
@@ -170,20 +170,20 @@ collect_result_ov <- function(cadsr_df, de_id, ov, enum = TRUE) {
         method = "osa",
         ignore_case = TRUE
       ) %>%
-      dplyr::select(ov = `ov.x`, name = value, id = concept_code) %>%
-      tidyr::replace_na(list(name = "NOMATCH"))
+      dplyr::select(ov = `ov.x`, value, concept_code) %>%
+      tidyr::replace_na(list(value = "NOMATCH"))
   } else {
     pv_hit_df <- ov_df %>% 
-      dplyr::mutate(id = NA, name = "CONFORMING")
+      dplyr::mutate(concept_code = NA, value = "CONFORMING")
   }
   
   pv_hit_df %>%
-    purrr::pmap(function(ov, id, name) {
+    purrr::pmap(function(ov, value, concept_code) {
       list(
-        "value" = ov,
-        "concept" = list(
-          "id" = id,
-          "name" = name
+        "observedValue" = ov,
+        "permissibleValue" = list(
+          "value" = value,
+          "conceptCode" = concept_code
         )
       )
     })
@@ -194,23 +194,36 @@ collect_result <- function(result_num, de_id, ov, cadsr_df, enum = TRUE) {
   if (is.null(de_id)) {
     list(
       "resultNumber" = 1,
-      "result" = "NOMATCH",
-      "observedValues" = purrr::map(ov, function(v) {
-        list(
-          "value" = v,
-          "concept" = list(
-            "id" = NA,
-            "name" = "NOMATCH"
-          )
+      "result" = list(
+        "dataElement" = list(
+          "name" = "NOMATCH",
+          "id" = NA
+        ),
+        "dataElementConcept" = list(
+          "name" = "NOMATCH",
+          "id" = NA,
+          "conceptCodes" = list()
+        ),
+        "valueDomain" = purrr::map(ov, function(v) {
+          list(
+            "observedValue" = v,
+            "permissibleValue" = list(
+              "value" = "NOMATCH",
+              "conceptCode" = NA
+            )
         )
-      })
+        })
+      )
     )
   } else {
-    list(
+    result_data <- list(
       "resultNumber" = result_num,
-      "result" = collect_result_hv(cadsr_df, de_id),
-      "observedValues" = collect_result_ov(cadsr_df, de_id, ov, enum)
+      "result" = collect_result_hv(cadsr_df, de_id)
     )
+    result_data$result[["valueDomain"]] <- collect_result_vd(
+      cadsr_df, de_id, ov, enum
+    )
+    result_data
   }
 }
 
@@ -330,8 +343,8 @@ annotate_table <- function(
 
 run_annotator <- function(
   dataset_name, 
-  cadsr_file = "/data/caDSR-dump-20190528-1320.tsv", 
-  cadsr_pv_expanded_file = "/cadsr_pv_expanded.feather",
+  cadsr_file = "/data/caDSR-export-20190528-1320.tsv", 
+  cadsr_pv_expanded_file = "/user_data/cadsr_pv_expanded.feather",
   n_results = 3
 ) {
   path_template <- "/input/{dset_name}.tsv"
@@ -360,7 +373,7 @@ run_annotator <- function(
     cde_pv_df = ref_tables$cde_pv_df
   )
   
-  submission_file <- glue::glue("/output/Annotated-{dset_name}.json", 
+  submission_file <- glue::glue("/output/{dset_name}-Submission.json", 
                                 dset_name = dataset_name)
   submission_data %>%
     jsonlite::toJSON(auto_unbox = TRUE, pretty = TRUE) %>%
