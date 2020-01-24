@@ -1,0 +1,7 @@
+FROM rocker/tidyverse:3.6.2
+
+WORKDIR /
+COPY bin/run_scoring.R run_scoring.R
+COPY R/scoring.R scoring.R
+
+RUN chmod +x run_scoring.R
