@@ -22,7 +22,7 @@ main <- function() {
   result_list[[key]] = score
   result_list[['prediction_file_status']] = "SCORED"
 
-  export_json <- toJSON(result_list, auto_unbox = TRUE, pretty=T)
+  export_json <- jsonlite::toJSON(result_list, auto_unbox = TRUE, pretty=T)
   write(export_json, results)
 }
 
