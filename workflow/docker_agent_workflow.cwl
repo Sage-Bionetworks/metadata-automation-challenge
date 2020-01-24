@@ -13,7 +13,6 @@ class: Workflow
 requirements:
   - class: StepInputExpressionRequirement
   - class: ScatterFeatureRequirement
-  - class: SubworkflowFeatureRequirement
 
 inputs:
   - id: submissionId
