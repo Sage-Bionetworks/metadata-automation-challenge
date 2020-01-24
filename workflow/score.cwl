@@ -4,7 +4,7 @@
 #
 cwlVersion: v1.0
 class: CommandLineTool
-baseCommand: python
+baseCommand: Rscript
 
 hints:
   DockerRequirement:
@@ -21,7 +21,7 @@ inputs:
     type: boolean?
 
 arguments:
-  - valueFrom: run_scoring.R
+  - valueFrom: /run_scoring.R
   - valueFrom: $(inputs.inputfile.path)
   - valueFrom: $(inputs.goldstandard.path)
   - valueFrom: results.json
