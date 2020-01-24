@@ -210,12 +210,21 @@ steps:
         default: true
     out: [finished]
 
+  get_goldstandard_id:
+    run: get_goldstandard_synid.cwl
+    scatter: dataset
+    in:
+      - id: dataset
+        source: "#dataset"
+    out:
+      - id: synid
+
   download_goldstandard:
     run: https://raw.githubusercontent.com/Sage-Bionetworks/synapse-client-cwl-tools/v0.1/synapse-get-tool.cwl
+    scatter: synapseid
     in:
       - id: synapseid
-        #This is a dummy syn id, replace when you use your own workflow
-        valueFrom: "syn18081597"
+        source: "#get_goldstandard_id/synid"
       - id: synapse_config
         source: "#synapseConfig"
     out:
@@ -255,7 +264,7 @@ steps:
 
   scoring:
     run: score.cwl
-    scatter: [inputfile, check_validation_finished]
+    scatter: [inputfile, check_validation_finished, goldstandard]
     scatterMethod: dotproduct
     in:
       - id: inputfile
