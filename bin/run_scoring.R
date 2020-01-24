@@ -1,5 +1,5 @@
 library(tidyverse)
-source("/R/scoring.R")
+source("/scoring.R")
 
 main <- function() {
   args <- commandArgs(trailingOnly = TRUE)
