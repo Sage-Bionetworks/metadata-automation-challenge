@@ -33,7 +33,8 @@ def _validate_json(json_filepath, schema_filepath):
     Draft7Validator.check_schema(schema)
     schema_validator = Draft7Validator(schema)
     # Extract error messages
-    errors = [(error.message, error.absolute_path)
+    errors = [f'Error: {error.message}\n  at {_parse_path(error.absolute_path)}'
+              #(error.message, error.absolute_path)
               for error in schema_validator.iter_errors(data)]
     return errors
 
@@ -59,12 +60,12 @@ def _parse_path(error_path):
               type=click.Path(exists=True))
 @click.option('--schema_filepath', help='Json schema filepath',
               default="/output-schema.json", type=click.Path(exists=True))
-def validate_input(json_filepath, schema_filepath):
-    """Validates input json"""
+def validate_submission(json_filepath, schema_filepath):
+    """Validates submission"""
     errors = _validate_json(json_filepath, schema_filepath)
     if errors:
         for error in errors:
-            print(f'Error: {error[0]}\n  at {_parse_path(error[1])}')
+            print(error)
     else:
         print("Your JSON file is valid!")
 
@@ -76,9 +77,9 @@ def validate_input(json_filepath, schema_filepath):
 @click.option('--entity_type', help='Submission entity type',
               required=True)
 @click.option('--results', help='Results filepath', required=True)
-def validate_json_submission(submission_file, schema_filepath, entity_type,
-                             results):
-    """Validates json submission"""
+def validate_submission_tool(submission_file, schema_filepath,
+                             entity_type, results):
+    """Validates submission: used by cwltool"""
     invalid_reasons = []
     if submission_file is None:
         prediction_file_status = "INVALID"
@@ -90,7 +91,6 @@ def validate_json_submission(submission_file, schema_filepath, entity_type,
             invalid_reasons.extend(errors)
         else:
             prediction_file_status = "VALIDATED"
-
     result = {'prediction_file_errors': "\n".join(invalid_reasons)[:500],
               'prediction_file_status': prediction_file_status}
     with open(results, 'w') as out:

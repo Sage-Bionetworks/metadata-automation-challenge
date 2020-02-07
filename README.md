@@ -33,8 +33,8 @@ The following command checks that the format of the submission file generated is
 ```
 $ docker run \
   -v $(pwd)/output/APOLLO-2-Submission.json:/input.json:ro \
-  docker.synapse.org/syn18065892/scoring_harness \
-  validate.py validate-input --json_filepath /input.json
+  metadata-validation \
+  validate-submission --json_filepath /input.json
 Your JSON file is valid!
 ```
 
