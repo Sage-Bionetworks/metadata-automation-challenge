@@ -4,7 +4,7 @@
 #
 cwlVersion: v1.0
 class: CommandLineTool
-baseCommand: Rscript
+baseCommand: score-submission-tool
 
 hints:
   DockerRequirement:
@@ -21,7 +21,6 @@ inputs:
     type: boolean?
 
 arguments:
-  - valueFrom: /run_scoring.R
   - valueFrom: $(inputs.inputfile.path)
   - valueFrom: $(inputs.goldstandard.path)
   - valueFrom: results.json

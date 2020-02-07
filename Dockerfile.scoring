@@ -5,3 +5,5 @@ COPY bin/run_scoring.R run_scoring.R
 COPY R/scoring.R scoring.R
 
 RUN chmod +x run_scoring.R
+
+ENTRYPOINT [ "Rscript", "run_scoring.R" ]
