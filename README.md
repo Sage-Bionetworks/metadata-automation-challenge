@@ -50,7 +50,7 @@ $ pip install click jsonschema
 Here is the generic command to validate the format of a submission file.
 
 ```
-$ python schema/validate.py validate-input \
+$ python schema/validate.py validate-submission \
   --json_filepath yourjson.json \
   --schema_filepath schema/output-schema.json
 ```
@@ -58,7 +58,7 @@ $ python schema/validate.py validate-input \
 To validate the submission file generate in the previous section, the command becomes:
 
 ```
-$ python schema/validate.py validate-input \
+$ python schema/validate.py validate-submission \
   --json_filepath output/APOLLO-2-Submission.json \
   --schema_filepath schema/output-schema.json
 Your JSON file is valid!
