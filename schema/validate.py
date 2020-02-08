@@ -2,6 +2,7 @@
 """Validate input json against json schema"""
 import json
 import itertools
+import os
 
 import click
 from jsonschema import Draft7Validator
@@ -84,6 +85,7 @@ def validate_submission_tool(submission_file, schema_filepath,
     if submission_file is None:
         prediction_file_status = "INVALID"
         invalid_reasons = ['Expected FileEntity type but found ' + entity_type]
+        dataset = ''
     else:
         errors = _validate_json(submission_file, schema_filepath)
         if errors:
@@ -91,7 +93,13 @@ def validate_submission_tool(submission_file, schema_filepath,
             invalid_reasons.extend(errors)
         else:
             prediction_file_status = "VALIDATED"
-    result = {'prediction_file_errors': "\n".join(invalid_reasons)[:500],
+        dataset = os.path.basename(submission_file).replace("-Submission.json", '')
+    if invalid_reasons:
+        error_string = '{}: {}'.format(dataset,
+                                       "\n".join(invalid_reasons)[:500])
+    else:
+        error_string = ''
+    result = {'prediction_file_errors': error_string,
               'prediction_file_status': prediction_file_status}
     with open(results, 'w') as out:
         out.write(json.dumps(result))
