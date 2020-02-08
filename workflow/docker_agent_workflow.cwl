@@ -28,6 +28,8 @@ inputs:
   - id: dataset
     type: string[]
     default: ['Apollo2', 'Outcome-Predictors', 'REMBRANDT', 'ROI-Masks']
+    # default: ['Apollo2']
+
 
 # there are no output at the workflow engine level.  Everything is uploaded to Synapse
 outputs: []
@@ -194,9 +196,9 @@ steps:
     run: collect_validations.cwl
     in:
       - id: status
-        valueFrom: "#validation/status"
+        source: "#validation/status"
       - id: invalid_reasons
-        valueFrom: "#validation/invalid_reasons"
+        source: "#validation/invalid_reasons"
     out:
       - id: results
       - id: status
