@@ -4,11 +4,11 @@
 #
 cwlVersion: v1.0
 class: CommandLineTool
-baseCommand: Rscript
+baseCommand: score-submission-tool
 
 hints:
   DockerRequirement:
-    dockerPull: docker.synapse.org/syn18065892/scoring
+    dockerPull: docker.synapse.org/syn18065892/scoring:v1
 
 inputs:
   - id: inputfile
@@ -21,7 +21,6 @@ inputs:
     type: boolean?
 
 arguments:
-  - valueFrom: /run_scoring.R
   - valueFrom: $(inputs.inputfile.path)
   - valueFrom: $(inputs.goldstandard.path)
   - valueFrom: results.json
