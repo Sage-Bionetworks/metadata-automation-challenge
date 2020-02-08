@@ -1,4 +1,4 @@
-library(tidyverse)
+library(tidyverse, quietly = T)
 source("/scoring.R")
 
 main <- function() {
