@@ -1,4 +1,4 @@
-library(tidyverse, quietly = T)
+suppressPackageStartupMessages(library(tidyverse))
 source("/scoring.R")
 
 main <- function() {
