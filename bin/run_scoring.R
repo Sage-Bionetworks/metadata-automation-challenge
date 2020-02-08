@@ -16,7 +16,7 @@ main <- function() {
   }
 }
 
-# Score submission used to CWL tool
+# Scoring function submission used by CWL tool
 score_submission_tool <- function() {
   submission_data <- jsonlite::read_json(submission_file)
 
