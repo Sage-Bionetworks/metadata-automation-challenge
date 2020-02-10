@@ -42,7 +42,7 @@ score_submission <- function(submission_file, goldstandard_file) {
   submission_data <- jsonlite::read_json(submission_file)
   anno_data <- jsonlite::read_json(goldstandard_file)
   score = suppressWarnings(get_overall_score(submission_data, anno_data))
-  print(score)
+  message(score)
 }
 main()
 
