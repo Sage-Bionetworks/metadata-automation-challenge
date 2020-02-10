@@ -138,7 +138,7 @@ def main(syn, args):
                                               detach=True, volumes=volumes,
                                               name=container_name,
                                               network_disabled=True,
-                                              mem_limit='10g', stderr=True)
+                                              mem_limit='6g', stderr=True)
         except docker.errors.APIError as err:
             remove_docker_container(container_name)
             errors = str(err) + "\n"
