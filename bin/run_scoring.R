@@ -17,7 +17,8 @@ main <- function() {
 }
 
 # Scoring function submission used by CWL tool
-score_submission_tool <- function() {
+score_submission_tool <- function(submission_file, goldstandard_file,
+                                  results, dataset_name) {
   submission_data <- jsonlite::read_json(submission_file)
 
   anno_data <- jsonlite::read_json(goldstandard_file)
