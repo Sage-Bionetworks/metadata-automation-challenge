@@ -72,5 +72,5 @@ $ docker run \
   -v $(pwd)/output/APOLLO-2-Submission.json:/submission.json:ro \
   -v $(pwd)/data/Annotated-APOLLO-2.json:/goldstandard.json:ro \
   metadata-scoring score-submission /submission.json /goldstandard.json
-[1] 0.9692308
+0.9692308
 ```
