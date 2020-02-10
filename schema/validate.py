@@ -2,6 +2,7 @@
 """Validate input json against json schema"""
 import json
 import itertools
+import os
 
 import click
 from jsonschema import Draft7Validator
@@ -34,6 +35,7 @@ def _validate_json(json_filepath, schema_filepath):
     schema_validator = Draft7Validator(schema)
     # Extract error messages
     errors = [f'Error: {error.message}\n  at {_parse_path(error.absolute_path)}'
+              if error.absolute_path else f'Error: {error.message}'
               #(error.message, error.absolute_path)
               for error in schema_validator.iter_errors(data)]
     return errors
@@ -49,7 +51,7 @@ def _parse_path(error_path):
     path_parts = []
     for field_loc in _grouper(2, error_path):
         field, loc = field_loc
-        if type(loc) == str:
+        if isinstance(loc, str):
             loc = f'"{loc}""'
         path_parts.append(f'{field}[{loc}]')
     return '::'.join(path_parts)
@@ -84,6 +86,7 @@ def validate_submission_tool(submission_file, schema_filepath,
     if submission_file is None:
         prediction_file_status = "INVALID"
         invalid_reasons = ['Expected FileEntity type but found ' + entity_type]
+        dataset = ''
     else:
         errors = _validate_json(submission_file, schema_filepath)
         if errors:
@@ -91,7 +94,13 @@ def validate_submission_tool(submission_file, schema_filepath,
             invalid_reasons.extend(errors)
         else:
             prediction_file_status = "VALIDATED"
-    result = {'prediction_file_errors': "\n".join(invalid_reasons)[:500],
+        dataset = os.path.basename(submission_file).replace("-Submission.json", '')
+    if invalid_reasons:
+        error_string = '{}: {}'.format(dataset,
+                                       "\n".join(invalid_reasons)[:500])
+    else:
+        error_string = ''
+    result = {'prediction_file_errors': error_string,
               'prediction_file_status': prediction_file_status}
     with open(results, 'w') as out:
         out.write(json.dumps(result))
