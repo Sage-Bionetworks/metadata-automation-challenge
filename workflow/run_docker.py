@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 """Run training synthetic docker models"""
 from __future__ import print_function
 import argparse
@@ -175,7 +176,8 @@ def main(syn, args):
     remove_docker_image(docker_image)
 
     output_folder = os.listdir(output_dir)
-    expected_json = "Annotated-{}.json".format(dataset)
+
+    expected_json = "{}-Submission.json".format(dataset)
     if not output_folder:
         raise Exception("No '{}' file written to /output, "
                         "please check inference docker".format(expected_json))

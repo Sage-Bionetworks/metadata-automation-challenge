@@ -58,14 +58,14 @@ get_dec_concepts <- function(res_data) {
   )
 }
 
-get_observed_values <- function(res_data) {
+get_value_domain <- function(res_data) {
   suppressWarnings(
     if (res_data$result$dataElement$name == "NOMATCH") {
-      tibble::tibble(rowvalue = NA, name = NA, id = NA) %>% 
+      tibble::tibble(observedValue = NA, name = NA, id = NA) %>% 
         dplyr::filter(complete.cases(.))
     } else {
-      res_data$observedValues %>% 
-        purrr::map(~ list(rowValue = .$rowValue, 
+      res_data$result$valueDomain %>% 
+        purrr::map(~ list(observedValue = .$observedValue, 
                           value = .$permissibleValue$value, 
                           conceptCode = .$permissibleValue$conceptCode)) %>% 
         purrr::map(~ purrr::discard(., is.null)) %>% 
@@ -96,17 +96,17 @@ score_concept_overlap <- function(sub_res_data, anno_res_data) {
 }
 
 score_value_coverage <- function(sub_res_data, anno_res_data) {
-  sub_ov <- get_observed_values(sub_res_data)
-  anno_ov <- get_observed_values(anno_res_data)
-  anno_nonenum <- any(stringr::str_detect(anno_ov$value, "CONFORMING"))
+  sub_vd <- get_value_domain(sub_res_data)
+  anno_vd <- get_value_domain(anno_res_data)
+  anno_nonenum <- any(stringr::str_detect(anno_vd$value, "CONFORMING"))
   if (anno_nonenum) {
     check_col <- "value"
   } else {
     check_col <- "conceptCode"
   }
-  mismatch_rows <- find_mismatch_rows(sub_ov, anno_ov, check_col)
-  if (nrow(anno_ov) & length(mismatch_rows)) {
-    1 - (length(mismatch_rows) / nrow(anno_ov))
+  mismatch_rows <- find_mismatch_rows(sub_vd, anno_vd, check_col)
+  if (nrow(anno_vd) & length(mismatch_rows)) {
+    1 - (length(mismatch_rows) / nrow(anno_vd))
   } else {
     0
   }

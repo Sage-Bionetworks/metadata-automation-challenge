@@ -30,8 +30,7 @@
                             "type": "object",
                             "required": [
                                 "resultNumber",
-                                "result",
-                                "observedValues"
+                                "result"
                             ],
                             "description": "Results",
                             "properties": {
@@ -44,9 +43,10 @@
                                     "type": "object",
                                     "required": [
                                         "dataElement",
-                                        "dataElementConcept"
+                                        "dataElementConcept",
+                                        "valueDomain"
                                     ],
-                                    "description": "Annotation details (data element, data element concepts, observed values) for a selected column and current result",
+                                    "description": "Annotation details (matched data element, data element concepts, value domain) for a selected column and current result",
                                     "properties": {
                                         "dataElement": {
                                             "type": "object",
@@ -105,43 +105,43 @@
                                                     ]
                                                 }
                                             }
-                                        }
-                                    }
-                                },
-                                "observedValues": {
-                                    "type": "array",
-                                    "description": "Mapping of unique observed values in rows to matched concepts",
-                                    "items": {
-                                        "type": "object",
-                                        "required": [
-                                            "rowValue",
-                                            "permissibleValue"
-                                        ],
-                                        "properties": {
-                                            "rowValue": {
-                                                "type": ["string", "number", "null"],
-                                                "examples": [
-                                                    "900_00_1961"
-                                                ]
-                                            },
-                                            "permissibleValue": {
+                                        },
+                                        "valueDomain": {
+                                            "type": "array",
+                                            "description": "Mapping of unique observed values in rows to matched permissible values and concepts in the data element's value domain",
+                                            "items": {
                                                 "type": "object",
                                                 "required": [
-                                                    "value",
-                                                    "conceptCode"
+                                                    "observedValue",
+                                                    "permissibleValue"
                                                 ],
                                                 "properties": {
-                                                    "value": {
-                                                        "type": "string",
+                                                    "observedValue": {
+                                                        "type": ["string", "number", "null"],
                                                         "examples": [
-                                                            "CONFORMING", "NONCONFORMING"
+                                                            "900_00_1961"
                                                         ]
                                                     },
-                                                    "conceptCode": {
-                                                        "type": [
-                                                            "string", "null"
+                                                    "permissibleValue": {
+                                                        "type": "object",
+                                                        "required": [
+                                                            "value",
+                                                            "conceptCode"
                                                         ],
-                                                        "example": null
+                                                        "properties": {
+                                                            "value": {
+                                                                "type": "string",
+                                                                "examples": [
+                                                                    "CONFORMING", "NONCONFORMING"
+                                                                ]
+                                                            },
+                                                            "conceptCode": {
+                                                                "type": [
+                                                                    "string", "null"
+                                                                ],
+                                                                "example": null
+                                                            }
+                                                        }
                                                     }
                                                 }
                                             }

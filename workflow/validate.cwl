@@ -4,11 +4,12 @@
 #
 cwlVersion: v1.0
 class: CommandLineTool
-baseCommand: validate.py
+baseCommand: validate-submission-tool
 
 hints:
   DockerRequirement:
-    dockerPull: docker.synapse.org/syn18065892/scoring_harness
+    dockerPull: docker.synapse.org/syn18065892/validation:v1
+    # dockerPull: metadata-validation
 
 inputs:
 
@@ -18,7 +19,6 @@ inputs:
     type: File?
 
 arguments:
-  - validate-json-submission
   - valueFrom: $(inputs.inputfile)
     prefix: --submission_file
   - valueFrom: results.json
