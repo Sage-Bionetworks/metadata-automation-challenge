@@ -35,6 +35,7 @@ def _validate_json(json_filepath, schema_filepath):
     schema_validator = Draft7Validator(schema)
     # Extract error messages
     errors = [f'Error: {error.message}\n  at {_parse_path(error.absolute_path)}'
+              if error.absolute_path else f'Error: {error.message}'
               #(error.message, error.absolute_path)
               for error in schema_validator.iter_errors(data)]
     return errors
@@ -50,7 +51,7 @@ def _parse_path(error_path):
     path_parts = []
     for field_loc in _grouper(2, error_path):
         field, loc = field_loc
-        if type(loc) == str:
+        if isinstance(loc, str):
             loc = f'"{loc}""'
         path_parts.append(f'{field}[{loc}]')
     return '::'.join(path_parts)
