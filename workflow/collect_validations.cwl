@@ -62,7 +62,8 @@ requirements:
             syn = synapseclient.Synapse(configPath=args.config)
             syn.login()
             ent = synapseclient.File(log_file, parent=args.parent_id)
-            syn.store(ent)
+            ent = syn.store(ent)
+            message = "Errors found. For more information, check the log file of this submission (validation_errors.txt: {}).".format(ent.id)
 
           result = {'prediction_file_errors': message,
                     'prediction_file_status': status}
