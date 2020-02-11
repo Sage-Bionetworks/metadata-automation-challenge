@@ -87,7 +87,7 @@ get_dec_concepts <- function(res_data) {
 
 get_value_domain <- function(res_data) {
   
-  suppressWarnings(
+
     if (res_data$result$dataElement$name == "NOMATCH") {
       tibble::tibble(observedValue = NA, name = NA, id = NA) %>% 
         dplyr::filter(complete.cases(.))
@@ -96,30 +96,16 @@ get_value_domain <- function(res_data) {
         purrr::map(~ list(observedValue = .$observedValue, 
                           value = .$permissibleValue$value, 
                           conceptCode = .$permissibleValue$conceptCode)) %>% 
-        purrr::map(~ purrr::discard(., is.null)) %>% 
-        purrr::map_df(tibble::as_tibble)
+        purrr::modify_depth(2, ~ dplyr::if_else(is.null(.), "", .)) %>% 
+        purrr::map_df(tibble::as_tibble) %>% 
+        dplyr::mutate(conceptCode = ifelse(conceptCode == "", NA, conceptCode))
     }
-  )
 
-}
-
-
-find_mismatch_cols <- function(df_a, df_b) {
-  
-  names(df_a) %>% 
-    purrr::imap(function(n, x) {
-      if (any(df_a[[x]] != df_b[[x]])) {
-        n
-      }
-    }) %>% 
-    purrr::discard(is.null) %>% 
-    purrr::flatten_chr()
-  
 }
 
 
 find_mismatch_rows <- function(df_a, df_b, col_name = "conceptCode") {
-  
+  # TODO: fix logic of this function
   df_a[[col_name]][!(df_a[[col_name]] %in% df_b[[col_name]])]
   
 }
@@ -160,9 +146,7 @@ get_res_score <- function(
   sub_col_data,
   anno_col_data,
   res_num,
-  score_checks,
-  overlap_thresh = 0.5,
-  coverage_thresh = 0.8
+  score_checks
 ) {
   
   sub_res_data <- get_result_data(sub_col_data, res_num)
@@ -222,9 +206,7 @@ get_col_score <- function(
   sub_col_data, 
   anno_col_data, 
   score_checks = get_score_checks(),
-  aggregate_by = "max",
-  overlap_thresh = 0.5,
-  coverage_thresh = 0.8
+  aggregate_by = "max"
 ) {
   
   n_res <- max(purrr::map_dbl(sub_col_data$results, "resultNumber"))
@@ -287,9 +269,7 @@ get_overall_score <- function(
   sub_data,
   anno_data,
   score_checks = get_score_checks(),
-  aggregate_by = "max",
-  overlap_thresh = 0.5,
-  coverage_thresh = 0.8
+  aggregate_by = "max"
 ) {
   
   n_columns <- length(sub_data$columns)
