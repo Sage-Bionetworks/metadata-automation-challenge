@@ -55,7 +55,6 @@ requirements:
 
           invalid_reasons = "\n".join(args.invalid_reasons)
           if status == "INVALID":
-            message = "Errors found. For more information, check the log file of this submission (validation_errors.txt)."
             log_file = "validation_errors.txt"
             with open(log_file, 'w') as log:
               log.write(invalid_reasons)
