@@ -60,7 +60,7 @@ cadsr_entity$path
 ```{r}
 # Read the 'caDSR-export-20190528-1320.tsv' file, wherever it's stored
 cadsr_file <- cadsr_entity$path
-cadsr_df <- readr::read_tsv(cadsr_entity$path, col_names = T)
+cadsr_df <- readr::read_tsv(cadsr_entity$path, col_names = TRUE)
 ```
 
 ## **Construct reference tables**
@@ -200,11 +200,19 @@ I can now read the input table into a dataframe (`input_df`) and the annotated J
 
 > WARNING: fix note and code to clarify that users should *not* use `readr`'s column type guessing functionality
 
-**Note:** if I was more thorough in designing my baseline algorithm, I could probably take advantage of the **`readr`** library's inferred types for each column (see the `Parsed with column specification:` message below).
+**IMPORTANT:** If you're using the **`readr`** library to load data, the default behavior is to guess/infer types for each column (i.e., you might see a `Parsed with column specification:` message). This can result in some columns failing to import correctly (or at all). We highly recommend forcing the data to be read in as `"character"` (or `"c"`).
 
 
 ```{r}
-input_df <- readr::read_tsv(dataset_entity$path, col_names = T)
+input_path <- dataset_entity$path
+num_cols <- readr::count_fields(input_path, 
+                                tokenizer = tokenizer_tsv(),
+                                n_max = 1)
+input_df <- readr::read_tsv(
+  input_path,
+  col_types = str_c(rep("c", num_cols), collapse = ""),
+  col_names = TRUE
+)
 anno_data <- jsonlite::read_json(anno_dataset_entity$path)
 ```
 
@@ -628,7 +636,7 @@ cadsr_df %>%
   dplyr::select(-coverage, -mean_dist)
 ```
 
-The manually annotated DE **!!!FILL IN HERE!!!** is my third best result... so it won't get me max points — but still not bad.
+The correctly annotated DE is my third best result... so it won't get me max points — but still not bad.
 
 ##### Collecting and formatting results
 
@@ -659,6 +667,10 @@ sub_col_data <- annotate_column(
 
 Checking the score...
 
+```{r}
+sub_col_data %>% get_result_data(1) %>% get_value_domain()
+```
+
 ```{r, warning=FALSE}
 col_score <- get_col_score(
   sub_col_data,
@@ -674,11 +686,12 @@ Putting it all together...
 
 # Annotating tables
 
-I can now apply the **`annotate_column()`** function across all columns in the table to generate the full results. I'll include a little message showing the input column number and HV to track progress.
+I can now apply the **`annotate_column()`** function across all columns in the table to generate the full results. I'll include a little message showing the input column number and HV to track progress. To save time, I'll only annotate the first 10 columns.
 
 ```{r, warning=FALSE}
+col_max <- 10
 submission_data <- annotate_table(
-  input_df,
+  input_df[, 1:col_max],
   cadsr_df,
   cde_syn_df,
   cde_pv_df,
@@ -693,7 +706,15 @@ submission_data <- annotate_table(
 Finally, I can use the **`get_overall_score()`** function to compare the baseline tool's results to the manual annotations.
 
 ```{r}
-s <- get_overall_score(submission_data, anno_data)
+anno_sub_data <- purrr::modify_at(
+  anno_data, 
+  "columns", 
+  ~ purrr::keep(., ~ .$columnNumber <= col_max)
+)
+s <- get_overall_score(
+  submission_data, 
+  anno_data
+)
 ```
 
 ```{r}
