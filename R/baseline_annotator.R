@@ -102,12 +102,10 @@ get_col_ov <- function(input_df, col_num) {
 guess_enumerated <- function(
   input_df, 
   col_num, 
-  div_thresh = NULL,
+  div_thresh = 3.85,
   verbose = TRUE
 ) {
-  if (is.null(div_thresh)) {
-    div_thresh <- nrow(input_df)/100 * 3.85
-  }
+  
   col_diversity <- input_df[[col_num]] %>% 
     tibble::tibble(val = .) %>% 
     dplyr::group_by(val) %>% 
