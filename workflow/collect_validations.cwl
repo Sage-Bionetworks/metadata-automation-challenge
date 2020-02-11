@@ -40,7 +40,7 @@ requirements:
           args = parser.parse_args()
 
           status = "VALIDATED" if all(s == "VALIDATED" for s in args.status) else "INVALID"
-          invalid_reasons = "\n".join(args.invalid_reasons)[:500]
+          invalid_reasons = "\n".join(args.invalid_reasons)[:1000]
 
           result = {'prediction_file_errors': invalid_reasons,
                     'prediction_file_status': status}
