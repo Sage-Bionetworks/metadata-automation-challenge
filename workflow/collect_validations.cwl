@@ -56,10 +56,11 @@ requirements:
           invalid_reasons = "\n".join(args.invalid_reasons)
           if status == "INVALID":
             message = "Errors found. For more information, check the log file of this submission (validation_errors.txt)."
-            with open("validation_errors.txt", 'w') as log:
+            log_file = "validation_errors.txt"
+            with open(log_file, 'w') as log:
               log.write(invalid_reasons)
             syn = synapseclient.login(configPath=args.config)
-            ent = synapseclient.File(log, parent=args.parent_id)
+            ent = synapseclient.File(log_file, parent=args.parent_id)
             syn.store(ent)
 
           result = {'prediction_file_errors': message,
