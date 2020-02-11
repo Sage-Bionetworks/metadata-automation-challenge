@@ -540,7 +540,7 @@ get_matched_pvs <- function(ov, pv_df, verbose = TRUE) {
 
 
 # Extract and format value domain (VD) information for the current result.
-collect_result_vd <- function(
+ollect_result_vd <- function(
   cadsr_df,
   de_id,
   ov,
@@ -564,24 +564,24 @@ collect_result_vd <- function(
       dplyr::mutate(pv = str_trim_lower(value)) %>%
       dplyr::distinct() %>%
       get_matched_pvs(ov, ., verbose = verbose) %>%
-      # fuzzyjoin::stringdist_left_join(
-      #   ov_df, ., by = "ov",
-      #   method = "osa",
-      #   ignore_case = TRUE
-      # ) %>%
-      # dplyr::select(ov = `ov.x`, value, concept_code, pv, dist, optdist) %>%
-      # dplyr::group_by(ov) %>%
-      # dplyr::filter(optdist == min(optdist)) %>%
-      # dplyr::sample_n(1) %>%
-      # dplyr::ungroup() %>%
-      dplyr::select(ov, value = value_meaning, concept_code) %>% 
+      fuzzyjoin::stringdist_left_join(
+        ov_df, ., by = "ov",
+        method = "osa",
+        ignore_case = TRUE
+      ) %>%
+      dplyr::select(ov = `ov.x`, value = value_meaning, concept_code, pv, 
+                    dist, optdist) %>%
+      dplyr::group_by(ov) %>%
+      dplyr::filter(optdist == min(optdist)) %>%
+      dplyr::sample_n(1) %>%
+      dplyr::ungroup() %>%
       tidyr::replace_na(list(value = "NOMATCH")) %>%
-      I
+      dplyr::select(-pv, -dist, -optdist)
   } else {
     pv_hit_df <- ov_df %>% 
       dplyr::mutate(concept_code = NA, value = "CONFORMING")
   }
-
+  
   pv_hit_df %>%
     purrr::pmap(function(ov, value, concept_code) {
       list(
