@@ -77,7 +77,7 @@ pv_to_table <- function(pv_str) {
 expand_pvs <- function(cadsr_df) {
   
   cadsr_df %>% 
-    tidyr::nest(PERMISSIBLE_VALUES) %>%
+    tidyr::nest(data = c(PERMISSIBLE_VALUES)) %>%
     dplyr::mutate(data = purrr::map(data, pv_to_table)) %>%
     tidyr::unnest(data)
   
@@ -416,36 +416,6 @@ combine_hv_ov_hits <- function(
     dplyr::full_join(col_ov_pv_hits, by = "CDE_ID") %>% 
     dplyr::distinct(CDE_ID)
   col_de_hits
-  # } 
-  
-  # if (num_common_hits == 0) {
-  #   if (num_hv_hits > num_ov_hits) {
-  #     if (verbose) {
-  #       message(
-  #         " ...using HV-based hits only."
-  #       )
-  #     }
-  #     col_de_hits <- col_hv_syn_hits %>% 
-  #       dplyr::distinct(CDE_ID)
-  #   } else {
-  #     if (verbose) {
-  #       message(
-  #         " ...using OV-based hits only."
-  #       )
-  #     }
-  #     col_de_hits <- col_ov_pv_hits %>% 
-  #       dplyr::distinct(CDE_ID)
-  #   }
-  # } else {
-  #   if (verbose) {
-  #     message(
-  #       " ...using intersection of HV- and OV-based hits."
-  #     )
-  #   }
-  #   col_de_hits <- col_hv_syn_hits %>% 
-  #     dplyr::inner_join(col_ov_pv_hits, by = "CDE_ID") %>% 
-  #     dplyr::distinct(CDE_ID)
-  # }
   
   col_de_hits
   
@@ -480,9 +450,6 @@ select_de_results <- function(
 
     col_de_results <- col_de_results %>%
       .filter_ov_hits(col_hv, ., cde_syn_df, n_hits = 100)
-
-        # col_de_results <- dplyr::filter(col_de_results, CDE_ID %in% col_de_sub_results$CDE_ID)
-    # print(col_de_results)   
   
     col_de_results <- col_de_results %>%
       summarize_ov_match(n_results, verbose = verbose)
@@ -904,10 +871,13 @@ run_annotator <- function(
   path_template <- "/input/{dset_name}.tsv"
   missing_anno_cols <- c("neoplasm_histologic_grade_1",
                          "Neurological Exam Outcome")
+  input_path <- glue::glue(path_template, dset_name = dataset_name)
+  num_cols <- readr::count_fields(input_path, tokenizer = tokenizer_tsv(), n_max = 1)
   
   suppressWarnings(
     input_df <- readr::read_tsv(
-      glue::glue(path_template, dset_name = dataset_name)
+      input_path,
+      col_types = str_c(rep("c", num_cols), collapse = "")
     ) %>% 
       dplyr::select_at(dplyr::vars(-dplyr::one_of(missing_anno_cols)))
   )
