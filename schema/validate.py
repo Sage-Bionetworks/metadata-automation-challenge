@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Validate input json against json schema"""
 import json
-import itertools
+# import itertools
 import os
 
 import click
