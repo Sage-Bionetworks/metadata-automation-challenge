@@ -1,5 +1,5 @@
 suppressPackageStartupMessages(library(tidyverse))
-source("/scoring.R")
+source("R/scoring.R")
 
 main <- function() {
   args <- commandArgs(trailingOnly = TRUE)
