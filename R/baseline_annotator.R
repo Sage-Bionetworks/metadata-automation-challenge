@@ -831,7 +831,7 @@ annotate_table <- function(
 # Load and preprocess reference tables.
 prep_ref_tables <- function(cadsr_file, cadsr_pv_expanded_file = "") {
   
-  cadsr_df <- readr::read_tsv(cadsr_file)
+  cadsr_df <- readr::read_tsv(cadsr_file, col_names = T)
   cde_syn_df <- expand_syns(cadsr_df)
   
   if (!fs::file_exists(cadsr_pv_expanded_file)) {
@@ -877,7 +877,8 @@ run_annotator <- function(
   suppressWarnings(
     input_df <- readr::read_tsv(
       input_path,
-      col_types = str_c(rep("c", num_cols), collapse = "")
+      col_types = str_c(rep("c", num_cols), collapse = ""),
+      col_names = TRUE
     ) %>% 
       dplyr::select_at(dplyr::vars(-dplyr::one_of(missing_anno_cols)))
   )
