@@ -8,7 +8,7 @@ baseCommand: validate-submission-tool
 
 hints:
   DockerRequirement:
-    dockerPull: docker.synapse.org/syn18065892/validation:v1
+    dockerPull: docker.synapse.org/syn18065892/validation:v2
     # dockerPull: metadata-validation
 
 inputs:
