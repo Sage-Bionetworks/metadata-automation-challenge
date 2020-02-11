@@ -3,8 +3,8 @@
 ## Building docker images
 
 ```
-docker build -t metadata-validation -f Dockerfile.validation .
 docker build -t metadata-baseline -f Dockerfile.baseline .
+docker build -t metadata-validation -f Dockerfile.validation .
 docker build -t metadata-scoring -f Dockerfile.scoring .
 ```
 
