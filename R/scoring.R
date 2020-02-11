@@ -96,8 +96,8 @@ get_value_domain <- function(res_data) {
         purrr::map(~ list(observedValue = .$observedValue, 
                           value = .$permissibleValue$value, 
                           conceptCode = .$permissibleValue$conceptCode)) %>% 
-        purrr::modify_depth(2, ~ dplyr::if_else(is.null(.), "", .)) %>% 
-        purrr::map_df(tibble::as_tibble) %>% 
+        purrr::modify_depth(2, ~ ifelse(is.null(.), "", .)) %>%
+        purrr::map_df(tibble::as_tibble) %>%
         dplyr::mutate(conceptCode = ifelse(conceptCode == "", NA, conceptCode))
     }
 
@@ -216,9 +216,7 @@ get_col_score <- function(
       sub_col_data,
       anno_col_data,
       res_num = r,
-      score_checks = score_checks,
-      overlap_thresh = overlap_thresh,
-      coverage_thresh = coverage_thresh
+      score_checks = score_checks
     )
   })
 
@@ -283,9 +281,7 @@ get_overall_score <- function(
       sub_col_data, 
       anno_col_data, 
       score_checks,
-      aggregate_by,
-      overlap_thresh, 
-      coverage_thresh
+      aggregate_by
     )
     
     suppressWarnings(
