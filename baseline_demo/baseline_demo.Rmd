@@ -60,7 +60,7 @@ cadsr_entity$path
 ```{r}
 # Read the 'caDSR-export-20190528-1320.tsv' file, wherever it's stored
 cadsr_file <- cadsr_entity$path
-cadsr_df <- readr::read_tsv(cadsr_entity$path)
+cadsr_df <- readr::read_tsv(cadsr_entity$path, col_names = T)
 ```
 
 ## **Construct reference tables**
@@ -204,7 +204,7 @@ I can now read the input table into a dataframe (`input_df`) and the annotated J
 
 
 ```{r}
-input_df <- readr::read_tsv(dataset_entity$path)
+input_df <- readr::read_tsv(dataset_entity$path, col_names = T)
 anno_data <- jsonlite::read_json(anno_dataset_entity$path)
 ```
 
