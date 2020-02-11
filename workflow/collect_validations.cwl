@@ -59,7 +59,8 @@ requirements:
             log_file = "validation_errors.txt"
             with open(log_file, 'w') as log:
               log.write(invalid_reasons)
-            syn = synapseclient.login(configPath=args.config)
+            syn = synapseclient.Synapse(configPath=args.config)
+            syn.login()
             ent = synapseclient.File(log_file, parent=args.parent_id)
             syn.store(ent)
 
