@@ -190,7 +190,7 @@ anno_dataset_ids <- list(
   "table-125350.309330" = "syn21515128"
 )
 
-anno_dataset_entity <- synapser::synGet(dataset_ids[[dataset_name]], 
+anno_dataset_entity <- synapser::synGet(anno_dataset_ids[[dataset_name]], 
                                         downloadLocation = data_dir,
                                         ifcollision = "overwrite.local")
 anno_dataset_entity$path
