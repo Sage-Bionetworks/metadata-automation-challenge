@@ -194,7 +194,7 @@ get_res_score <- function(
   
   score_1 <- metric_1*score_checks$weight[[1]]
   score_2 <- metric_2*score_checks$weight[[2]]
-  score_3 <- metric_3*metric_3*score_checks$weight[[3]]
+  score_3 <- metric_3*score_checks$weight[[3]]
   
   bonus <- (3 - res_num) * (mean(metric_1, metric_2, metric_3))
 
@@ -261,7 +261,7 @@ get_col_score_table <- function(col_score) {
     tibble::enframe() %>%
     tidyr::spread(name, value) %>%
     dplyr::rename(column_score = score) %>%
-    tidyr::nest(-column_score) %>%
+    tidyr::nest(data = -c(column_score)) %>%
     dplyr::mutate(
       data = purrr::map(data, function(x) {
         x$res_data %>%
@@ -278,7 +278,7 @@ get_col_score_table <- function(col_score) {
           })
       }) 
     ) %>%
-    tidyr::unnest()
+    tidyr::unnest(cols = c(column_score, data))
 
 }
 
