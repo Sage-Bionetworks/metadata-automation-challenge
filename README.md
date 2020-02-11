@@ -55,7 +55,7 @@ $ python schema/validate.py validate-submission \
   --schema_filepath schema/output-schema.json
 ```
 
-To validate the submission file generate in the previous section, the command becomes:
+To validate the submission file generated in the previous section, the command becomes:
 
 ```
 $ python schema/validate.py validate-submission \
