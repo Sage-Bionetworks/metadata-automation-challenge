@@ -538,7 +538,7 @@ get_matched_pvs <- function(ov, pv_df, verbose = TRUE) {
 
 
 # Extract and format value domain (VD) information for the current result.
-ollect_result_vd <- function(
+collect_result_vd <- function(
   cadsr_df,
   de_id,
   ov,
