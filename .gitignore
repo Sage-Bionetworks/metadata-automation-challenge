@@ -6,3 +6,7 @@
 .DS_Store
 
 data
+
+baseline_demo/data
+baseline_demo/input
+baseline_demo/output
