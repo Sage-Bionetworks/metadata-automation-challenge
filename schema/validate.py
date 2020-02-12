@@ -46,7 +46,8 @@ def _validate_json(json_filepath, schema_filepath):
         if error_map[error] == ['']:
             error_string = f'{error}\n'
         else:
-            error_string = f'{error} at\n  {", ".join(error_map[error])}\n'
+            errors = "\n  ".join(error_map[error])
+            error_string = f'{error} at\n  {errors}\n'
         final_error_list.append(error_string)
     return final_error_list
 
