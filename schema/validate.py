@@ -46,7 +46,8 @@ def _validate_json(json_filepath, schema_filepath):
         if error_map[error] == ['']:
             error_string = f'{error}\n'
         else:
-            error_string = f'{error} at\n  {", ".join(error_map[error])}\n'
+            errors = "\n  ".join(error_map[error])
+            error_string = f'{error} at\n  {errors}\n'
         final_error_list.append(error_string)
     return final_error_list
 
@@ -107,12 +108,12 @@ def validate_submission_tool(submission_file, schema_filepath,
             invalid_reasons.extend(errors)
         else:
             prediction_file_status = "VALIDATED"
-        dataset = os.path.basename(submission_file).replace("-Submission.json", '')
+        dataset = os.path.basename(
+            submission_file).replace("-Submission.json", '')
     if invalid_reasons:
-        invalid_string = "\n".join(invalid_reasons)[:230]
+        invalid_string = "\n".join(invalid_reasons)
         error_string = '> {} ERRORS:\n{}\n'.format(dataset, invalid_string)
-        if len(invalid_string) > 230:
-            error_string += '...\n'
+
     else:
         error_string = ''
     result = {'prediction_file_errors': error_string,

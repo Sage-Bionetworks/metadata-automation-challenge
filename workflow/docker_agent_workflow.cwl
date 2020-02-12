@@ -199,6 +199,10 @@ steps:
         source: "#validation/status"
       - id: invalid_reasons
         source: "#validation/invalid_reasons"
+      - id: parent_id
+        source: "#submitterUploadSynId"
+      - id: synapse_config
+        source: "#synapseConfig"
     out:
       - id: results
       - id: status
