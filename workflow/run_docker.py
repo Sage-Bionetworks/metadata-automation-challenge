@@ -100,7 +100,8 @@ def main(syn, args):
     # Must make the directory or else it will be mounted into docker as a file
     os.makedirs(output_dir, exist_ok=True)
     data_dir = args.data_dir
-    input_dir = os.path.join("/home/tyu/input", dataset + ".tsv")
+    # update this with folder name
+    input_dir = os.path.join("/home/tyu/leaderboard_data", dataset + ".tsv")
     mount_input = os.path.join('/input', dataset + ".tsv")
     print("mounting volumes")
     # These are the locations on the docker that you want your mounted
