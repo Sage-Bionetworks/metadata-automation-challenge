@@ -61,7 +61,7 @@ get_de_id <- function(res_data) {
 }
 
 get_dec_id <- function(res_data) {
-  
+
   suppressWarnings(
     if (res_data$result$dataElementConcept$name == "NOMATCH") {
       ""
@@ -73,7 +73,7 @@ get_dec_id <- function(res_data) {
 }
 
 get_dec_concepts <- function(res_data) {
-  
+  print(res_data$result$dataElementConcept$name)
   suppressWarnings(
     if (res_data$result$dataElementConcept$name == "NOMATCH") {
       c()
@@ -88,7 +88,7 @@ get_dec_concepts <- function(res_data) {
 get_value_domain <- function(res_data) {
   
 
-    if (res_data$result$dataElement$name == "NOMATCH") {
+    if (res_data$result$dataElement$name == "NOMATCH" || length(res_data$result$valueDomain) == 0) {
       tibble::tibble(observedValue = NA, name = NA, id = NA) %>% 
         dplyr::filter(complete.cases(.))
     } else {
