@@ -30,7 +30,7 @@ score_submission_tool <- function(submission_file, goldstandard_file,
   score = suppressWarnings(get_overall_score(submission_data, anno_data))
   result_list = list()
   key = paste0(dataset_name, "_score")
-  result_list[[key]] = score
+  result_list[[key]] = score$score
   result_list[['prediction_file_status']] = "SCORED"
 
   export_json <- jsonlite::toJSON(result_list, auto_unbox = TRUE, pretty=T)
@@ -41,8 +41,8 @@ score_submission_tool <- function(submission_file, goldstandard_file,
 score_submission <- function(submission_file, goldstandard_file) {
   submission_data <- jsonlite::read_json(submission_file)
   anno_data <- jsonlite::read_json(goldstandard_file)
-  score = suppressWarnings(get_overall_score(submission_data, anno_data))
-  print(score)
+  score = suppressMessages(suppressWarnings(get_overall_score(submission_data, anno_data)))
+  message(score$score)
 }
 main()
 

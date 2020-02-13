@@ -3,8 +3,8 @@
 ## Building docker images
 
 ```
-docker build -t metadata-validation -f Dockerfile.validation .
 docker build -t metadata-baseline -f Dockerfile.baseline .
+docker build -t metadata-validation -f Dockerfile.validation .
 docker build -t metadata-scoring -f Dockerfile.scoring .
 ```
 
@@ -69,8 +69,8 @@ Here we evaluate the performance of the submission by comparing the content of t
 
 ```
 $ docker run \
-  -v $(pwd)/output/APOLLO-2-Submission.json:/submission.json:ro \
-  -v $(pwd)/data/Annotated-APOLLO-2.json:/goldstandard.json:ro \
+  -v $(pwd)/output/Apollo2-Submission.json:/submission.json:ro \
+  -v $(pwd)/data/Annotated-Apollo2.json:/goldstandard.json:ro \
   metadata-scoring score-submission /submission.json /goldstandard.json
-[1] 0.9692308
+0.9692308
 ```

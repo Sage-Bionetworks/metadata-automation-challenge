@@ -8,7 +8,7 @@ baseCommand: score-submission-tool
 
 hints:
   DockerRequirement:
-    dockerPull: docker.synapse.org/syn18065892/scoring:v1
+    dockerPull: docker.synapse.org/syn18065892/scoring:v2
 
 inputs:
   - id: inputfile
