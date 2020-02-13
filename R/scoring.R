@@ -73,7 +73,6 @@ get_dec_id <- function(res_data) {
 }
 
 get_dec_concepts <- function(res_data) {
-  print(res_data$result$dataElementConcept$name)
   suppressWarnings(
     if (res_data$result$dataElementConcept$name == "NOMATCH") {
       c()
