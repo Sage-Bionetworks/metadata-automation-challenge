@@ -111,7 +111,10 @@ def validate_submission_tool(submission_file, schema_filepath,
         dataset = os.path.basename(
             submission_file).replace("-Submission.json", '')
     if invalid_reasons:
-        invalid_string = "\n".join(invalid_reasons)
+        if dataset == "APOLLO-2":
+            invalid_string = "Errors found."
+        else:
+            invalid_string = "\n".join(invalid_reasons)
         error_string = '> {} ERRORS:\n{}\n'.format(dataset, invalid_string)
 
     else:

@@ -91,11 +91,11 @@ def main(syn, args):
 
     print(getpass.getuser())
 
-    #Add docker.config file
+    # Add docker.config file
     docker_image = args.docker_repository + "@" + args.docker_digest
     dataset = args.dataset
 
-    #These are the volumes that you want to mount onto your docker container
+    # These are the volumes that you want to mount onto your docker container
     output_dir = os.path.join(os.getcwd(), "output", dataset)
     # Must make the directory or else it will be mounted into docker as a file
     os.makedirs(output_dir, exist_ok=True)
@@ -110,15 +110,15 @@ def main(syn, args):
     mounted_volumes = {output_dir: '/output:rw',
                        data_dir: '/data:ro',
                        input_dir: mount_input + ':ro'}
-    #All mounted volumes here in a list
+    # All mounted volumes here in a list
     all_volumes = [output_dir, input_dir, data_dir]
-    #Mount volumes
+    # Mount volumes
     volumes = {}
     for vol in all_volumes:
         volumes[vol] = {'bind': mounted_volumes[vol].split(":")[0],
                         'mode': mounted_volumes[vol].split(":")[1]}
 
-    #Look for if the container exists already, if so, reconnect
+    # Look for if the container exists already, if so, reconnect
     print("checking for containers")
     container = None
     errors = None
@@ -132,7 +132,7 @@ def main(syn, args):
                 container = cont
     # If the container doesn't exist, make sure to run the docker image
     if container is None:
-        #Run as detached, logs will stream below
+        # Run as detached, logs will stream below
         print("running container")
         try:
             container = client.containers.run(docker_image, dataset,
@@ -144,33 +144,37 @@ def main(syn, args):
             remove_docker_container(container_name)
             errors = str(err) + "\n"
 
-    print("creating logfile")
-    # Create the logfile
-    log_filename = container_name + "_log.txt"
-    # Open log file first
-    open(log_filename, 'w').close()
-
     # If the container doesn't exist, there are no logs to write out and
     # no container to remove
     if container is not None:
-        # Check if container is still running
-        while container in client.containers.list():
+
+        # Do not write a log file for the APOLLO-2 dataset.
+        if dataset != "APOLLO-2":
+            print("creating logfile")
+            # Create the logfile
+            log_filename = container_name + "_log.txt"
+            # Open log file first
+            open(log_filename, 'w').close()
+
+            # Check if container is still running
+            while container in client.containers.list():
+                log_text = container.logs()
+                create_log_file(log_filename, log_text=log_text)
+                store_log_file(syn, log_filename, args.parentid)
+                time.sleep(60)
+            # Must run again to make sure all the logs are captured
             log_text = container.logs()
             create_log_file(log_filename, log_text=log_text)
             store_log_file(syn, log_filename, args.parentid)
-            time.sleep(60)
-        # Must run again to make sure all the logs are captured
-        log_text = container.logs()
-        create_log_file(log_filename, log_text=log_text)
-        store_log_file(syn, log_filename, args.parentid)
+
+            statinfo = os.stat(log_filename)
+
+            if statinfo.st_size == 0:
+                create_log_file(log_filename, log_text=errors)
+                store_log_file(syn, log_filename, args.parentid)
+
         # Remove container and image after being done
         container.remove()
-
-    statinfo = os.stat(log_filename)
-
-    if statinfo.st_size == 0:
-        create_log_file(log_filename, log_text=errors)
-        store_log_file(syn, log_filename, args.parentid)
 
     print("finished training")
     # Try to remove the image
