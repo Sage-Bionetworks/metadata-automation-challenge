@@ -6,3 +6,8 @@
 .DS_Store
 
 data
+
+baseline_demo/baseline_demo.nb.html
+baseline_demo/data
+baseline_demo/input
+baseline_demo/output

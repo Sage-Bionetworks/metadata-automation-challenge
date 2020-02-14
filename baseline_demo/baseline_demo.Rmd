@@ -1,7 +1,7 @@
 ---
 title: "Metadata Automation Challenge - Baseline Tool Demo"
 author: James Eddy
-date: January 3rd, 2020
+date: "February 13th, 2020"
 output: 
   html_notebook: 
     highlight: pygments
@@ -19,72 +19,86 @@ I acknowledge that there are a number of flaws and limitations in my approach be
 
 # Setup
 
-## Load packages and scoring functions
+## **Load packages plus annotator and scoring functions**
 
 ```{r, message=FALSE, warning=FALSE}
 library(tidyverse)
+library(snakecase)
+library(feather)
 library(fuzzyjoin)
+library(vegan)
 library(synapser)
 source("../R/baseline_annotator.R")
 source("../R/scoring.R")
 ```
 
 
-## Specify file locations
+## **Specify file locations**
 
-I've chosen to use folders at the root of my system path to store various inputs and outputs for the demo — as this matches the expected setup for the Docker image I'll eventually need to create. However, you might need special privilages to create these folders on your local machine.
-
-You can change these paths as needed to point to other locations (including the current working directory).
+I've set this demo up to run within the current working directory. You can change these paths as needed to point to other locations.
 
 ```{r}
-input_dir <- "/input/"
-output_dir <- "/output/"
-data_dir <- "/data/"
+input_dir <- "./input/"
+output_dir <- "./output/"
+data_dir <- "./data/"
 user_data_dir <- "./"
 ```
 
 
-## Load reference data
+## **Load reference data**
 
-The **caDSR export** table can be accessed and downloaded from Synapse [**here**](https://www.synapse.org/#!Synapse:syn20540628). Alternatively, I can use
-the **`synapser`** package to fetch the data via the Synapse API.
+The **caDSR export** table can be accessed and downloaded from Synapse [**here**](https://www.synapse.org/#!Synapse:syn20540628). Alternatively, I can use the **`synapser`** package to fetch the data via the Synapse API.
 
 ```{r}
 synapser::synLogin()
-cadsr_entity <- synapser::synGet("syn20540628", downloadLocation = data_dir)
+cadsr_entity <- synapser::synGet("syn20540628", 
+                                 downloadLocation = data_dir,
+                                 ifcollision = "overwrite.local")
 cadsr_entity$path
 ```
 
 ```{r}
 # Read the 'caDSR-export-20190528-1320.tsv' file, wherever it's stored
-cadsr_df <- readr::read_tsv(cadsr_entity$path)
+cadsr_file <- cadsr_entity$path
+cadsr_df <- readr::read_tsv(cadsr_entity$path, col_names = TRUE)
 ```
 
-
-## Construct reference tables
+## **Construct reference tables**
 
 I'll start by normalizing the caDSR export table into a two-column dataframe with data element (DE) identifiers (CDE IDs) mapped to all corresponding synonyms. Rather than trying to directly match column headers in the input table to standard data element names, I'll use synonyms to give a bit more flexibility and hopefully increase the number of hits.
+
+**Note:** Rather than choose one or the other, I'll match against values and synonyms from both the **`CDE_SHORT_NAME`** and **`QUESTION_TEXT`** columns.
 
 Let's look at an example with a single DE (`2192199` for `"Race Category Text"`).
 
 ```{r}
 syn_str <- cadsr_df %>% 
-  dplyr::filter(CDE_ID == "2192199") %>% 
-  dplyr::select(CDE_SYNONYMS_MACHINE) %>%
+  dplyr::filter(CDE_ID == 2192199) %>% 
+  dplyr::select(CDE_SHORT_NAME) %>%
   purrr::flatten_chr()
-
-syn_str
 ```
-
-Based on the description of the **`CDE_SYNONYMS_MACHINE`** column on the [**Reference Standards** page](https://www.synapse.org/#!Synapse:syn18065892/wiki/599381), I can figure out what the various pieces of this string represent:
-
-> Collection of CDE short name and *all* computer-friendly alternate names. The names in the collection are pipe-delimited.
-
-Using this information, I can use a function I wrote (`expand_syns()`) to parse and expand the list of synonyms so there is a separate row for each.
 
 ```{r}
 cadsr_df %>% 
-  dplyr::filter(CDE_ID == "2192199") %>% 
+  dplyr::filter(CDE_ID == 2192199) %>% 
+  dplyr::select("QUESTION_TEXT") %>%
+  purrr::flatten_chr()
+```
+
+
+Based on the description of columns on the [**Reference Standards** page](https://www.synapse.org/#!Synapse:syn18065892/wiki/599381), I can figure out what the various pieces of these strings represent:
+
++ **`CDE_SHORT_NAME`:**
+> Collection of CDE short name and *all* computer-friendly alternate names. The names in the collection are pipe-delimited.
+
++ **`QUESTION_TEXT`:**
+> Collection of user-friendly alternate names and question text. The terms in this collection are pipe-delimited.	
+
+Using this information, I can use a function I wrote (`expand_syns()`) to parse and expand the list of synonyms so there is a separate row for each — including all delimited values for both **`CDE_SHORT_NAME`** and **`QUESTION_TEXT`**.
+
+```{r}
+cadsr_df %>% 
+  dplyr::filter(CDE_ID == 2192199) %>%
   expand_syns()
 ```
 
@@ -138,7 +152,7 @@ The expanded dataframe includes the full set of information for each PV concept.
 
 ```{r}
 cde_pv_df <- pv_concept_df %>% 
-  dplyr::select(CDE_ID, pv = text_value) %>% 
+  dplyr::select(CDE_ID, pv = value) %>% # change to value
   dplyr::mutate(pv = str_trim_lower(pv)) %>% 
   dplyr::distinct()
 
@@ -149,41 +163,31 @@ head(cde_pv_df)
 
 # Demo
 
-## Load example data
+## **Load example data**
 
-Let's take a look at some real data. I'll start with one of the four **leaderboard datasets**, the **APOLLO-2** table. 
-
-The **APOLLO-2** input table can be accessed and downloaded from Synapse [**here**](https://www.synapse.org/#!Synapse:syn21088742). Alternatively, I can use
+The **caDSR Synthetic data** input table, `table-125350.309330.tsv`, can be accessed and downloaded from Synapse [**here**](https://www.synapse.org/#!Synapse:syn21088795). Alternatively, I can use
 the **`synapser`** package to fetch the data via the Synapse API.
-
-**Note:** while the examples and explanations below use the **APOLLO-2** dataset, you can switch between other datasets by changing the value of `dataset_num`. The rest of the code *should* still work (even if the text doesn't match).
 
 ```{r}
 dataset_ids <- list(
-  "APOLLO-2" = "syn21088742",
-  "Outcome-Predictors" = "syn21088743",
-  "REMBRANDT" = "syn21088744",
-  "ROI-Masks" = "syn21088745"
+  "table-125350.309330" = "syn21088795"
 )
 
 datasets <- names(dataset_ids)
 dataset_num <- 1
 dataset_name <- datasets[dataset_num]
 
-dataset_entity <- synapser::synGet(dataset_ids[[dataset_name]], 
+dataset_entity <- synapser::synGet(dataset_ids[[dataset_name]],
                                    downloadLocation = input_dir,
                                    ifcollision = "overwrite.local")
 dataset_entity$path
 ```
 
-I also have access to the manually ascribed annotations, stored in Synapse as structured JSON files. I can download the annotation for **APOLLO-2** [**here**](https://www.synapse.org/#!Synapse:syn21431292) or use **`synapser`**.
+I also have access to the matching annotations, stored in Synapse as structured JSON files. I can download the annotation for `table-125350.309330` [**here**](https://www.synapse.org/#!Synapse:syn21515128) or use **`synapser`**.
 
 ```{r}
 anno_dataset_ids <- list(
-  "APOLLO-2" = "syn21431292",
-  "Outcome-Predictors" = "syn21431291",
-  "REMBRANDT" = "syn21431290",
-  "ROI-Masks" = "syn21431289"
+  "table-125350.309330" = "syn21515128"
 )
 
 anno_dataset_entity <- synapser::synGet(anno_dataset_ids[[dataset_name]], 
@@ -194,62 +198,58 @@ anno_dataset_entity$path
 
 I can now read the input table into a dataframe (`input_df`) and the annotated JSON file into a list object (`anno_data`).
 
-**Note:** if I was more thorough in designing my baseline algorithm, I could probably take advantage of the **`readr`** library's inferred types for each column (see the `Parsed with column specification:` message below).
+> WARNING: fix note and code to clarify that users should *not* use `readr`'s column type guessing functionality
+
+**IMPORTANT:** If you're using the **`readr`** library to load data, the default behavior is to guess/infer types for each column (i.e., you might see a `Parsed with column specification:` message). This can result in some columns failing to import correctly (or at all). We highly recommend forcing the data to be read in as `"character"` (or `"c"`).
 
 
 ```{r}
-missing_anno_cols <- c("neoplasm_histologic_grade_1", 
-                       "Neurological Exam Outcome")
-
-# To make things a bit easier for switching between datasets, I'll use a simple
-# template to take advantage of the 'glue' library's string literal features
-path_template <- "{dir_name}{prefix}{dset_name}.{ext}"
-
+input_path <- dataset_entity$path
+num_cols <- readr::count_fields(input_path, 
+                                tokenizer = tokenizer_tsv(),
+                                n_max = 1)
 input_df <- readr::read_tsv(
-  glue::glue(path_template,
-             dir_name = input_dir,
-             prefix = "",
-             dset_name = dataset_name,
-             ext = "tsv")
-) %>% 
-  dplyr::select_at(dplyr::vars(-dplyr::one_of(missing_anno_cols)))
-
-anno_data <- jsonlite::read_json(
-  glue::glue(path_template,
-             dir_name = data_dir,
-             prefix = "Annotated-",
-             dset_name = dataset_name,
-             ext = "json")
+  input_path,
+  col_types = str_c(rep("c", num_cols), collapse = ""),
+  col_names = TRUE
 )
+anno_data <- jsonlite::read_json(anno_dataset_entity$path)
 ```
 
+## **Annotation Examples** {.tabset .tabset-fade}
 
-## Inspecting the data
+### Enumerated
 
-In order to demonstrate the annotation logic below, I'll focus on the first column in the input data. The primary target of our annotation efforts for this challenge is the overall *column* itself, as encapsulated by the column's **header value (HV)**.
+#### **Inspecting the data**
 
 ```{r}
-demo_col_num <- 1
+demo_col_num <- 40
+```
+
+In order to demonstrate the annotation logic below, I'll focus on column **`r demo_col_num`** in the input data. The primary target of our annotation efforts for this challenge is the overall *column* itself, as encapsulated by the column's **header value (HV)**.
+
+```{r}
 demo_col_hv <- names(input_df)[demo_col_num]
 
 demo_col_hv
 ```
 
-Checking the manual annotation for this column, I can see the expected result to semantically describe what the column represents. The annotation includes structured information about the **data element (DE)** — sourced from caDSR — that curators have interpreted to define this particular column of (meta)data based on the header and individual row values.
+Checking the manual annotation for this column, I can see the expected result that semantically describes what the column represents. The annotation includes structured information about the **data element (DE)** — sourced from caDSR — that define this particular column of (meta)data.
+
+**Note:** I find the 'prettified' JSON a bit easier to view than the printed R list, so I'll use the **jsonlite** **`toJSON()`** function to display results henceforth:
 
 ```{r}
 anno_col_data <- anno_data$columns[[demo_col_num]]
 anno_res_data <- anno_col_data$results[[1]]
-anno_res_hv <- anno_res_data$result
+anno_res_hv <- anno_res_data$result[c("dataElement", "dataElementConcept")]
 
-# I find the 'prettified' JSON a bit easier to view than the printed R list
 anno_res_hv %>% 
   jsonlite::toJSON(auto_unbox = TRUE, pretty = TRUE)
 ```
 
-So, I know that curators chose DE `2192199` or `"Race Category Text"` as the best match for the `"race"` column. I'll see if I can develop an algorithm to produce the same result automatically...
+I can see that **`r anno_res_hv$dataElement$id`** or **`r anno_res_hv$dataElement$name`** is the best (correct) matching DE for the **"`r demo_col_hv`"** column. My goal is to develop an algorithm to produce the same result automatically...
 
-Next I'll check out the individual values in the *rows* of the first column. In contrast to the "permissible values" specified for a particular DE, the **observed values (OV)** represent the raw values we find in rows of the data.
+Next, I'll check out the individual values in the *rows* of the first column. In contrast to the "permissible values" specified for a particular DE, the **observed values (OV)** represent the raw values we find in rows of the data.
 
 ```{r}
 demo_col_ov <- get_col_ov(input_df, demo_col_num)
@@ -257,24 +257,40 @@ demo_col_ov <- get_col_ov(input_df, demo_col_num)
 head(demo_col_ov)
 ```
 
-Like the column headers, curators have also annotated row values according to standard vocabularies, based on the object and property concepts of the matched DE (**`OBJECT_CLASS_IDS`** and **`PROPERTY_IDS`** columns in the caDSR table, respectively).
+For a column with `r nrow(input_df[demo_col_num])`, there are only `length(demo_col_ov)` unique values. Just to confirm (for the sake of this demonstration), I can look up whether the value domain type for the matched CDE is enumerated or non-enumerated:
+
+```{r}
+cadsr_df %>% 
+  filter(CDE_ID == anno_res_hv$dataElement$id) %>% 
+  select(VALUE_DOMAIN_TYPE)
+```
+
+Like the column headers, row values are also annotated according to standard vocabularies, based on the specified **Value Domain** of the matched CDE.
 
 ```{r,}
-anno_res_ov <- anno_res_data$observedValues
+anno_res_vd <- anno_res_data$result$valueDomain
 
-anno_res_ov %>% 
+anno_res_vd %>% 
   head() %>% 
   jsonlite::toJSON(auto_unbox = TRUE, pretty = TRUE)
 ```
 
 
-## Annotating the data
+#### **Annotating the data**
 
-Getting to the interesting stuff... For the sake of demonstrating a baseline tool, I plan to *only* use the caDSR export content to identify and select matches. While all results must correspond to existing caDSR standards, participants can use whatever other sources or strategies they choose to discover the best match.
+For the sake of demonstrating a baseline tool, I plan to *only* use the caDSR export content to identify and select matches. While all submitted results must correspond to existing caDSR standards, participants can use whatever other sources or strategies they choose to discover the best match.
 
-### Matching by similarity between header and DE synonyms
+##### Matching by similarity between header and DE synonyms
 
-I'll start by searching for any DEs for which one or more synonyms *contain* the HV for the current column. This search (using the the HV as a regular expression) and any preprocessing (conversion to lowercase, trimming of whitespace) is performed by the **`match_hv_syn()`** function (i.e., match DEs based on similarity between input HV and caDSR synonyms).
+I'll start by searching for any DEs for which one or more synonyms *contain* the HV for the current column. This search (using the HV as a *regular expression*) and any preprocessing (conversion from `"camelCase"` to `"snake_case"`, conversion to lowercase, trimming of whitespace) is performed by the **`match_hv_syn()`** function (i.e., match DEs based on similarity between input HV and CDE synonyms in caDSR).
+
+**Note:** by default, the **`match_hv_syn()`** only finds matches where the whole HV is detected in a synonym.
+
+The output dataframe includes 3 columns:
+
++ `CDE_ID`: public ID of matched data elements
++ `hv`: header value of the selected column in the input table
++ `synonym`: parsed **`CDE_SHORT_NAME`** or **`QUESTION_TEXT`** value in which the header value was detected
 
 ```{r}
 demo_col_hv_syn_hits <- match_hv_syn(demo_col_hv, cde_syn_df)
@@ -282,76 +298,116 @@ demo_col_hv_syn_hits <- match_hv_syn(demo_col_hv, cde_syn_df)
 demo_col_hv_syn_hits
 ```
 
-While it's great that I got some candidate hits, I'd obviously like to narrow the results down a bit from `r nrow(demo_col_hv_syn_hits)`.
+Because the mangled headers in the caDSR synthetic datasets make it tough to find matches when used as a whole, I'll also check for matches to substrings of the HV. To do so, I can break the HV string into parts, treating any non-alphanumeric characters as separators. I'll only keep CDEs for which the most parts were matched. For example, the string `"THIS_IS_A_HEADER"` has 4 parts (separated by underscore). If I find 5 CDEs for which 3 of those parts are matched, plus another 20 CDEs where 2 or fewer parts match, I end up with 5 candidate matches.
 
-### Matching by overlap between observed and permissible values
+Similarly, the output dataframe includes 3 columns:
 
-I'm making the fairly naive assumption that values in the rows of a column are "enumerated" (i.e., fall within a pre-defined range of options). I'll include some checks later on to guess whether the column might actually be some other datatype... but to keep things simple, I'll stick to a default next step of matching OVs to PVs.
-
-The **`match_ov_pv()`** function performs a basic *inner join* to find the intersection between unique OVs in the column and expanded PVs in the dataframe I constructed above.
++ `CDE_ID`: public ID of matched data elements
++ `hvparts`: individual HV parts used for matching (separated by `|` character)
++ `synonym`: parsed **`CDE_SHORT_NAME`** or **`QUESTION_TEXT`** value in which one or more of the HV parts were detected
 
 ```{r}
-demo_col_ov_pv_hits <- match_ov_pv(demo_col_ov, cde_pv_df)
+demo_col_hvparts_syn_hits <- match_hvparts_syn(demo_col_hv, cde_syn_df)
 
-demo_col_ov_pv_hits
+demo_col_hvparts_syn_hits
 ```
 
-I now have two different sets of match candidates of different sizes, with (presumably) some overlapping and some non-overlapping DEs.
+Now, with this smaller set of CDE hits, I'll search for the full HV again among synonyms — but this time I'll allow for some "fuzziness" in the matching. When the argument `fuzzy` is set as `TRUE`, the **`match_hv_syn()`** function will use the **fuzzyjoin** package to perform more flexible joins based on string distance.
 
-### Combining matches
-
-I'll use a simple inner join here to get the intersection between the HV- and OV-based match candidates collected above.
 
 ```{r}
-demo_col_de_hits <- demo_col_hv_syn_hits %>% 
-  dplyr::inner_join(demo_col_ov_pv_hits, by = "CDE_ID") %>% 
-  dplyr::distinct(CDE_ID)
-
-demo_col_de_hits
-```
-
-I still have a bunch of hits, so I'll need to find a way to rank these results and select the best candidates.
-
-### Ranking and filtering matches
-
-This step is a bit of a hack... I previously mentioned that my default assumption is that each column is enumerated. If I don't find any hits under this assumption, then I double check whether there were any matches only based on the HV compared to synonyms — in this case, I treat the column as *non-enumerated*. If neither of these conditions is satisfied, then I settle for *no match*.
-
-```{r}
-is_enum_de <- TRUE
-if (nrow(demo_col_de_hits) == 0) {
-  enum_hits <- cadsr_df %>% 
-    filter(CDE_ID %in% demo_col_hv_syn_hits$CDE_ID,
-           VALUE_DOMAIN_TYPE == "Enumerated")
-  is_enum_de <- nrow(enum_hits) > 0
-  demo_col_de_hits <- demo_col_hv_syn_hits
+if (nrow(demo_col_hv_syn_hits) == 0) {
+  demo_col_hv_syn_hits <- cde_syn_df %>% 
+    filter(CDE_ID %in% demo_col_hvparts_syn_hits$CDE_ID) %>% 
+    match_hv_syn(demo_col_hv, ., fuzzy = TRUE, n_hits = 10)
 }
+
+demo_col_hv_syn_hits
+```
+
+So, based on matching the column header to CDE synonyms, I have **`r nrow(demo_col_hv_syn_hits)`** hits.
+
+##### Matching by overlap between observed and permissible values
+
+A trick I use (and which I'm sharing here, because you can find it in my code anyway) to *guess* whether a particular column is enumerated or non-enumerated:
+
+```{r}
+enum_guess <- guess_enumerated(input_df, demo_col_num)
+is_enum_de <- enum_guess[[2]]
 is_nonenum_de <- !is_enum_de & (nrow(demo_col_hv_syn_hits) > 0)
 
 glue::glue("Enumerated? {is_enum_de}\nNon-enumerated? {is_nonenum_de}")
 ```
 
+The **`match_ov_pv()`** function performs a basic *inner join* (i.e., looks for exact matches) to find the intersection between unique OVs in the column and expanded PVs in the dataframe I parsed above.
+
+The output dataframe includes 3 columns:
+
++ `CDE_ID`: public ID of matched data elements
++ `ov`: a unique observed value in the current column of the input table
++ `pv`: permissible value to which the OV was matched
+
+
+```{r}
+demo_col_ov_pv_hits <- match_ov_pv(demo_col_ov, cde_pv_df)
+
+demo_col_ov_pv_hits %>% 
+  dplyr::sample_n(10)
+```
+
+This leaves me with `r n_distinct(demo_col_ov_pv_hits$CDE_ID)` distinct CDE hits.
+
+I follow up with a pretty expensive join using these hits down below, so I'll filter them down some to keep the operation more reasonable.
+
+```{r}
+demo_col_ov_pv_hits <- .filter_ov_hits(
+  demo_col_hv, 
+  demo_col_ov_pv_hits, 
+  cde_syn_df, 
+  n_hits = 100
+)
+
+demo_col_ov_pv_hits
+```
+
+Now just `r n_distinct(demo_col_ov_pv_hits$CDE_ID)` CDE hits — a bit more reasonable.
+
+I now have two different sets of match candidates of different sizes, with (presumably) some overlapping and some non-overlapping DEs.
+
+##### Combining matches
+
+I'll use a full join in the `combine_hv_ov_hits()` function to get the union between the HV- and OV-based match candidates collected above.
+
+```{r}
+demo_col_de_hits <- combine_hv_ov_hits(demo_col_hv_syn_hits,
+                                       demo_col_ov_pv_hits)
+
+demo_col_de_hits
+```
+
+I'll need to find a way to rank these results and select the best candidates.
+
+##### Ranking and filtering matches
+
 If the column appears to be enumerated, I'll try to expand/improve my results a bit by doing a "fuzzy" search* — capturing DEs for which PVs partially (but not exactly) match OVs. Based on these results, I'll select the top 3 results based on (a) which fraction of the columns OVs are covered and (b) the minimum average string distance between OVs and PVs. Any tiebreakers are broken at random.
 
-\*The logic used by **`match_ov_pv()`** when `fuzzy = TRUE` is pretty messy, so I won't get into it here, but you can check out the code on GitHub [**here**](https://github.com/Sage-Bionetworks/metadata-automation-challenge/blob/master/R/baseline_annotator.R#L79-L110).
+\*The logic used by **`match_ov_pv()`** when `fuzzy = TRUE` is pretty messy, so I won't get into it here, but you can check out the code on GitHub [**here**](https://github.com/Sage-Bionetworks/metadata-automation-challenge/blob/master/R/baseline_annotator.R).
 
 If I think the column is non-enumerated, I'll just pick the top 3 DE results at random.
 
 ```{r}
 n_results <- 3
 
-if (is_enum_de) {
-  demo_col_de_results <- cde_pv_df %>% 
-    dplyr::filter(CDE_ID %in% demo_col_de_hits$CDE_ID) %>% 
-    match_ov_pv(demo_col_ov, ., fuzzy = TRUE, n_results)
-} else if (is_nonenum_de) {
-  set.seed(0)
-  demo_col_de_results <- cadsr_df %>% 
-    dplyr::filter(CDE_ID %in% demo_col_hv_syn_hits$CDE_ID,
-                  !VALUE_DOMAIN_TYPE == "Enumerated") %>% 
-    dplyr::select(CDE_ID) %>% 
-    dplyr::mutate(coverage = NA, mean_dist = NA) %>% 
-    dplyr::sample_n(n_results)
-}
+demo_col_de_results <- select_de_results(
+  demo_col_de_hits, 
+  demo_col_ov, 
+  cde_pv_df, 
+  demo_col_hv,
+  cde_syn_df,
+  cadsr_df, 
+  is_enum_de, 
+  n_results
+)
 
 demo_col_de_results
 ```
@@ -365,9 +421,9 @@ cadsr_df %>%
   dplyr::select(-coverage, -mean_dist)
 ```
 
-The manually annotated DE (`"Race Category Text"`) is my third best result... so it won't get me max points — but still not bad.
+The annotated DE is my top result — pretty good!
 
-### Collecting and formatting results
+##### Collecting and formatting results
 
 The next few functions are designed to convert results in tabular (dataframe) format into the structured JSON required for submissions.
 
@@ -379,19 +435,233 @@ collect_result_hv(cadsr_df, de_id) %>%
 ```
 
 
+```{r}
+collect_result_vd(cadsr_df, de_id, demo_col_ov, enum = is_enum_de) %>% 
+  head() %>%
+  jsonlite::toJSON(auto_unbox = TRUE, pretty = TRUE)
+```
+
+The **`collect_result()`** function combines the **`collect_result_hv()`** and **`collect_result_ov()`** functions to aggregate and format results for a single match for the current column.
+
 ```{r, message=FALSE, warning=FALSE}
-collect_result_ov(cadsr_df, de_id, demo_col_ov, enum = is_enum_de) %>% 
+collect_result(1, de_id, demo_col_ov, cadsr_df, enum = is_enum_de) %>% 
+  purrr::modify_depth(2, head) %>% 
+  jsonlite::toJSON(auto_unbox = TRUE, pretty = TRUE)
+```
+
+#### Column annotation & scoring
+
+The **`annotate_column()`** function combines all of the steps above to produce properly formatted results for a single column.
+
+```{r, warning=FALSE}
+n_results <- 3
+sub_col_data <- annotate_column(
+  input_df, 
+  demo_col_num, 
+  n_results, 
+  cadsr_df, 
+  cde_syn_df, 
+  cde_pv_df,
+  verbose = TRUE
+)
+```
+
+I can use the `get_col_score` function to evaluate my results. This gives me the raw data for each result and each associated check, which I can format as a table using the `get_col_score_table()` function.
+
+```{r, warning=FALSE}
+col_score <- get_col_score(
+  sub_col_data,
+  get_column_data(anno_data, demo_col_num)
+)
+
+col_score %>% get_col_score_table()
+```
+
+### Non-Enumerated
+
+#### **Inspecting the data**
+
+I'll step through the same procedure as for the **Enumerated** example to illustrate how things might look for a non-enumerate field — in this case, the 33rd column in the input data.
+
+```{r}
+demo_col_num <- 33
+demo_col_hv <- names(input_df)[demo_col_num]
+
+demo_col_hv
+```
+
+The annotation for this column includes structured information about the **data element (DE)** — sourced from caDSR.
+
+```{r}
+anno_col_data <- anno_data$columns[[demo_col_num]]
+anno_res_data <- anno_col_data$results[[1]]
+anno_res_hv <- anno_res_data$result[c("dataElement", "dataElementConcept")]
+
+anno_res_hv %>% 
+  jsonlite::toJSON(auto_unbox = TRUE, pretty = TRUE)
+```
+
+In this case, **`r anno_res_hv$dataElement$id`** or **`r anno_res_hv$dataElement$name`** is the best (correct) matching DE for the **"`r demo_col_hv`"** column. 
+
+I'll check out the individual values in the *rows* of the column. In contrast to the "permissible values" specified for a particular DE, the **observed values (OV)** represent the raw values we find in rows of the data.
+
+```{r}
+demo_col_ov <- get_col_ov(input_df, demo_col_num)
+
+head(demo_col_ov)
+```
+
+Like the column headers, row values are annotated according to standard vocabularies based on properties of the matched CDE's **Value Domain**.
+
+```{r,}
+anno_res_vd <- anno_res_data$result$valueDomain
+
+anno_res_vd %>% 
   head() %>% 
   jsonlite::toJSON(auto_unbox = TRUE, pretty = TRUE)
 ```
 
-The **`collect_result()`** function combines the **`collect_result_hv()`** and **`collect_result_ov()`** functions to aggregate and format results for a single result for the current column.
+
+#### **Annotating the data**
+
+##### Matching by similarity between header and DE synonyms
+
+I'll start by searching for any DEs for which one or more synonyms *contain* the HV for the current column. This search (using the HV as a regular expression) and any preprocessing (conversion to lowercase, trimming of whitespace) is performed by the **`match_hv_syn()`** function (i.e., match DEs based on similarity between input HV and CDE synonyms in caDSR).
+
+**Note:** by default, the **`match_hv_syn()`** only finds matches where the whole HV is detected in a synonym.
+
+The output dataframe again includes 3 columns:
+
++ `CDE_ID`: public ID of matched data elements
++ `hv`: header value of the selected column in the input table
++ `synonym`: parsed **`CDE_SHORT_NAME`** or **`QUESTION_TEXT`** value in which the header value was detected
+
+```{r}
+demo_col_hv_syn_hits <- match_hv_syn(demo_col_hv, cde_syn_df)
+
+demo_col_hv_syn_hits
+```
+
+Because the mangled headers in the caDSR synthetic datasets make it tough to find matches when used as a whole, I'll also check for matches to substrings of the HV. To do so, I can break the HV string into parts, treating any non-alphanumeric characters as separators. I'll only keep CDEs for which the most parts were matched. For example, the string `"THIS_IS_A_HEADER"` has 4 parts (separated by underscore). If I find 5 CDEs for which 3 of those parts are matched, plus another 20 CDEs where 2 or fewer parts match, I end up with 5 candidate matches.
+
+Similarly, the output dataframe includes 3 columns:
+
++ `CDE_ID`: public ID of matched data elements
++ `hvparts`: individual HV parts used for matching (separated by `|` character)
++ `synonym`: parsed **`CDE_SHORT_NAME`** or **`QUESTION_TEXT`** value in which one or more of the HV parts were detected
+
+```{r}
+demo_col_hvparts_syn_hits <- match_hvparts_syn(demo_col_hv, cde_syn_df)
+
+demo_col_hvparts_syn_hits
+```
+
+Now, with this set of CDE hits, I'll search for the full HV again among synonyms — but this time I'll allow for some "fuzziness" in the matching. When the argument `fuzzy` is set as `TRUE`, the **`match_hv_syn()`** function will use the **fuzzyjoin** package to perform more flexible joins based on string distance.
+
+
+```{r}
+if (nrow(demo_col_hv_syn_hits) == 0) {
+  demo_col_hv_syn_hits <- cde_syn_df %>% 
+    filter(CDE_ID %in% demo_col_hvparts_syn_hits$CDE_ID) %>% 
+    match_hv_syn(demo_col_hv, ., fuzzy = TRUE, n_hits = 10)
+}
+
+demo_col_hv_syn_hits
+```
+
+While it's great that I got some candidate hits, I'd obviously like to narrow the results down a bit from `r nrow(demo_col_hv_syn_hits)`.
+
+##### Matching by overlap between observed and permissible values
+
+```{r}
+enum_guess <- guess_enumerated(input_df, demo_col_num)
+is_enum_de <- enum_guess[[2]]
+is_nonenum_de <- !is_enum_de & (nrow(demo_col_hv_syn_hits) > 0)
+
+glue::glue("Enumerated? {is_enum_de}\nNon-enumerated? {is_nonenum_de}")
+```
+
+Because this looks like a non-enumerated column, I won't bother try searching/matching based on the observed values (i.e., with the **`match_ov_pv()`** function).
+
+
+```{r}
+demo_col_de_hits <- dplyr::distinct(demo_col_hv_syn_hits, CDE_ID)
+
+demo_col_de_hits
+```
+
+
+##### Ranking and filtering matches
+
+If I think the column is non-enumerated, I'll just pick the top 3 DE results at random — not very clever, but I don't want to spend too much time developing logic to inspect conformancy of non-enumerated values.
+
+```{r}
+n_results <- 3
+
+demo_col_de_results <- select_de_results(
+  demo_col_de_hits, 
+  demo_col_ov, 
+  cde_pv_df,
+  demo_col_hv,
+  cde_syn_df,
+  cadsr_df, 
+  is_enum_de, 
+  n_results
+)
+
+demo_col_de_results
+```
+
+Taking a look at my top results...
+
+```{r}
+cadsr_df %>% 
+  dplyr::select(CDE_ID, CDE_LONG_NAME, DEFINITION) %>% 
+  dplyr::left_join(demo_col_de_results, ., by = "CDE_ID") %>% 
+  dplyr::select(-coverage, -mean_dist)
+```
+
+The correctly annotated DE is my third best result... so it won't get me max points — but still not bad.
+
+##### Collecting and formatting results
+
+The **`collect_result()`** function combines the **`collect_result_hv()`** and **`collect_result_ov()`** functions to aggregate and format results for a single match for the current column.
 
 ```{r, message=FALSE, warning=FALSE}
 collect_result(1, de_id, demo_col_ov, cadsr_df, enum = is_enum_de) %>% 
-  purrr::modify_depth(1, head) %>% 
+  purrr::modify_depth(2, head) %>% 
   jsonlite::toJSON(auto_unbox = TRUE, pretty = TRUE)
 ```
+
+#### Column annotation & scoring
+
+The **`annotate_column()`** function combines all of the steps above to produce properly formatted results for a single column.
+
+```{r, warning=FALSE}
+n_results <- 3
+sub_col_data <- annotate_column(
+  input_df, 
+  demo_col_num, 
+  n_results, 
+  cadsr_df, 
+  cde_syn_df, 
+  cde_pv_df,
+  verbose = TRUE
+)
+```
+
+Checking the score...
+
+```{r, warning=FALSE}
+col_score <- get_col_score(
+  sub_col_data,
+  get_column_data(anno_data, demo_col_num)
+)
+
+col_score %>% get_col_score_table()
+```
+
+So, overall, a score of `r col_score$score` for this column.
 
 ---
 
@@ -399,36 +669,16 @@ Putting it all together...
 
 # Annotating tables
 
-The **`annotate_column()`** function combines all of the steps above to produce properly formatted results for a single column.
-
-```{r, message=FALSE, warning=FALSE}
-n_results <- 3
-annotate_column(
-  input_df, demo_col_num, n_results, cadsr_df, cde_syn_df, cde_pv_df
-) %>% 
-  purrr::modify_depth(2, head) %>% 
-  jsonlite::toJSON(auto_unbox = TRUE, pretty = TRUE)
-```
-
-I can now apply the **`annotate_column()`** function across all columns in the table to generate the full results. I'll include a little message showing the input column number and HV to track progress.
+I can now apply the **`annotate_column()`** function across all columns in the table to generate the full results. I'll include a little message showing the input column number and HV to track progress. To save time, I'll only annotate the first 10 columns.
 
 ```{r, warning=FALSE}
-submission_data <- list(
-  "columns" = purrr::imap(names(input_df), function(.x, .y) {
-    cat(paste0(.y, ": ", .x, "\n"))
-    list(
-      "columnNumber" = .y,
-      "headerValue" = .x,
-      "results" = annotate_column(
-        input_df, 
-        .y, 
-        n_results, 
-        cadsr_df,
-        cde_syn_df,
-        cde_pv_df
-      )
-    )
-  })
+col_max <- 10
+submission_data <- annotate_table(
+  input_df[, 1:col_max],
+  cadsr_df,
+  cde_syn_df,
+  cde_pv_df,
+  n_results
 )
 ```
 
@@ -439,8 +689,30 @@ submission_data <- list(
 Finally, I can use the **`get_overall_score()`** function to compare the baseline tool's results to the manual annotations.
 
 ```{r}
-get_overall_score(submission_data, anno_data)
+anno_sub_data <- purrr::modify_at(
+  anno_data, 
+  "columns", 
+  ~ purrr::keep(., ~ .$columnNumber <= col_max)
+)
+s <- get_overall_score(
+  submission_data, 
+  anno_data
+)
 ```
+
+How'd we do?
+
+```{r}
+s$score
+```
+
+The maximum theoretical score is 5.0, so this isn't great — but it's a start (and hopefully a reasonable baseline)! As a reminder, I can check out the full score table to see which columns my tool might have struggled with:
+
+```{r}
+s$score_table
+```
+
+That's all for now — best of luck to all participants in developing your tools!
 
 ---
 

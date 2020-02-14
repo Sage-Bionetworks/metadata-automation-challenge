@@ -27,7 +27,7 @@ inputs:
     type: File
   - id: dataset
     type: string[]
-    default: ['Apollo2', 'Outcome-Predictors', 'REMBRANDT', 'ROI-Masks']
+    default: ['APOLLO-2', 'Outcome-Predictors', 'REMBRANDT', 'ROI-Masks']
     # default: ['Apollo2']
 
 

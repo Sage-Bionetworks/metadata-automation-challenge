@@ -19,14 +19,14 @@ outputs:
 expression: |
 
   ${
-    if (inputs.dataset == "Apollo2"){
-      return {synid: "syn21431292"};
+    if (inputs.dataset == "APOLLO-2"){
+      return {synid: "syn21595885"};
     } else if (inputs.dataset == "Outcome-Predictors"){
-      return {synid: "syn21431291"};
+      return {synid: "syn21595889"};
     } else if (inputs.dataset == "REMBRANDT"){
-      return {synid: "syn21431290"};
+      return {synid: "syn21595894"};
     } else if (inputs.dataset == "ROI-Masks"){
-      return {synid: "syn21431289"};
+      return {synid: "syn21595898"};
     } else {
       throw 'no dataset goldstandard';
     }
