@@ -149,17 +149,18 @@ def main(syn, args):
     # Open log file first
     open(log_filename, 'w').close()
 
+    # Store log file only if dataset is not APOLLO-2
+    store_log = dataset != "APOLLO-2"
+
     # If the container doesn't exist, there are no logs to write out and
     # no container to remove
     if container is not None:
-        # Store log file only if dataset is not APOLLO-2
-        store_log = dataset != "APOLLO-2"
-
         # Check if container is still running
         while container in client.containers.list():
             log_text = container.logs()
             create_log_file(log_filename, log_text=log_text)
-            store_log_file(syn, log_filename, args.parentid, store_log=store_log)
+            store_log_file(syn, log_filename, args.parentid,
+                           store_log=store_log)
             time.sleep(60)
         # Must run again to make sure all the logs are captured
         log_text = container.logs()
