@@ -104,13 +104,12 @@ def validate_submission_tool(submission_file, schema_filepath,
     else:
         dataset = os.path.basename(
             submission_file).replace("-Submission.json", '')
+        prediction_file_status = "VALIDATED"
         if dataset != "APOLLO-2":
             errors = _validate_json(submission_file, schema_filepath)
             if errors:
                 prediction_file_status = "INVALID"
                 invalid_reasons.extend(errors)
-            else:
-                prediction_file_status = "VALIDATED"
     if invalid_reasons:
         invalid_string = "\n".join(invalid_reasons)
         error_string = '> {} ERRORS:\n{}\n'.format(dataset, invalid_string)
