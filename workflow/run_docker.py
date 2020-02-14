@@ -164,7 +164,7 @@ def main(syn, args):
         # Must run again to make sure all the logs are captured
         log_text = container.logs()
         create_log_file(log_filename, log_text=log_text)
-        store_log_file(syn, log_filename, args.parentid, store_log)
+        store_log_file(syn, log_filename, args.parentid, store_log=store_log)
         # Remove container and image after being done
         container.remove()
 
