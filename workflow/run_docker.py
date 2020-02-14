@@ -159,7 +159,7 @@ def main(syn, args):
         while container in client.containers.list():
             log_text = container.logs()
             create_log_file(log_filename, log_text=log_text)
-            store_log_file(syn, log_filename, args.parentid, store_log)
+            store_log_file(syn, log_filename, args.parentid, store_log=store_log)
             time.sleep(60)
         # Must run again to make sure all the logs are captured
         log_text = container.logs()
