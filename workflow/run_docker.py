@@ -144,16 +144,18 @@ def main(syn, args):
             remove_docker_container(container_name)
             errors = str(err) + "\n"
 
-    if dataset != "APOLLO-2":
-        print("creating logfile")
-        # Create the logfile
-        log_filename = container_name + "_log.txt"
-        # Open log file first
-        open(log_filename, 'w').close()
+    # If the container doesn't exist, there are no logs to write out and
+    # no container to remove
+    if container is not None:
 
-        # If the container doesn't exist, there are no logs to write out and
-        # no container to remove
-        if container is not None:
+        # Do not write a log file for the APOLLO-2 dataset.
+        if dataset != "APOLLO-2":
+            print("creating logfile")
+            # Create the logfile
+            log_filename = container_name + "_log.txt"
+            # Open log file first
+            open(log_filename, 'w').close()
+
             # Check if container is still running
             while container in client.containers.list():
                 log_text = container.logs()
@@ -164,14 +166,15 @@ def main(syn, args):
             log_text = container.logs()
             create_log_file(log_filename, log_text=log_text)
             store_log_file(syn, log_filename, args.parentid)
-            # Remove container and image after being done
-            container.remove()
 
-        statinfo = os.stat(log_filename)
+            statinfo = os.stat(log_filename)
 
-        if statinfo.st_size == 0:
-            create_log_file(log_filename, log_text=errors)
-            store_log_file(syn, log_filename, args.parentid)
+            if statinfo.st_size == 0:
+                create_log_file(log_filename, log_text=errors)
+                store_log_file(syn, log_filename, args.parentid)
+
+        # Remove container and image after being done
+        container.remove()
 
     print("finished training")
     # Try to remove the image
