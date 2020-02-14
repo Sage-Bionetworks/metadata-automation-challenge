@@ -172,7 +172,7 @@ def main(syn, args):
 
     if statinfo.st_size == 0:
         create_log_file(log_filename, log_text=errors)
-        store_log_file(syn, log_filename, args.parentid, store_log)
+        store_log_file(syn, log_filename, args.parentid, store_log=store_log)
 
     print("finished training")
     # Try to remove the image
