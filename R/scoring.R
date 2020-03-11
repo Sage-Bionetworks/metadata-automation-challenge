@@ -132,8 +132,12 @@ score_value_coverage <- function(sub_res_data, anno_res_data) {
     check_col <- "conceptCode"
   }
   mismatch_rows <- find_mismatch_rows(sub_vd, anno_vd, check_col)
-  if (nrow(anno_vd) & length(mismatch_rows)) {
-    1 - (length(mismatch_rows) / nrow(anno_vd))
+  if (nrow(anno_vd)) {
+    if (length(mismatch_rows)) {
+      1 - (length(mismatch_rows) / nrow(anno_vd))
+    } else {
+      1
+    }
   } else {
     0
   }
