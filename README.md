@@ -10,13 +10,13 @@
 
 3. Install packages. In the RStudio console, run:
 
-4. Create the folders `input`, `data` and `output` in your current directory.
-
 ```
 renv::restore()
 ```
 
 This may take some time to complete - get something nice to drink :)
+
+4. Create the folders `input`, `data` and `output` in your current directory.
 
 5. Create `.synapseConfig` file
 
