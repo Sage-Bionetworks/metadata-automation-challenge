@@ -328,7 +328,7 @@ steps:
       - id: submissionid
         source: "#submissionId"
       - id: annotation_values
-        source: "#collect_score/results"
+        source: "#add_rank/results"
       - id: to_public
         default: true
       - id: force_change_annotation_acl
