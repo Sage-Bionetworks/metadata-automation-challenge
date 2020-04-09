@@ -56,14 +56,17 @@ requirements:
           with open(args.scores) as scores, open(args.results, "w") as out:
             results = json.load(scores)
             
-            apo_weight = results.get('APOLLO-2_score') * args.apollo
-            out_weight = results.get('Outcome-Predictors_score') * args.outcome
-            rem_weight = results.get('REMBRANDT_score') * args.rembrandt
-            roi_weight = results.get('ROI-Masks_score') * args.roi
-            weighted_avg = sum([apo_weight, out_weight, rem_weight, roi_weight]) / \
-              sum([args.apollo, args.outcome, args.rembrandt, args.roi])
-              
-            results['weighted_avg'] = round(weighted_avg, 3)
+            try:
+              apo_weight = results.get('APOLLO-2_score') * args.apollo
+              out_weight = results.get('Outcome-Predictors_score') * args.outcome
+              rem_weight = results.get('REMBRANDT_score') * args.rembrandt
+              roi_weight = results.get('ROI-Masks_score') * args.roi
+              weighted_avg = sum([apo_weight, out_weight, rem_weight, roi_weight]) / \
+                sum([args.apollo, args.outcome, args.rembrandt, args.roi])
+              weighted_avg = round(weighted_avg, 3)
+            except TypeError:
+              weighted_avg = "NA"
+            results['weighted_avg'] = weighted_avg
             out.write(json.dumps(results))
 
 outputs:
