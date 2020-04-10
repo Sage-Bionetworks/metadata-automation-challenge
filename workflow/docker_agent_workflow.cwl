@@ -309,7 +309,7 @@ steps:
       - id: roimasks
         valueFrom: 8
     out:
-      id: results
+      - id: results
 
   score_email:
     run: https://raw.githubusercontent.com/Sage-Bionetworks/ChallengeWorkflowTemplates/v2.2/score_email.cwl
