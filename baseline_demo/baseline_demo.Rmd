@@ -47,7 +47,7 @@ user_data_dir <- "./"
 
 ## **Load reference data**
 
-The **caDSR export** table can be accessed and downloaded from Synapse [**here**](https://www.synapse.org/#!Synapse:syn20540628). Alternatively, I can use the **`synapser`** package to fetch the data via the Synapse API.
+The **caDSR export** table can be accessed and downloaded from Synapse [**here**](https://www.synapse.org/#!Synapse:syn21905710). Alternatively, I can use the **`synapser`** package to fetch the data via the Synapse API.
 
 ```{r}
 synapser::synLogin()
