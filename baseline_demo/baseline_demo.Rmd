@@ -51,14 +51,14 @@ The **caDSR export** table can be accessed and downloaded from Synapse [**here**
 
 ```{r}
 synapser::synLogin()
-cadsr_entity <- synapser::synGet("syn20540628", 
+cadsr_entity <- synapser::synGet("syn21905710", 
                                  downloadLocation = data_dir,
                                  ifcollision = "overwrite.local")
 cadsr_entity$path
 ```
 
 ```{r}
-# Read the 'caDSR-export-20190528-1320.tsv' file, wherever it's stored
+# Read the 'caDSR-export-20200402-0932.tsv' file, wherever it's stored
 cadsr_file <- cadsr_entity$path
 cadsr_df <- readr::read_tsv(cadsr_entity$path, col_names = TRUE)
 ```
