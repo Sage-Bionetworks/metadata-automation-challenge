@@ -301,13 +301,13 @@ steps:
       - id: scores_file
         source: "#collect_score/results"
       - id: apollo
-        valueFrom: 15
+        default: 15
       - id: outcome
-        valueFrom: 17
+        default: 17
       - id: rembrandt
-        valueFrom: 8
+        default: 8
       - id: roimasks
-        valueFrom: 8
+        default: 8
     out:
       - id: results
 
