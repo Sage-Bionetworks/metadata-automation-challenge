@@ -1,6 +1,32 @@
-# metadata-automation-challenge
+# Metadata Automation Challenge
 
-## Building docker images
+## Using the baseline demo in RStudio
+
+### Environment setup
+
+1. Clone this repository
+
+2. Open `metadta-automation-challenge.Rproj`
+
+3. Install packages. In the RStudio console, run:
+
+```
+renv::restore()
+```
+
+This may take some time to complete - get something nice to drink :)
+
+4. Create the folders `input`, `data` and `output` in your current directory.
+
+5. Create `.synapseConfig` file
+
+See this vignette about [Managing Synapse Credentials](https://r-docs.synapse.org/articles/manageSynapseCredentials.html) to learn how to store credentials to login without needing to specify your username and password each time. 
+
+### Open and run the demo notebook
+
+You can find the baseline demo R Notebook at `baseline_demo/baseline_demo.Rmd`. After opening the notebook, you should be able to step through and execute each chunk in order.
+
+## Building Docker images
 
 ```
 docker build -t metadata-baseline -f Dockerfile.baseline .
@@ -8,7 +34,8 @@ docker build -t metadata-validation -f Dockerfile.validation .
 docker build -t metadata-scoring -f Dockerfile.scoring .
 ```
 
-## Running the baseline method
+## Running the baseline method with Docker
+
 Here we describe how to apply the baseline method to automatically annotate a dataset (see [Data Description](https://www.synapse.org/#!Synapse:syn18065891/wiki/600449)).
 
 1. Create the folders `input`, `data` and `output` in your current directory.
@@ -28,6 +55,7 @@ where `APOLLO-2` is the name of the dataset in the folder `input` (without the e
 The file `/output/APOLLO-2-leaderboard-Submission.json` is created upon successful completion of the above command.
 
 ## Validating the submission file
+
 The following command checks that the format of the submission file generated is valid.
 
 ```
@@ -40,7 +68,7 @@ Your JSON file is valid!
 
 where `$(pwd)/output/APOLLO-2-leaderboard-Submission.json` points to the location of the submission file generated in the previous section.
 
-Alternatively, the scoring script can be run directly using Python.
+Alternatively, the validation script can be run directly using Python.
 
 ```
 $ python3 -m venv venv
@@ -65,6 +93,7 @@ Your JSON file is valid!
 ```
 
 ## Scoring the submission
+
 Here we evaluate the performance of the submission by comparing the content of the submission file to a gold standard (e.g. manual annotations).
 
 ```

@@ -294,6 +294,22 @@ steps:
         source: "#scoring/results"
     out:
       - id: results
+  
+  add_rank:
+    run: calc_weighted_score.cwl
+    in:
+      - id: scores_file
+        source: "#collect_score/results"
+      - id: apollo
+        default: 15
+      - id: outcome
+        default: 17
+      - id: rembrandt
+        default: 8
+      - id: roimasks
+        default: 8
+    out:
+      - id: results
 
   score_email:
     run: https://raw.githubusercontent.com/Sage-Bionetworks/ChallengeWorkflowTemplates/v2.2/score_email.cwl
@@ -303,7 +319,7 @@ steps:
       - id: synapse_config
         source: "#synapseConfig"
       - id: results
-        source: "#collect_score/results"
+        source: "#add_rank/results"
     out: []
 
   annotate_submission_with_output:
@@ -312,7 +328,7 @@ steps:
       - id: submissionid
         source: "#submissionId"
       - id: annotation_values
-        source: "#collect_score/results"
+        source: "#add_rank/results"
       - id: to_public
         default: true
       - id: force_change_annotation_acl
