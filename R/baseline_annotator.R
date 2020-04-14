@@ -863,7 +863,7 @@ prep_ref_tables <- function(cadsr_file, cadsr_pv_expanded_file = "") {
 # Execute all annotation steps for a specified input dataset.
 run_annotator <- function(
   dataset_name, 
-  cadsr_file = "/data/caDSR-export-20190528-1320.tsv", 
+  cadsr_file = "/data/caDSR-export.tsv", 
   cadsr_pv_expanded_file = "/user_data/cadsr_pv_expanded.feather",
   n_results = 3
 ) {
