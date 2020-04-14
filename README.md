@@ -6,7 +6,7 @@
 
 1. Clone this repository
 
-2. Open `metadta-automation-challenge.Rproj`
+2. Open `metadata-automation-challenge.Rproj`
 
 3. Install packages. In the RStudio console, run:
 
