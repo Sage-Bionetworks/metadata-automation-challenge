@@ -97,7 +97,8 @@ get_value_domain <- function(res_data) {
                           conceptCode = .$permissibleValue$conceptCode)) %>% 
         purrr::modify_depth(2, ~ ifelse(is.null(.), "", .)) %>%
         purrr::map_df(tibble::as_tibble) %>%
-        dplyr::mutate(conceptCode = ifelse(conceptCode == "", NA, conceptCode))
+        dplyr::mutate(conceptCode = ifelse(conceptCode == "", NA, conceptCode)) %>%
+        dplyr::distinct()
     }
 
 }
@@ -136,15 +137,22 @@ score_value_coverage <- function(sub_res_data, anno_res_data) {
   }
   mismatch_rows <- find_mismatch_rows(sub_vd, anno_vd, check_col)
   if (nrow(anno_vd)) {
-    if (length(mismatch_rows)) {
-      1 - (length(mismatch_rows) / nrow(anno_vd))
+    if (nrow(sub_vd)) {
+      if (length(mismatch_rows)) {
+        1 - (length(mismatch_rows) / nrow(sub_vd))
+      } else {
+        1
+      }
     } else {
-      1
+      0
     }
   } else {
-    0
+    if (!nrow(sub_vd)) {
+      1
+    } else {
+      1 - (length(mismatch_rows) / nrow(sub_vd))
+    }
   }
-  
 }
 
 
