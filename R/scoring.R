@@ -85,22 +85,21 @@ get_dec_concepts <- function(res_data) {
 }
 
 get_value_domain <- function(res_data) {
-  
-
-    if (res_data$result$dataElement$name == "NOMATCH" || length(res_data$result$valueDomain) == 0) {
-      tibble::tibble(observedValue = NA, name = NA, id = NA) %>% 
-        dplyr::filter(complete.cases(.))
-    } else {
-      res_data$result$valueDomain %>% 
-        purrr::map(~ list(observedValue = .$observedValue, 
-                          value = .$permissibleValue$value, 
-                          conceptCode = .$permissibleValue$conceptCode)) %>% 
-        purrr::modify_depth(2, ~ ifelse(is.null(.), "", .)) %>%
-        purrr::map_df(tibble::as_tibble) %>%
-        dplyr::mutate(conceptCode = ifelse(conceptCode == "", NA, conceptCode)) %>%
-        dplyr::distinct()
-    }
-
+  if (length(res_data$result$valueDomain) == 0) {
+    tibble::tibble(observedValue = NA, name = NA, id = NA) %>%
+      dplyr::filter(complete.cases(.))
+  } else {
+    res_data$result$valueDomain %>%
+      purrr::map(~ list(
+        observedValue = .$observedValue,
+        value = .$permissibleValue$value,
+        conceptCode = .$permissibleValue$conceptCode
+      )) %>%
+      purrr::modify_depth(2, ~ ifelse(is.null(.), "", .)) %>%
+      purrr::map_df(tibble::as_tibble) %>%
+      dplyr::mutate(conceptCode = ifelse(conceptCode == "", NA, conceptCode)) %>%
+      dplyr::distinct()
+  }
 }
 
 
