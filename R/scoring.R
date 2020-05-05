@@ -105,8 +105,15 @@ get_value_domain <- function(res_data) {
 
 find_mismatch_rows <- function(df_a, df_b, col_name = "conceptCode") {
   # TODO: fix logic of this function
-  df_a[[col_name]][!(df_a[[col_name]] %in% df_b[[col_name]])]
+  #df_a[[col_name]][!(df_a[[col_name]] %in% df_b[[col_name]])]
   
+  # # grab the column of interest then find the difference
+  df_a <- df_a %>% select("observedValue", col_name)
+  df_a[[col_name]] <- replace_na(df_a[[col_name]], "")
+  df_b <- df_b %>% select("observedValue", col_name)
+  df_b[[col_name]] <- replace_na(df_b[[col_name]], "")
+
+  setdiff(df_a, df_b)[[col_name]]
 }
 
 
@@ -127,6 +134,8 @@ score_value_coverage <- function(sub_res_data, anno_res_data) {
   anno_nonenum <- any(stringr::str_detect(anno_vd$value, "CONFORMING"))
   if (!nrow(anno_vd) & !nrow(sub_vd)) {
     return(1)
+  } else if (nrow(anno_vd) & !nrow(sub_vd)) {
+    return(0)
   }
   
   if (anno_nonenum) {
@@ -135,23 +144,23 @@ score_value_coverage <- function(sub_res_data, anno_res_data) {
     check_col <- "conceptCode"
   }
   mismatch_rows <- find_mismatch_rows(sub_vd, anno_vd, check_col)
-  if (nrow(anno_vd)) {
-    if (nrow(sub_vd)) {
+  # if (nrow(anno_vd)) {
+  #   if (nrow(sub_vd)) {
       if (length(mismatch_rows)) {
         1 - (length(mismatch_rows) / nrow(sub_vd))
       } else {
         1
       }
-    } else {
-      0
-    }
-  } else {
-    if (!nrow(sub_vd)) {
-      1
-    } else {
-      1 - (length(mismatch_rows) / nrow(sub_vd))
-    }
-  }
+    # } else {
+    #   0
+    # }
+  # } else {
+  #   if (!nrow(sub_vd)) {
+  #     1
+  #   } else {
+  #     1 - (length(mismatch_rows) / nrow(sub_vd))
+  #   }
+  # }
 }
 
 
