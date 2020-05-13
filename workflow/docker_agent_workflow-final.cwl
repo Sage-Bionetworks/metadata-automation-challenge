@@ -26,7 +26,7 @@ inputs:
     type: File
   - id: dataset
     type: string
-    default: ["APOLLO-5"]
+    default: "APOLLO-5"
 # there are no output at the workflow engine level.  Everything is uploaded to Synapse
 outputs: []
 
