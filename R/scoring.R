@@ -85,29 +85,35 @@ get_dec_concepts <- function(res_data) {
 }
 
 get_value_domain <- function(res_data) {
-  
-
-    if (res_data$result$dataElement$name == "NOMATCH" || length(res_data$result$valueDomain) == 0) {
-      tibble::tibble(observedValue = NA, name = NA, id = NA) %>% 
-        dplyr::filter(complete.cases(.))
-    } else {
-      res_data$result$valueDomain %>% 
-        purrr::map(~ list(observedValue = .$observedValue, 
-                          value = .$permissibleValue$value, 
-                          conceptCode = .$permissibleValue$conceptCode)) %>% 
-        purrr::modify_depth(2, ~ ifelse(is.null(.), "", .)) %>%
-        purrr::map_df(tibble::as_tibble) %>%
-        dplyr::mutate(conceptCode = ifelse(conceptCode == "", NA, conceptCode)) %>%
-        dplyr::distinct()
-    }
-
+  if (length(res_data$result$valueDomain) == 0) {
+    tibble::tibble(observedValue = NA, name = NA, id = NA) %>%
+      dplyr::filter(complete.cases(.))
+  } else {
+    res_data$result$valueDomain %>%
+      purrr::map(~ list(
+        observedValue = .$observedValue,
+        value = .$permissibleValue$value,
+        conceptCode = .$permissibleValue$conceptCode
+      )) %>%
+      purrr::modify_depth(2, ~ ifelse(is.null(.), "", .)) %>%
+      purrr::map_df(tibble::as_tibble) %>%
+      dplyr::mutate(conceptCode = ifelse(conceptCode == "", NA, conceptCode)) %>%
+      dplyr::distinct()
+  }
 }
 
 
 find_mismatch_rows <- function(df_a, df_b, col_name = "conceptCode") {
   # TODO: fix logic of this function
-  df_a[[col_name]][!(df_a[[col_name]] %in% df_b[[col_name]])]
+  #df_a[[col_name]][!(df_a[[col_name]] %in% df_b[[col_name]])]
   
+  # Grab the column of interest and replace NAs in the said column
+  df_a <- df_a %>% select("observedValue", col_name)
+  df_a[[col_name]] <- replace_na(df_a[[col_name]], "")
+  df_b <- df_b %>% select("observedValue", col_name)
+  df_b[[col_name]] <- replace_na(df_b[[col_name]], "")
+
+  setdiff(df_a, df_b)[[col_name]]
 }
 
 
@@ -122,36 +128,29 @@ score_concept_overlap <- function(sub_res_data, anno_res_data) {
 
 
 score_value_coverage <- function(sub_res_data, anno_res_data) {
-
+  
   sub_vd <- get_value_domain(sub_res_data)
   anno_vd <- get_value_domain(anno_res_data)
   anno_nonenum <- any(stringr::str_detect(anno_vd$value, "CONFORMING"))
+  
+  # Return 1 if both value domains are empty, whereas return 0 if the
+  # goldstandard has >0 VD but the submission predicted none
   if (!nrow(anno_vd) & !nrow(sub_vd)) {
     return(1)
+  } else if (nrow(anno_vd) & !nrow(sub_vd)) {
+    return(0)
   }
-  
+
   if (anno_nonenum) {
     check_col <- "value"
   } else {
     check_col <- "conceptCode"
   }
   mismatch_rows <- find_mismatch_rows(sub_vd, anno_vd, check_col)
-  if (nrow(anno_vd)) {
-    if (nrow(sub_vd)) {
-      if (length(mismatch_rows)) {
-        1 - (length(mismatch_rows) / nrow(sub_vd))
-      } else {
-        1
-      }
-    } else {
-      0
-    }
+  if (length(mismatch_rows)) {
+    1 - (length(mismatch_rows) / nrow(sub_vd))
   } else {
-    if (!nrow(sub_vd)) {
-      1
-    } else {
-      1 - (length(mismatch_rows) / nrow(sub_vd))
-    }
+    1
   }
 }
 
