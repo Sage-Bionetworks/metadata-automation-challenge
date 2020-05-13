@@ -251,6 +251,8 @@ steps:
         source: "#synapseConfig"
       - id: results
         source: "#scoring/results"
+      - id: private_annotations
+        default: ["APOLLO-5_score"]
     out: []
 
   annotate_submission_with_output:
