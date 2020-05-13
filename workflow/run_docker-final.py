@@ -100,7 +100,7 @@ def main(syn, args):
     os.makedirs(output_dir, exist_ok=True)
     data_dir = args.data_dir
     # update this with folder name
-    input_dir = os.path.join("/home/tyu/final_data", dataset + ".tsv")
+    input_dir = os.path.join("/home/tyu/final_input", dataset + ".tsv")
     mount_input = os.path.join('/input', dataset + ".tsv")
     print("mounting volumes")
     # These are the locations on the docker that you want your mounted
