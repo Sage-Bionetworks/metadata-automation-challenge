@@ -149,9 +149,6 @@ def main(syn, args):
     # Open log file first
     open(log_filename, 'w').close()
 
-    # Store log file only if dataset is not APOLLO-2
-    store_log = dataset != "APOLLO-2"
-
     # If the container doesn't exist, there are no logs to write out and
     # no container to remove
     if container is not None:
@@ -159,13 +156,12 @@ def main(syn, args):
         while container in client.containers.list():
             log_text = container.logs()
             create_log_file(log_filename, log_text=log_text)
-            store_log_file(syn, log_filename, args.parentid,
-                           store_log=store_log)
+            store_log_file(syn, log_filename, args.parentid, store_log=False)
             time.sleep(60)
         # Must run again to make sure all the logs are captured
         log_text = container.logs()
         create_log_file(log_filename, log_text=log_text)
-        store_log_file(syn, log_filename, args.parentid, store_log=store_log)
+        store_log_file(syn, log_filename, args.parentid, store_log=False)
         # Remove container and image after being done
         container.remove()
 
@@ -173,7 +169,7 @@ def main(syn, args):
 
     if statinfo.st_size == 0:
         create_log_file(log_filename, log_text=errors)
-        store_log_file(syn, log_filename, args.parentid, store_log=store_log)
+        store_log_file(syn, log_filename, args.parentid, store_log=False)
 
     print("finished training")
     # Try to remove the image
@@ -203,7 +199,7 @@ def quitting(signo, _frame, submissionid=None, docker_image=None,
         log_text = cont.logs()
         log_filename = submissionid + "_training_log.txt"
         create_log_file(log_filename, log_text=log_text)
-        store_log_file(syn, log_filename, args.parentid)
+        store_log_file(syn, log_filename, args.parentid, store_log=False)
         cont.stop()
         cont.remove()
     except Exception:
