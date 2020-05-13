@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Run training synthetic docker models"""
+"""Run final round models"""
 from __future__ import print_function
 import argparse
 from functools import partial
