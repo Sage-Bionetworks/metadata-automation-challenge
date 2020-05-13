@@ -1,6 +1,6 @@
 #!/usr/bin/env cwl-runner
 #
-# Workflow for SC1
+# Workflow for Validation Phase
 # Inputs:
 #   submissionId: ID of the Synapse submission to process
 #   adminUploadSynId: ID of a folder accessible only to the submission queue administrator
@@ -178,8 +178,10 @@ steps:
     in:
       - id: inputfile
         source: "#run_docker/predictions"
-      - id: goldstandard
-        source: "#download_goldstandard/filepath"
+      # - id: goldstandard
+      #   source: "#download_goldstandard/filepath"
+      - id: entity_type
+        valueFrom: "none"
     out:
       - id: results
       - id: status
