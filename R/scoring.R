@@ -139,6 +139,8 @@ score_value_coverage <- function(sub_res_data, anno_res_data) {
     return(1)
   } else if (nrow(anno_vd) & !nrow(sub_vd)) {
     return(0)
+  } else if (!nrow(anno_vd) & nrow(sub_vd)) {
+    return(0)
   }
 
   if (anno_nonenum) {
